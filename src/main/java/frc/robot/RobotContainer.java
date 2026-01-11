@@ -20,9 +20,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
-import frc.robot.subsystems.swerve.generated.TunerConstants;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
+import frc.robot.subsystems.swerve.generated.TunerConstants;
 
 public class RobotContainer {
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -45,27 +44,23 @@ public class RobotContainer {
 
     /* Path follower */
     private final AutoFactory autoFactory;
-    private final Autos autoRoutines;
-    private final SendableChooser<Command> autoChooser = new SendableChooser<>();
-    private final AutoChooser autoChooserChoreo = new AutoChooser();
+    private final AutoRoutines autoRoutines;
+    private final AutoChooser autoChooser = new AutoChooser();
+    private final SendableChooser<Command> autoChooserReal = new SendableChooser<Command>();
 
     public RobotContainer() {
         autoFactory = drivetrain.createAutoFactory();
-        autoRoutines = new Autos(autoFactory);
+        autoRoutines = new AutoRoutines(autoFactory);
 
-        configureBindings();
-        configureSelector();
-    }
-
-    private void configureSelector() {
-        autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers lol"));
-
-        autoChooser.addOption("Test Auto Paths", autoRoutines.testAutoPaths());
-
+        autoChooser.addRoutine("SimplePath", autoRoutines::simplePathAuto);
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
-        autoChooserChoreo.addRoutine("SimplePath", autoRoutines::simplePathAuto);
-        SmartDashboard.putData("Auto Chooser Choreo", autoChooserChoreo);
+        autoChooserReal.setDefaultOption("NOTHING", Commands.print("good luck lmao"));
+        autoChooserReal.addOption("SimplePath", autoRoutines.simplePathAutoCommand());
+        autoChooserReal.addOption("TestPath2026", autoRoutines.testAutoPaths());
+        SmartDashboard.putData("Auto Chooser Real", autoChooserReal);
+
+        configureBindings();
     }
 
     private void configureBindings() {
@@ -114,6 +109,6 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         /* Run the routine selected from the auto chooser */
-        return autoChooser.getSelected();
+        return autoChooserReal.getSelected();
     }
 }
