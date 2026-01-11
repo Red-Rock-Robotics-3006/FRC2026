@@ -9,7 +9,6 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -44,23 +43,24 @@ public class RobotContainer {
 
     /* Path follower */
     private final AutoFactory autoFactory;
-    private final AutoRoutines autoRoutines;
-    private final AutoChooser autoChooser = new AutoChooser();
-    private final SendableChooser<Command> autoChooserReal = new SendableChooser<Command>();
+    private final Autos autos;
+    private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
     public RobotContainer() {
         autoFactory = drivetrain.createAutoFactory();
-        autoRoutines = new AutoRoutines(autoFactory);
+        autos = new Autos(autoFactory);
 
-        autoChooser.addRoutine("SimplePath", autoRoutines::simplePathAuto);
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-
-        autoChooserReal.setDefaultOption("NOTHING", Commands.print("good luck lmao"));
-        autoChooserReal.addOption("SimplePath", autoRoutines.simplePathAutoCommand());
-        autoChooserReal.addOption("TestPath2026", autoRoutines.testAutoPaths());
-        SmartDashboard.putData("Auto Chooser Real", autoChooserReal);
-
+        configureSelector();
         configureBindings();
+    }
+
+    private void configureSelector() {
+        autoChooser.setDefaultOption("NOTHING", Commands.print("good luck lmao"));
+
+        autoChooser.addOption("SimplePath", autos.simplePathAutoCommand());
+        autoChooser.addOption("TestPath2026", autos.testAutoPaths());
+
+        SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     private void configureBindings() {
@@ -109,6 +109,6 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         /* Run the routine selected from the auto chooser */
-        return autoChooserReal.getSelected();
+        return autoChooser.getSelected();
     }
 }
