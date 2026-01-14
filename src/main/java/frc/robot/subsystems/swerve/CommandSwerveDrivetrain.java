@@ -48,7 +48,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private SmartDashboardNumber maxDriveSpeed = new SmartDashboardNumber("dt/dt drive speeds/max drive mps", 4);
     private SmartDashboardNumber maxTurnSpeed = new SmartDashboardNumber("dt/dt drive speeds/turn rotps", 1);
     private SmartDashboardNumber drivingDeadBand = new SmartDashboardNumber("dt/dt thresholds/deadband", 0.025);
-    private SmartDashboardNumber pidRotationThreshold = new SmartDashboardNumber("dt/dt thresholds/rotation threshold", kNumConfigAttempts); // threshold to enable heading pid again.
+    private SmartDashboardNumber pidRotationThreshold = new SmartDashboardNumber("dt/dt thresholds/rotation threshold", 1); // threshold to enable heading pid again.
 
     private SmartDashboardNumber headingP = new SmartDashboardNumber("dt/dt heading pid coeffs/kP", 4);
     private SmartDashboardNumber headingI = new SmartDashboardNumber("dt/dt heading pid coeffs/kI", 0);
@@ -201,6 +201,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private void initialize() {
         this.configureHeadingPID();
         this.registerTelemetry(telemetry::telemeterize);
+        this.register();
     }
 
     /**
@@ -233,6 +234,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        this.initialize();
     }
 
     /**
@@ -349,12 +351,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         this.updateDriveState();
         SmartDashboard.putString("dt/drive state", this.state.toString());
+        // System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
         this.setControl(this.getRequest());
     }
 
     private void updateDeadbands() {
-        drive.withDeadband(drivingDeadBand.getNumber()).withRotationalDeadband(drivingDeadBand.getNumber());
-        driveFacingAngle.withDeadband(drivingDeadBand.getNumber()).withRotationalDeadband(drivingDeadBand.getNumber());
+        drive.withDeadband(drivingDeadBand.getNumber() * maxDriveSpeed.getNumber()).withRotationalDeadband(drivingDeadBand.getNumber() * maxTurnSpeed.getNumber());
+        driveFacingAngle.withDeadband(drivingDeadBand.getNumber() * maxDriveSpeed.getNumber()).withRotationalDeadband(drivingDeadBand.getNumber() * maxTurnSpeed.getNumber());
     }
 
     private void updateHeadingPIDValues() {
@@ -445,8 +448,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public SwerveRequest getRequest() {
         double requestedXSpeed = -controller.getLeftY() * maxDriveSpeed.getNumber();
-        double requestedYSpeed = controller.getLeftX() * maxDriveSpeed.getNumber();
-        double requestedRotationSpeed = controller.getRightX() * RotationsPerSecond.of(maxTurnSpeed.getNumber()).in(RadiansPerSecond);
+        double requestedYSpeed = -controller.getLeftX() * maxDriveSpeed.getNumber();
+        double requestedRotationSpeed = -controller.getRightX() * RotationsPerSecond.of(maxTurnSpeed.getNumber()).in(RadiansPerSecond);
 
         switch (state) {
             case DRIVE_RESIDUAL:
@@ -459,11 +462,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void updateDriveState() {
+        SmartDashboard.putNumber("right x", controller.getRightX());
+        SmartDashboard.putNumber("rps", this.getState().Speeds.omegaRadiansPerSecond);
+        SmartDashboard.putBoolean("drive facing angle bool", Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber());
         switch (state) {
             case DRIVE_FACING_ANGLE:
                 if (Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber()) state = DriveState.DRIVE;
+                break;
             case DRIVE:
                 if (Math.abs(controller.getRightX()) <= drivingDeadBand.getNumber()) state = DriveState.DRIVE_RESIDUAL;
+                break;
             case DRIVE_RESIDUAL:
                 SwerveDriveState driveState = this.getState();
                 if (Math.abs(driveState.Speeds.omegaRadiansPerSecond) <= 
@@ -471,6 +479,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     targetAngle = driveState.Pose.getRotation();
                     state = DriveState.DRIVE_FACING_ANGLE;
                 }
+                break;
         }
     }
 
@@ -492,6 +501,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public CommandSwerveDrivetrain withController(CommandXboxController controller) {
         this.controller = controller;
         return this;
+    }
+
+    public void setTargetHeading(Rotation2d target) {
+        this.targetAngle = target;
     }
 
     public static CommandSwerveDrivetrain getInstance() {
