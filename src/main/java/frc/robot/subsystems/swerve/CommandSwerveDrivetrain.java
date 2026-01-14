@@ -342,6 +342,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
+        telemetry.setMaxSpeed(maxDriveSpeed.getNumber());
+
         this.updateDeadbands();
         this.updateHeadingPIDValues();
 
