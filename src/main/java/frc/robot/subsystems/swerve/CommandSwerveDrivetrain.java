@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.swerve;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -10,6 +10,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
@@ -22,14 +23,16 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
-import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.subsystems.swerve.generated.TunerConstants;
+import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrain;
+import redrocklib.logging.SmartDashboardNumber;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -39,7 +42,31 @@ import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
+    private static CommandSwerveDrivetrain instance = null;
     private CommandXboxController controller;
+
+    private SmartDashboardNumber maxDriveSpeed = new SmartDashboardNumber("dt/dt drive speeds/max drive mps", 4);
+    private SmartDashboardNumber maxTurnSpeed = new SmartDashboardNumber("dt/dt drive speeds/turn rotps", 1);
+    private SmartDashboardNumber drivingDeadBand = new SmartDashboardNumber("dt/dt thresholds/deadband", 0.025);
+    private SmartDashboardNumber pidRotationThreshold = new SmartDashboardNumber("dt/dt thresholds/rotation threshold", kNumConfigAttempts); // threshold to enable heading pid again.
+
+    private SmartDashboardNumber headingP = new SmartDashboardNumber("dt/dt heading pid coeffs/kP", 4);
+    private SmartDashboardNumber headingI = new SmartDashboardNumber("dt/dt heading pid coeffs/kI", 0);
+    private SmartDashboardNumber headingD = new SmartDashboardNumber("dt/dt heading pid coeffs/kD", 0);
+
+    private SmartDashboardNumber headingTolerance = new SmartDashboardNumber("dt/dt heading pid coeffs/tolerance", 0.015);
+    
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+            .withDeadband(maxDriveSpeed.getNumber() * drivingDeadBand.getNumber()).withRotationalDeadband(maxTurnSpeed.getNumber() * drivingDeadBand.getNumber()) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+
+    private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
+            .withDeadband(maxDriveSpeed.getNumber() * drivingDeadBand.getNumber()).withRotationalDeadband(maxTurnSpeed.getNumber() * drivingDeadBand.getNumber()) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+    private Telemetry telemetry = new Telemetry(maxDriveSpeed.getNumber());
+
+    private Rotation2d targetAngle = new Rotation2d();
 
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
@@ -143,6 +170,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        initialize();
     }
 
     /**
@@ -167,6 +195,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        initialize();
+    }
+
+    private void initialize() {
+        this.configureHeadingPID();
+        this.registerTelemetry(telemetry::telemeterize);
     }
 
     /**
@@ -307,6 +341,23 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+
+        this.updateDeadbands();
+        this.updateHeadingPIDValues();
+
+        this.updateDriveState();
+        SmartDashboard.putString("dt/drive state", this.state.toString());
+        this.setControl(this.getRequest());
+    }
+
+    private void updateDeadbands() {
+        drive.withDeadband(drivingDeadBand.getNumber()).withRotationalDeadband(drivingDeadBand.getNumber());
+        driveFacingAngle.withDeadband(drivingDeadBand.getNumber()).withRotationalDeadband(drivingDeadBand.getNumber());
+    }
+
+    private void updateHeadingPIDValues() {
+        this.driveFacingAngle.HeadingController.setPID(headingP.getNumber(), headingI.getNumber(), headingD.getNumber());
+        this.driveFacingAngle.HeadingController.setTolerance(headingTolerance.getNumber());
     }
 
     private void startSimThread() {
@@ -377,18 +428,72 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private DriveState state = DriveState.DRIVE_FACING_ANGLE;
 
+    public void setDriveState(DriveState state) {
+        this.state = state;
+    }
+
+    public DriveState getDriveState() {
+        return this.state;
+    }
+
+    private void configureHeadingPID() {
+        driveFacingAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+        this.updateHeadingPIDValues();
+    }
+
     public SwerveRequest getRequest() {
-        switch (state){
+        double requestedXSpeed = -controller.getLeftY() * maxDriveSpeed.getNumber();
+        double requestedYSpeed = controller.getLeftX() * maxDriveSpeed.getNumber();
+        double requestedRotationSpeed = controller.getRightX() * RotationsPerSecond.of(maxTurnSpeed.getNumber()).in(RadiansPerSecond);
+
+        switch (state) {
+            case DRIVE_RESIDUAL:
+                return drive.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withRotationalRate(0);
+            case DRIVE_FACING_ANGLE:
+                return driveFacingAngle.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withTargetDirection(this.targetAngle);
             default:
-                return new SwerveRequest.FieldCentricFacingAngle();
+                return drive.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withRotationalRate(requestedRotationSpeed);
         }
     }
 
-    
-
-    public void setController(CommandXboxController controller) {
-        this.controller = controller;
+    public void updateDriveState() {
+        switch (state) {
+            case DRIVE_FACING_ANGLE:
+                if (Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber()) state = DriveState.DRIVE;
+            case DRIVE:
+                if (Math.abs(controller.getRightX()) <= drivingDeadBand.getNumber()) state = DriveState.DRIVE_RESIDUAL;
+            case DRIVE_RESIDUAL:
+                SwerveDriveState driveState = this.getState();
+                if (Math.abs(driveState.Speeds.omegaRadiansPerSecond) <= 
+                    DegreesPerSecond.of(pidRotationThreshold.getNumber()).in(RadiansPerSecond)) {
+                    targetAngle = driveState.Pose.getRotation();
+                    state = DriveState.DRIVE_FACING_ANGLE;
+                }
+        }
     }
 
-    
+    public void resetHeading() {
+        this.resetPose(
+            new Pose2d(
+                this.getState().Pose.getX(),
+                this.getState().Pose.getY(),
+                Rotation2d.kZero
+            )
+        );
+        this.targetAngle = Rotation2d.kZero;
+    }
+
+    public Command resetHeadingCommand() {
+        return this.runOnce(this::resetHeading);
+    }
+
+    public CommandSwerveDrivetrain withController(CommandXboxController controller) {
+        this.controller = controller;
+        return this;
+    }
+
+    public static CommandSwerveDrivetrain getInstance() {
+        if (instance == null) instance = TunerConstants.createDrivetrain();
+        return instance;
+    }
 }
