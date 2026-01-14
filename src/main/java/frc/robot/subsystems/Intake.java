@@ -40,9 +40,9 @@ public class Intake extends SubsystemBase {
         .withSpikeThreshold(40)
         .withCurrentLimitConfigs(
             new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(40)
+            .withSupplyCurrentLimit(45)
             .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(45)
+            .withStatorCurrentLimit(80)
             .withStatorCurrentLimitEnable(true)
         ).withTuningEnabled(true);
     }
