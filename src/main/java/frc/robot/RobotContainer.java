@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.swerve.generated.TunerConstants;
 
@@ -103,6 +104,20 @@ public class RobotContainer {
 
         // Reset the field-centric heading on left bumper press.
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+
+        joystick.leftTrigger(0.1).onTrue(
+            Intake.getInstance().intakeCommand()
+        );
+        joystick.leftTrigger(0.1).onFalse(
+            Intake.getInstance().stopIntakeCommand()
+        );
+
+        joystick.rightTrigger(0.1).onTrue(
+            Intake.getInstance().reverseIntakeCommand()
+        );
+        joystick.rightTrigger(0.1).onFalse(
+            Intake.getInstance().stopIntakeCommand()
+        );
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
