@@ -9,4 +9,8 @@ public class Autos {
     public Command testAutoPaths() {
         return drivetrain.followTrajectory("TestPath2026");
     }
+
+    public Command slowTestAutoPaths() {
+        return drivetrain.followTrajectory("TestPathSlow");
+    }
 }

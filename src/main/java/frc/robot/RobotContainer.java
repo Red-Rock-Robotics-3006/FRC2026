@@ -4,25 +4,14 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
-
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest;
-
-import choreo.auto.AutoChooser;
-import choreo.auto.AutoFactory;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
-import frc.robot.subsystems.swerve.Telemetry;
-import frc.robot.subsystems.swerve.generated.TunerConstants;
 
 public class RobotContainer {
     // private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -58,6 +47,7 @@ public class RobotContainer {
         autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
 
         autoChooser.addOption("Test Auto Paths", autos.testAutoPaths());
+        autoChooser.addOption("Slow Test Auto Paths", autos.slowTestAutoPaths());
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
