@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -84,6 +85,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final PIDController m_pathXController = new PIDController(10, 0, 0);
     private final PIDController m_pathYController = new PIDController(10, 0, 0);
     private final PIDController m_pathThetaController = new PIDController(7, 0, 0);
+
+    private AutoFactory factory;
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -202,6 +205,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.configureHeadingPID();
         this.registerTelemetry(telemetry::telemeterize);
         this.register();
+        this.factory = this.createAutoFactory();
     }
 
     /**
@@ -333,6 +337,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
          * Otherwise, only check and apply the operator perspective if the DS is disabled.
          * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
          */
+
+        if (DriverStation.isAutonomous()) return;
+
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
                 setOperatorPerspectiveForward(
@@ -351,7 +358,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         this.updateDriveState();
         SmartDashboard.putString("dt/drive state", this.state.toString());
-        // System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
         this.setControl(this.getRequest());
     }
 
@@ -462,9 +468,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void updateDriveState() {
-        SmartDashboard.putNumber("right x", controller.getRightX());
-        SmartDashboard.putNumber("rps", this.getState().Speeds.omegaRadiansPerSecond);
-        SmartDashboard.putBoolean("drive facing angle bool", Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber());
         switch (state) {
             case DRIVE_FACING_ANGLE:
                 if (Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber()) state = DriveState.DRIVE;
@@ -505,6 +508,25 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public void setTargetHeading(Rotation2d target) {
         this.targetAngle = target;
+    }
+
+    public Command followTrajectory(String pathName) {
+        return Commands.sequence(
+            this.factory.resetOdometry(pathName),
+            this.factory.trajectoryCmd(pathName)
+        );
+    }
+
+    public Command resetOdometryCommand(String pathName) {
+        return this.factory.resetOdometry(pathName);
+    }
+
+    public Command resetOdometryCommand(String pathName, int index) {
+        return this.factory.resetOdometry(pathName, index);
+    }
+
+    public Command followTrajectory(String pathName, int index) {
+        return this.factory.trajectoryCmd(pathName, index);
     }
 
     public static CommandSwerveDrivetrain getInstance() {
