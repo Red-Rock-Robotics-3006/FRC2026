@@ -87,6 +87,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final PIDController m_pathThetaController = new PIDController(7, 0, 0);
 
     private AutoFactory factory;
+    private boolean inAutoPath = false;
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -356,9 +357,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.updateDeadbands();
         this.updateHeadingPIDValues();
 
-        this.updateDriveState();
+        if (!inAutoPath) {
+            this.updateDriveState();
+            this.setControl(this.getRequest());
+        }
         SmartDashboard.putString("dt/drive state", this.state.toString());
-        this.setControl(this.getRequest());
     }
 
     private void updateDeadbands() {
@@ -509,11 +512,35 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void setTargetHeading(Rotation2d target) {
         this.targetAngle = target;
     }
+    public Command setTargetHeadingCommand(Rotation2d target) {
+        return this.runOnce(() -> this.targetAngle = target);
+    }
+
+    public void setInAutoPath(boolean inAuto) {
+        this.inAutoPath = inAuto;
+    }
+
+    public Command setInAutoPathCommand(boolean inAuto) {
+        return this.runOnce(() -> this.inAutoPath = inAuto);
+    }
 
     public Command followTrajectory(String pathName) {
         return Commands.sequence(
+            this.setInAutoPathCommand(true),
             this.factory.resetOdometry(pathName),
-            this.factory.trajectoryCmd(pathName)
+            this.factory.trajectoryCmd(pathName),
+            this.setInAutoPathCommand(false),
+            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation())
+        );
+    }
+
+    public Command followTrajectory(String pathName, int index) {
+        return Commands.sequence(
+            this.setInAutoPathCommand(true),
+            this.factory.resetOdometry(pathName, index),
+            this.factory.trajectoryCmd(pathName, index),
+            this.setInAutoPathCommand(false),
+            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName, index).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation())
         );
     }
 
@@ -523,10 +550,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command resetOdometryCommand(String pathName, int index) {
         return this.factory.resetOdometry(pathName, index);
-    }
-
-    public Command followTrajectory(String pathName, int index) {
-        return this.factory.trajectoryCmd(pathName, index);
     }
 
     public static CommandSwerveDrivetrain getInstance() {
