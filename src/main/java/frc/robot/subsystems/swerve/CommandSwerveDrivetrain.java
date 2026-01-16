@@ -10,6 +10,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
@@ -22,12 +23,17 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.swerve.generated.TunerConstants;
 import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrain;
+import redrocklib.logging.SmartDashboardNumber;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -37,6 +43,32 @@ import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrai
  * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
+    private static CommandSwerveDrivetrain instance = null;
+    private CommandXboxController controller;
+
+    private SmartDashboardNumber maxDriveSpeed = new SmartDashboardNumber("dt/dt drive speeds/max drive mps", 4);
+    private SmartDashboardNumber maxTurnSpeed = new SmartDashboardNumber("dt/dt drive speeds/turn rotps", 1);
+    private SmartDashboardNumber drivingDeadBand = new SmartDashboardNumber("dt/dt thresholds/deadband", 0.025);
+    private SmartDashboardNumber pidRotationThreshold = new SmartDashboardNumber("dt/dt thresholds/rotation threshold", 1); // threshold to enable heading pid again.
+
+    private SmartDashboardNumber headingP = new SmartDashboardNumber("dt/dt heading pid coeffs/kP", 4);
+    private SmartDashboardNumber headingI = new SmartDashboardNumber("dt/dt heading pid coeffs/kI", 0);
+    private SmartDashboardNumber headingD = new SmartDashboardNumber("dt/dt heading pid coeffs/kD", 0);
+
+    private SmartDashboardNumber headingTolerance = new SmartDashboardNumber("dt/dt heading pid coeffs/tolerance", 0.015);
+    
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+            .withDeadband(maxDriveSpeed.getNumber() * drivingDeadBand.getNumber()).withRotationalDeadband(maxTurnSpeed.getNumber() * drivingDeadBand.getNumber()) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+
+    private final SwerveRequest.FieldCentricFacingAngle driveFacingAngle = new SwerveRequest.FieldCentricFacingAngle()
+            .withDeadband(maxDriveSpeed.getNumber() * drivingDeadBand.getNumber()).withRotationalDeadband(maxTurnSpeed.getNumber() * drivingDeadBand.getNumber()) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+    private Telemetry telemetry = new Telemetry(maxDriveSpeed.getNumber());
+
+    private Rotation2d targetAngle = new Rotation2d();
+
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -54,10 +86,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final PIDController m_pathYController = new PIDController(10, 0, 0);
     private final PIDController m_pathThetaController = new PIDController(7, 0, 0);
 
+    private AutoFactory factory;
+    private boolean inAutoPath = false;
+
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
-    // private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
-    // private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+    private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
+    private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -75,48 +110,48 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         )
     );
 
-    // /* SysId routine for characterizing steer. This is used to find PID gains for the steer motors. */
-    // private final SysIdRoutine m_sysIdRoutineSteer = new SysIdRoutine(
-    //     new SysIdRoutine.Config(
-    //         null,        // Use default ramp rate (1 V/s)
-    //         Volts.of(7), // Use dynamic voltage of 7 V
-    //         null,        // Use default timeout (10 s)
-    //         // Log state with SignalLogger class
-    //         state -> SignalLogger.writeString("SysIdSteer_State", state.toString())
-    //     ),
-    //     new SysIdRoutine.Mechanism(
-    //         volts -> setControl(m_steerCharacterization.withVolts(volts)),
-    //         null,
-    //         this
-    //     )
-    // );
+    /* SysId routine for characterizing steer. This is used to find PID gains for the steer motors. */
+    private final SysIdRoutine m_sysIdRoutineSteer = new SysIdRoutine(
+        new SysIdRoutine.Config(
+            null,        // Use default ramp rate (1 V/s)
+            Volts.of(7), // Use dynamic voltage of 7 V
+            null,        // Use default timeout (10 s)
+            // Log state with SignalLogger class
+            state -> SignalLogger.writeString("SysIdSteer_State", state.toString())
+        ),
+        new SysIdRoutine.Mechanism(
+            volts -> setControl(m_steerCharacterization.withVolts(volts)),
+            null,
+            this
+        )
+    );
 
-    // /*
-    //  * SysId routine for characterizing rotation.
-    //  * This is used to find PID gains for the FieldCentricFacingAngle HeadingController.
-    //  * See the documentation of SwerveRequest.SysIdSwerveRotation for info on importing the log to SysId.
-    //  */
-    // private final SysIdRoutine m_sysIdRoutineRotation = new SysIdRoutine(
-    //     new SysIdRoutine.Config(
-    //         /* This is in radians per second², but SysId only supports "volts per second" */
-    //         Volts.of(Math.PI / 6).per(Second),
-    //         /* This is in radians per second, but SysId only supports "volts" */
-    //         Volts.of(Math.PI),
-    //         null, // Use default timeout (10 s)
-    //         // Log state with SignalLogger class
-    //         state -> SignalLogger.writeString("SysIdRotation_State", state.toString())
-    //     ),
-    //     new SysIdRoutine.Mechanism(
-    //         output -> {
-    //             /* output is actually radians per second, but SysId only supports "volts" */
-    //             setControl(m_rotationCharacterization.withRotationalRate(output.in(Volts)));
-    //             /* also log the requested output for SysId */
-    //             SignalLogger.writeDouble("Rotational_Rate", output.in(Volts));
-    //         },
-    //         null,
-    //         this
-    //     )
-    // );
+    /*
+     * SysId routine for characterizing rotation.
+     * This is used to find PID gains for the FieldCentricFacingAngle HeadingController.
+     * See the documentation of SwerveRequest.SysIdSwerveRotation for info on importing the log to SysId.
+     */
+    private final SysIdRoutine m_sysIdRoutineRotation = new SysIdRoutine(
+        new SysIdRoutine.Config(
+            /* This is in radians per second², but SysId only supports "volts per second" */
+            Volts.of(Math.PI / 6).per(Second),
+            /* This is in radians per second, but SysId only supports "volts" */
+            Volts.of(Math.PI),
+            null, // Use default timeout (10 s)
+            // Log state with SignalLogger class
+            state -> SignalLogger.writeString("SysIdRotation_State", state.toString())
+        ),
+        new SysIdRoutine.Mechanism(
+            output -> {
+                /* output is actually radians per second, but SysId only supports "volts" */
+                setControl(m_rotationCharacterization.withRotationalRate(output.in(Volts)));
+                /* also log the requested output for SysId */
+                SignalLogger.writeDouble("Rotational_Rate", output.in(Volts));
+            },
+            null,
+            this
+        )
+    );
 
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
@@ -139,6 +174,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        initialize();
     }
 
     /**
@@ -163,6 +199,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        initialize();
+    }
+
+    private void initialize() {
+        this.configureHeadingPID();
+        this.registerTelemetry(telemetry::telemeterize);
+        this.register();
+        this.factory = this.createAutoFactory();
     }
 
     /**
@@ -195,6 +239,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        this.initialize();
     }
 
     /**
@@ -293,6 +338,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
          * Otherwise, only check and apply the operator perspective if the DS is disabled.
          * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
          */
+
+        if (DriverStation.isAutonomous()) return;
+
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
                 setOperatorPerspectiveForward(
@@ -303,6 +351,27 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
+
+        telemetry.setMaxSpeed(maxDriveSpeed.getNumber());
+
+        this.updateDeadbands();
+        this.updateHeadingPIDValues();
+
+        if (!inAutoPath) {
+            this.updateDriveState();
+            this.setControl(this.getRequest());
+        }
+        SmartDashboard.putString("dt/drive state", this.state.toString());
+    }
+
+    private void updateDeadbands() {
+        drive.withDeadband(drivingDeadBand.getNumber() * maxDriveSpeed.getNumber()).withRotationalDeadband(drivingDeadBand.getNumber() * maxTurnSpeed.getNumber());
+        driveFacingAngle.withDeadband(drivingDeadBand.getNumber() * maxDriveSpeed.getNumber()).withRotationalDeadband(drivingDeadBand.getNumber() * maxTurnSpeed.getNumber());
+    }
+
+    private void updateHeadingPIDValues() {
+        this.driveFacingAngle.HeadingController.setPID(headingP.getNumber(), headingI.getNumber(), headingD.getNumber());
+        this.driveFacingAngle.HeadingController.setTolerance(headingTolerance.getNumber());
     }
 
     private void startSimThread() {
@@ -363,5 +432,128 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     @Override
     public Optional<Pose2d> samplePoseAt(double timestampSeconds) {
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
+    }
+
+    public enum DriveState {
+        DRIVE,
+        DRIVE_RESIDUAL,
+        DRIVE_FACING_ANGLE
+    }
+
+    private DriveState state = DriveState.DRIVE_FACING_ANGLE;
+
+    public void setDriveState(DriveState state) {
+        this.state = state;
+    }
+
+    public DriveState getDriveState() {
+        return this.state;
+    }
+
+    private void configureHeadingPID() {
+        driveFacingAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+        this.updateHeadingPIDValues();
+    }
+
+    public SwerveRequest getRequest() {
+        double requestedXSpeed = -controller.getLeftY() * maxDriveSpeed.getNumber();
+        double requestedYSpeed = -controller.getLeftX() * maxDriveSpeed.getNumber();
+        double requestedRotationSpeed = -controller.getRightX() * RotationsPerSecond.of(maxTurnSpeed.getNumber()).in(RadiansPerSecond);
+
+        switch (state) {
+            case DRIVE_RESIDUAL:
+                return drive.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withRotationalRate(0);
+            case DRIVE_FACING_ANGLE:
+                return driveFacingAngle.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withTargetDirection(this.targetAngle);
+            default:
+                return drive.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withRotationalRate(requestedRotationSpeed);
+        }
+    }
+
+    public void updateDriveState() {
+        switch (state) {
+            case DRIVE_FACING_ANGLE:
+                if (Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber()) state = DriveState.DRIVE;
+                break;
+            case DRIVE:
+                if (Math.abs(controller.getRightX()) <= drivingDeadBand.getNumber()) state = DriveState.DRIVE_RESIDUAL;
+                break;
+            case DRIVE_RESIDUAL:
+                SwerveDriveState driveState = this.getState();
+                if (Math.abs(driveState.Speeds.omegaRadiansPerSecond) <= 
+                    DegreesPerSecond.of(pidRotationThreshold.getNumber()).in(RadiansPerSecond)) {
+                    targetAngle = driveState.Pose.getRotation();
+                    state = DriveState.DRIVE_FACING_ANGLE;
+                }
+                break;
+        }
+    }
+
+    public void resetHeading() {
+        this.resetPose(
+            new Pose2d(
+                this.getState().Pose.getX(),
+                this.getState().Pose.getY(),
+                Rotation2d.kZero
+            )
+        );
+        this.targetAngle = Rotation2d.kZero;
+    }
+
+    public Command resetHeadingCommand() {
+        return this.runOnce(this::resetHeading);
+    }
+
+    public CommandSwerveDrivetrain withController(CommandXboxController controller) {
+        this.controller = controller;
+        return this;
+    }
+
+    public void setTargetHeading(Rotation2d target) {
+        this.targetAngle = target;
+    }
+    public Command setTargetHeadingCommand(Rotation2d target) {
+        return this.runOnce(() -> this.targetAngle = target);
+    }
+
+    public void setInAutoPath(boolean inAuto) {
+        this.inAutoPath = inAuto;
+    }
+
+    public Command setInAutoPathCommand(boolean inAuto) {
+        return this.runOnce(() -> this.inAutoPath = inAuto);
+    }
+
+    public Command followTrajectory(String pathName) {
+        return Commands.sequence(
+            this.setInAutoPathCommand(true),
+            this.factory.resetOdometry(pathName),
+            this.factory.trajectoryCmd(pathName),
+            this.setInAutoPathCommand(false),
+            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation())
+        );
+    }
+
+    public Command followTrajectory(String pathName, int index) {
+        return Commands.sequence(
+            this.setInAutoPathCommand(true),
+            this.factory.resetOdometry(pathName, index),
+            this.factory.trajectoryCmd(pathName, index),
+            this.setInAutoPathCommand(false),
+            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName, index).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation())
+        );
+    }
+
+    public Command resetOdometryCommand(String pathName) {
+        return this.factory.resetOdometry(pathName);
+    }
+
+    public Command resetOdometryCommand(String pathName, int index) {
+        return this.factory.resetOdometry(pathName, index);
+    }
+
+    public static CommandSwerveDrivetrain getInstance() {
+        if (instance == null) instance = TunerConstants.createDrivetrain();
+        return instance;
     }
 }
