@@ -1,6 +1,6 @@
 {
  "name":"TestPath2026",
- "version":2,
+ "version":3,
  "snapshot":{
   "waypoints":[
     {"x":3.62, "y":0.85, "heading":0.0, "intervals":20, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
