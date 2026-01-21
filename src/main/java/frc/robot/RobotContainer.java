@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 public class RobotContainer {
@@ -17,6 +18,7 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(joystick);
+    private final Intake intake = Intake.getInstance();
 
     private final Autos autos;
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
@@ -24,7 +26,8 @@ public class RobotContainer {
     public RobotContainer() {
         autos = new Autos();
 
-        configureDriveBindings();
+        // configureSysIDBindings();
+        configureBindings();
         configureSelector();
     }
 
@@ -37,16 +40,23 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
-    private void configureDriveBindings() {
+    private void configureSysIDBindings() {
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
         joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
         joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
         joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+    }
 
-        joystick.start()
-            .and(joystick.back()).onTrue(drivetrain.resetHeadingCommand());
+    private void configureBindings() {
+        joystick.start().and(joystick.back()).onTrue(drivetrain.resetHeadingCommand());
+
+        joystick.leftTrigger(0.1).onTrue(
+            intake.startIntakeCommand()
+        ).onFalse(
+            intake.stopIntakeCommand()
+        );
     }
 
     public Command getAutonomousCommand() {

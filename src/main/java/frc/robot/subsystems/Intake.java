@@ -28,7 +28,8 @@ public class Intake extends SubsystemBase{
     private SmartDashboardNumber resetSpeed = new SmartDashboardNumber("intake/pivot/reset speed", -0.05);
     private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/pivot/deploy position", 10); 
     private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/pivot/stow position", 0); 
-    
+    private SmartDashboardNumber intakeDeployThreshold = new SmartDashboardNumber("intake/deploy threshold", 9);
+
     private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed RPM", 1000);
     private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed RPM", -400);
 
@@ -127,10 +128,6 @@ public class Intake extends SubsystemBase{
         this.setDriveSpeed(0);
     }
 
-    public Command startIntakeCommand() {
-        return Commands.runOnce(() -> this.startIntake(), this);
-    }
-
     public Command reverseIntakeCommand() {
         return Commands.runOnce(() -> this.reverseIntake(), this);
     }
@@ -139,8 +136,15 @@ public class Intake extends SubsystemBase{
         return Commands.runOnce(() -> this.stopIntake(), this);
     }
 
-    public Command deployIntakeCommand() {
-        return Commands.runOnce(() -> this.deployIntake(), this);
+    public Command startIntakeCommand() {
+        return Commands.either(
+            Commands.runOnce(() -> this.startIntake(), this),
+            Commands.sequence( 
+                Commands.runOnce(() -> this.deployIntake(), this),
+                Commands.runOnce(() -> this.startIntake(), this)
+            ),
+            () -> (this.pivotMotor.motor.getPosition().getValueAsDouble() > intakeDeployThreshold.getNumber())
+        );
     }
 
     public Command stowIntakeCommand() {
