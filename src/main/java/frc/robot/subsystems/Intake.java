@@ -3,6 +3,8 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -15,15 +17,15 @@ import redrocklib.wrappers.RedRockTalon;
 public class Intake extends SubsystemBase {
     private static Intake instance = null;
 
-    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake speed", 0.2).withTuningEnabled(true);
-    private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake reverse speed", -0.2).withTuningEnabled(true);
+    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake speed", 1).withTuningEnabled(true);
+    private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake reverse speed", -0.75).withTuningEnabled(true);
     
     private RedRockTalon intakeMotor = new RedRockTalon(31, "intake", "*");
 
     private Intake() {
         this.intakeMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withInverted(InvertedValue.Clockwise_Positive)
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
@@ -33,7 +35,7 @@ public class Intake extends SubsystemBase {
             .withKA(0)
             .withKS(0)
             .withKV(0)
-            .withKP(0.2)
+            .withKP(0)
             .withKI(0)
             .withKD(0)
         )
@@ -48,7 +50,7 @@ public class Intake extends SubsystemBase {
     }
 
     private void startIntaking() {
-        this.intakeMotor.motor.set(intakeSpeed.getNumber());
+        this.intakeMotor.motor.setControl(new DutyCycleOut(intakeSpeed.getNumber()));
     }
 
     private void stopIntaking() {
@@ -56,7 +58,7 @@ public class Intake extends SubsystemBase {
     }
 
     private void reverseIntake() {
-        this.intakeMotor.motor.set(intakeReverseSpeed.getNumber());
+        this.intakeMotor.motor.setControl(new DutyCycleOut(intakeReverseSpeed.getNumber()));
     }
 
     public Command intakeCommand() {
@@ -69,6 +71,12 @@ public class Intake extends SubsystemBase {
 
     public Command reverseIntakeCommand() {
         return Commands.runOnce(() -> reverseIntake(), this);
+    }
+
+    @Override
+    public void periodic() {
+        // This method will be called once per scheduler run
+        this.intakeMotor.update();
     }
 
     public static Intake getInstance() {
