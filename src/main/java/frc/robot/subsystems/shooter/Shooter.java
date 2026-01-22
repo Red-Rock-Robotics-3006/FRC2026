@@ -161,12 +161,6 @@ public class Shooter extends SubsystemBase{
 
     @Override
     public void periodic() {
-        shooterMotor.update();
-        turretMotor.update();
-        hoodMotor.update();
-
-        boolean autoAim = false;
-        boolean lob = false;
 
         Pose2d dtPose = CommandSwerveDrivetrain.getInstance().getPose();
         Pose2d turretPose = dtPose
@@ -176,55 +170,51 @@ public class Shooter extends SubsystemBase{
                                     shooterOffset.rotateBy(dtPose.getRotation())
                                 )
                             );
+        
+        boolean isBlue = CommandSwerveDrivetrain.getInstance().isBlue();
 
         switch (state) {
             case RESTING:
                 this.setHoodAngle(Rotation2d.kZero);
                 break;
             case LOB:
-                lob = true;
-            case AUTO_AIM:
-                autoAim = true;
-            case TURRET_TRACKING:
-                Pose2d targetPose;
-                if (DriverStation.getAlliance().isPresent()
-                    && DriverStation.getAlliance().get() == Alliance.Red) {
-                    targetPose = Localization.redHub;
-                    if (this.state == ShooterState.LOB || this.state == ShooterState.LOB_TRACKING) {
-                        if (dtPose.getY() > halfFieldY) {
-                            targetPose = Localization.redLobTargets[1];
-                        } else {
-                            targetPose = Localization.redLobTargets[0];
-                        }
-                    }
-                } else {
-                    targetPose = Localization.blueHub;
-                    if (this.state == ShooterState.LOB || this.state == ShooterState.LOB_TRACKING) {
-                        if (dtPose.getY() > halfFieldY) {
-                            targetPose = Localization.blueLobTargets[1];
-                        } else {
-                            targetPose = Localization.blueLobTargets[0];
-                        }
-                    }
-                }
-                Rotation2d rot = turretPose
-                                    .relativeTo(targetPose)
-                                    .getTranslation()
-                                    .getAngle()
-                                    .minus(dtPose.getRotation());
-                
-                //dt pose + offset = turret pose. find turret pose relative to hubpose to find desired angle. subtract drivetrain pose to offset drivetrain.
-                                    
-                this.setTurretAngle(rot);
-                if (this.state == ShooterState.AUTO_AIM) {
-                    double distanceToTarget = turretPose.minus(targetPose).getTranslation().getNorm();
-                    this.setShotParameter(InterpolatingTable.get(distanceToTarget));
-                } else if (this.state == ShooterState.LOB) {
-                    double distanceToTarget = turretPose.minus(targetPose).getTranslation().getNorm();
-                    this.setShotParameter(LobInterpolatingTable.get(distanceToTarget));
-                }
+            case LOB_TRACKING:
+                Pose2d[] lobPoses = isBlue ? Localization.blueLobTargets : Localization.redLobTargets;
+                Pose2d targetPose = (dtPose.getY() > halfFieldY) ? lobPoses[1] : lobPoses[0];
+                this.setTurretAngle(
+                    turretPose
+                        .relativeTo(targetPose)
+                        .getTranslation()
+                        .getAngle()
+                        .minus(dtPose.getRotation())
+                );
+
+                if (this.state == ShooterState.LOB)
+                    this.setShotParameter(
+                        LobInterpolatingTable.get(
+                            turretPose.minus(targetPose).getTranslation().getNorm()));
                 break;
+            case AUTO_AIM:
+            case TURRET_TRACKING:
+                Pose2d hubPose = isBlue ? Localization.blueHub : Localization.redHub;
+                this.setTurretAngle(
+                    turretPose
+                        .relativeTo(hubPose)
+                        .getTranslation()
+                        .getAngle()
+                        .minus(dtPose.getRotation())
+                );
+
+                if (this.state == ShooterState.AUTO_AIM)
+                    this.setShotParameter(
+                        LobInterpolatingTable.get(
+                            turretPose.minus(hubPose).getTranslation().getNorm()));
+            break;
         }
+
+        shooterMotor.update();
+        turretMotor.update();
+        hoodMotor.update();
     }
 
     public static Shooter getInstance() {

@@ -44,6 +44,9 @@ import redrocklib.logging.SmartDashboardNumber;
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
     private static CommandSwerveDrivetrain instance = null;
+
+    private Alliance alliance = Alliance.Blue;
+
     private CommandXboxController controller;
 
     private SmartDashboardNumber maxDriveSpeed = new SmartDashboardNumber("dt/dt drive speeds/max drive mps", 4);
@@ -349,6 +352,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                         : kBlueAlliancePerspectiveRotation
                 );
                 m_hasAppliedOperatorPerspective = true;
+                alliance = allianceColor;
             });
         }
 
@@ -525,6 +529,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void setInAutoPath(boolean inAuto) {
         if (inAuto) this.state = DriveState.AUTO;
         else this.state = DriveState.DRIVE_FACING_ANGLE;
+    }
+
+    public boolean isBlue() {
+        return this.alliance == Alliance.Blue;
     }
 
     public Command setInAutoPathCommand(boolean inAuto) {
