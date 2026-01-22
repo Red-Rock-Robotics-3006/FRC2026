@@ -193,6 +193,7 @@ public class Shooter extends SubsystemBase{
                     this.setShotParameter(
                         LobInterpolatingTable.get(
                             turretPose.minus(targetPose).getTranslation().getNorm()));
+                else this.setShotParameter(new ShotParameter(Rotation2d.kZero, 0));
                 break;
             case AUTO_AIM:
             case TURRET_TRACKING:
@@ -209,7 +210,8 @@ public class Shooter extends SubsystemBase{
                     this.setShotParameter(
                         LobInterpolatingTable.get(
                             turretPose.minus(hubPose).getTranslation().getNorm()));
-            break;
+                else this.setShotParameter(new ShotParameter(Rotation2d.kZero, 0));
+                break;
         }
 
         shooterMotor.update();
