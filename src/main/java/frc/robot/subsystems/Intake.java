@@ -137,14 +137,10 @@ public class Intake extends SubsystemBase{
     }
 
     public Command startIntakeCommand() {
-        return Commands.either(
-            Commands.runOnce(() -> this.startIntake(), this),
-            Commands.sequence( 
+        return Commands.sequence( 
                 Commands.runOnce(() -> this.deployIntake(), this),
                 Commands.runOnce(() -> this.startIntake(), this)
-            ),
-            () -> (this.pivotMotor.motor.getPosition().getValueAsDouble() > intakeDeployThreshold.getNumber())
-        );
+            );
     }
 
     public Command stowIntakeCommand() {
