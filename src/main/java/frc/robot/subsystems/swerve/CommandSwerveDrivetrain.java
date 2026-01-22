@@ -48,7 +48,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private SmartDashboardNumber maxDriveSpeed = new SmartDashboardNumber("dt/dt drive speeds/max drive mps", 4);
     private SmartDashboardNumber maxTurnSpeed = new SmartDashboardNumber("dt/dt drive speeds/turn rotps", 1);
-    private SmartDashboardNumber drivingDeadBand = new SmartDashboardNumber("dt/dt thresholds/deadband", 0.025);
+    private SmartDashboardNumber drivingDeadBand = new SmartDashboardNumber("dt/dt thresholds/deadband", 0.005);
     private SmartDashboardNumber pidRotationThreshold = new SmartDashboardNumber("dt/dt thresholds/rotation threshold", 1); // threshold to enable heading pid again.
 
     private SmartDashboardNumber headingP = new SmartDashboardNumber("dt/dt heading pid coeffs/kP", 4);
@@ -339,7 +339,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
          * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
          */
 
-        if (DriverStation.isAutonomous()) return;
+        // if (DriverStation.isAutonomous()) return;
 
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
@@ -357,7 +357,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.updateDeadbands();
         this.updateHeadingPIDValues();
 
-        if (!inAutoPath) {
+        if (this.state != DriveState.AUTO) {
             this.updateDriveState();
             this.setControl(this.getRequest());
         }
@@ -437,7 +437,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public enum DriveState {
         DRIVE,
         DRIVE_RESIDUAL,
-        DRIVE_FACING_ANGLE
+        DRIVE_FACING_ANGLE,
+        AUTO
     }
 
     private DriveState state = DriveState.DRIVE_FACING_ANGLE;
@@ -448,6 +449,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public DriveState getDriveState() {
         return this.state;
+    }
+
+    public Pose2d getPose() {
+        return this.getState().Pose;
     }
 
     private void configureHeadingPID() {
@@ -472,6 +477,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public void updateDriveState() {
         switch (state) {
+            case AUTO: break;
             case DRIVE_FACING_ANGLE:
                 if (Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber()) state = DriveState.DRIVE;
                 break;
@@ -517,7 +523,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void setInAutoPath(boolean inAuto) {
-        this.inAutoPath = inAuto;
+        if (inAuto) this.state = DriveState.AUTO;
+        else this.state = DriveState.DRIVE_FACING_ANGLE;
     }
 
     public Command setInAutoPathCommand(boolean inAuto) {
@@ -526,11 +533,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command followTrajectory(String pathName) {
         return Commands.sequence(
-            this.setInAutoPathCommand(true),
+            // this.setInAutoPathCommand(true),
+            this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
             this.factory.resetOdometry(pathName),
             this.factory.trajectoryCmd(pathName),
-            this.setInAutoPathCommand(false),
-            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation())
+            // this.setInAutoPathCommand(false),
+            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation()),
+            this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
         );
     }
 

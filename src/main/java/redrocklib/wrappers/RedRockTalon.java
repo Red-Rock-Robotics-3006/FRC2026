@@ -5,11 +5,17 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import redrocklib.logging.SmartDashboardNumber;
 
 public class RedRockTalon {
@@ -30,6 +36,7 @@ public class RedRockTalon {
     private SmartDashboardNumber motionVel;
 
     private SmartDashboardNumber spikeThreshold;
+    private SmartDashboardNumber resetSpeed;
 
     private boolean tuningEnabled = true;
 
@@ -118,8 +125,6 @@ public class RedRockTalon {
             .withSpikeThreshold(5)
             .withMotionMagicConfigs(new MotionMagicConfigs())
             .withTuningEnabled(true);
-
-
     }
 
     public RedRockTalon withTuningEnabled(boolean enabled) {
@@ -198,6 +203,29 @@ public class RedRockTalon {
     public double getSpikeThreshold() {
         return this.spikeThreshold.getNumber();
     }
+
+    public void setResetSpeed() {
+        this.motor.setControl(new DutyCycleOut(resetSpeed.getNumber()));
+    }
+
+    public void resetMotor() {
+        this.motor.setControl(new NeutralOut());
+        this.motor.setPosition(0);
+    }
+
+    public Command resetMotorCommand() {
+        return Commands.sequence(
+            Commands.runOnce(() -> this.setResetSpeed()),
+            Commands.waitUntil(() -> this.aboveSpikeThreshold()),
+            Commands.runOnce(() -> this.resetMotor())
+        );
+    }
+
+    public Command resetMotorCommand(Subsystem requirement) {
+        Command m = this.resetMotorCommand();
+        m.addRequirements(requirement);
+        return m;
+    } 
 
     /**
      * Updates telemetry, and applies any changed config numbers for the motor

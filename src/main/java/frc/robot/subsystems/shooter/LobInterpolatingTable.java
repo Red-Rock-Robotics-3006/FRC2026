@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-public class InterpolatingTable {
+public class LobInterpolatingTable {
 
-    private InterpolatingTable() {}
+    private LobInterpolatingTable() {}
                 
     public static TreeMap<Double, ShotParameter> table =
         new TreeMap<>(
