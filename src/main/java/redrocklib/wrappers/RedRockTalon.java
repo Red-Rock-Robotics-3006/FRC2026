@@ -1,21 +1,33 @@
 package redrocklib.wrappers;
 
+import java.util.ArrayList;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import redrocklib.logging.SmartDashboardNumber;
 
 public class RedRockTalon {
     public static final boolean kEnableMotorDashboardTuning = true;
 
-    public TalonFX motor;
+    /**
+     * main motor
+     */
+    public final TalonFX motor;
 
     private SmartDashboardNumber kS;
     private SmartDashboardNumber kA;
@@ -30,13 +42,24 @@ public class RedRockTalon {
     private SmartDashboardNumber motionVel;
 
     private SmartDashboardNumber spikeThreshold;
+    private SmartDashboardNumber resetSpeed;
 
     private boolean tuningEnabled = true;
 
     private Slot0Configs slot0Configs;
     private MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs();
+    private CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(50)
+            .withSupplyCurrentLimitEnable(true)
+            .withStatorCurrentLimit(80)
+            .withStatorCurrentLimitEnable(true);
+
+    private MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs();
+    private FeedbackConfigs feedbackConfigs = null;
 
     private String name;
+
+    private ArrayList<TalonFX> followerMotors = new ArrayList<>();
 
     public RedRockTalon(int motorID) {
         this(motorID, "motor-" + motorID);
@@ -82,16 +105,12 @@ public class RedRockTalon {
 
         this.withMotorOutputConfigs(outPutConfigs)
             .withSlot0Configs(slot0Configs)
-            .withCurrentLimitConfigs(new CurrentLimitsConfigs()
-                                        .withSupplyCurrentLimit(60)
-                                        .withSupplyCurrentLimitEnable(true)
-                                        .withStatorCurrentLimit(100)
-                                        .withStatorCurrentLimitEnable(true))
+            .withCurrentLimitConfigs(this.currentLimitsConfigs)
             .withSpikeThreshold(5)
             .withMotionMagicConfigs(new MotionMagicConfigs())
             .withTuningEnabled(true);
 
-
+        this.followerMotors.add(motor);
     }
 
     /**
@@ -110,16 +129,12 @@ public class RedRockTalon {
 
         this.withMotorOutputConfigs(outPutConfigs)
             .withSlot0Configs(slot0Configs)
-            .withCurrentLimitConfigs(new CurrentLimitsConfigs()
-                                        .withSupplyCurrentLimit(60)
-                                        .withSupplyCurrentLimitEnable(true)
-                                        .withStatorCurrentLimit(100)
-                                        .withStatorCurrentLimitEnable(true))
+            .withCurrentLimitConfigs(this.currentLimitsConfigs)
             .withSpikeThreshold(5)
             .withMotionMagicConfigs(new MotionMagicConfigs())
             .withTuningEnabled(true);
-
-
+        
+        this.followerMotors.add(motor);
     }
 
     public RedRockTalon withTuningEnabled(boolean enabled) {
@@ -128,48 +143,70 @@ public class RedRockTalon {
     }
 
     public RedRockTalon withSpikeThreshold(double threshold) {
-        this.spikeThreshold = new SmartDashboardNumber(name + "/" + name + "-spike-threshold", threshold);
+        this.spikeThreshold = new SmartDashboardNumber(name + "/" + name + "-spike-threshold", threshold, this.tuningEnabled);
         return this;
     }
 
     public RedRockTalon withCurrentLimitConfigs(CurrentLimitsConfigs configs) {
-        this.motor.getConfigurator().apply(configs);
+        for (TalonFX follower : followerMotors)
+            follower.getConfigurator().apply(configs);
+        this.currentLimitsConfigs = configs;
         return this;
     }
 
     public RedRockTalon withMotorOutputConfigs(MotorOutputConfigs configs) {
-        this.motor.getConfigurator().apply(configs);
+        for (TalonFX follower : followerMotors)
+            follower.getConfigurator().apply(configs);
+        this.motorOutputConfigs = configs;
         return this;
     }
 
     public RedRockTalon withFeedbackConfigs(FeedbackConfigs configs){
-        this.motor.getConfigurator().apply(configs);
+        for (TalonFX follower : followerMotors)
+            follower.getConfigurator().apply(configs);
+        this.feedbackConfigs = configs;
         return this;
     }
 
     public RedRockTalon withSlot0Configs(Slot0Configs slot0Configs) {
         this.slot0Configs = slot0Configs;
-        this.kS = new SmartDashboardNumber(name + "/" + name + "-slot0/kS", slot0Configs.kS);
-        this.kA = new SmartDashboardNumber(name + "/" + name + "-slot0/kA", slot0Configs.kA);
-        this.kV = new SmartDashboardNumber(name + "/" + name + "-slot0/kV", slot0Configs.kV);
-        this.kP = new SmartDashboardNumber(name + "/" + name + "-slot0/kP", slot0Configs.kP);
-        this.kI = new SmartDashboardNumber(name + "/" + name + "-slot0/kI", slot0Configs.kI);
-        this.kD = new SmartDashboardNumber(name + "/" + name + "-slot0/kD", slot0Configs.kD);
-        this.kG = new SmartDashboardNumber(name + "/" + name + "-slot0/kG", slot0Configs.kG);
+        this.kS = new SmartDashboardNumber(name + "/" + name + "-slot0/kS", slot0Configs.kS, this.tuningEnabled);
+        this.kA = new SmartDashboardNumber(name + "/" + name + "-slot0/kA", slot0Configs.kA, this.tuningEnabled);
+        this.kV = new SmartDashboardNumber(name + "/" + name + "-slot0/kV", slot0Configs.kV, this.tuningEnabled);
+        this.kP = new SmartDashboardNumber(name + "/" + name + "-slot0/kP", slot0Configs.kP, this.tuningEnabled);
+        this.kI = new SmartDashboardNumber(name + "/" + name + "-slot0/kI", slot0Configs.kI, this.tuningEnabled);
+        this.kD = new SmartDashboardNumber(name + "/" + name + "-slot0/kD", slot0Configs.kD, this.tuningEnabled);
+        this.kG = new SmartDashboardNumber(name + "/" + name + "-slot0/kG", slot0Configs.kG, this.tuningEnabled);
 
-        this.motor.getConfigurator().apply(slot0Configs);
+        for (TalonFX follower : followerMotors)
+            follower.getConfigurator().apply(slot0Configs);
 
         return this;
     }
 
     public RedRockTalon withMotionMagicConfigs(MotionMagicConfigs configs) {
         this.motionMagicConfigs = configs;
-        this.motionAccel = new SmartDashboardNumber(name + "/" + name + "-motion-magic/accel", configs.MotionMagicAcceleration);
-        this.motionVel = new SmartDashboardNumber(name + "/" + name + "-motion-magic/velocity", configs.MotionMagicCruiseVelocity);
-        this.motionJerk = new SmartDashboardNumber(name + "/" + name + "-motion-magic/jerk", configs.MotionMagicJerk);
+        this.motionAccel = new SmartDashboardNumber(name + "/" + name + "-motion-magic/accel", configs.MotionMagicAcceleration, this.tuningEnabled);
+        this.motionVel = new SmartDashboardNumber(name + "/" + name + "-motion-magic/velocity", configs.MotionMagicCruiseVelocity, this.tuningEnabled);
+        this.motionJerk = new SmartDashboardNumber(name + "/" + name + "-motion-magic/jerk", configs.MotionMagicJerk, this.tuningEnabled);
 
-        this.motor.getConfigurator().apply(configs);
+        for (TalonFX follower : followerMotors)
+            follower.getConfigurator().apply(configs);
 
+        return this;
+    }
+
+    public RedRockTalon withFollowerMotor(TalonFX follower, MotorAlignmentValue alignmentValue) {
+        followerMotors.add(follower);
+        for (TalonFX followerMotor : followerMotors) {
+            followerMotor.getConfigurator().apply(this.motorOutputConfigs);
+            followerMotor.getConfigurator().apply(this.slot0Configs);
+            followerMotor.getConfigurator().apply(this.motionMagicConfigs);
+            followerMotor.getConfigurator().apply(this.currentLimitsConfigs);
+            if (this.feedbackConfigs != null)
+                followerMotor.getConfigurator().apply(this.feedbackConfigs);
+        }
+        follower.setControl(new Follower(this.motor.getDeviceID(), alignmentValue));
         return this;
     }
 
@@ -199,6 +236,29 @@ public class RedRockTalon {
         return this.spikeThreshold.getNumber();
     }
 
+    public void setResetSpeed() {
+        this.motor.setControl(new DutyCycleOut(resetSpeed.getNumber()));
+    }
+
+    public void resetMotor() {
+        this.motor.setControl(new NeutralOut());
+        for (TalonFX follower : this.followerMotors) follower.setPosition(0);
+    }
+
+    public Command resetMotorCommand() {
+        return Commands.sequence(
+            Commands.runOnce(() -> this.setResetSpeed()),
+            Commands.waitUntil(() -> this.aboveSpikeThreshold()),
+            Commands.runOnce(() -> this.resetMotor())
+        );
+    }
+
+    public Command resetMotorCommand(Subsystem requirement) {
+        Command m = this.resetMotorCommand();
+        m.addRequirements(requirement);
+        return m;
+    } 
+
     /**
      * Updates telemetry, and applies any changed config numbers for the motor
      * 
@@ -221,27 +281,33 @@ public class RedRockTalon {
                 slot0Configs.kD = kD.getNumber();
                 slot0Configs.kG = kG.getNumber();
     
-                motor.getConfigurator().apply(slot0Configs);
+                for (TalonFX follower : followerMotors) {
+                    follower.getConfigurator().apply(slot0Configs);
+                }
             }
     
             if (motionVel.hasChanged() && Double.compare(motionVel.getNumber(), 0) != 0) {
                 motionMagicConfigs.MotionMagicCruiseVelocity = motionVel.getNumber();
-                motor.getConfigurator().apply(motionMagicConfigs);
+                for (TalonFX follower : followerMotors) 
+                    follower.getConfigurator().apply(motionMagicConfigs);
             }
     
             if (motionAccel.hasChanged() && Double.compare(motionAccel.getNumber(), 0) != 0) {
                 motionMagicConfigs.MotionMagicAcceleration = motionAccel.getNumber();
-                motor.getConfigurator().apply(motionMagicConfigs);
+                for (TalonFX follower : followerMotors) 
+                    follower.getConfigurator().apply(motionMagicConfigs);
             }
     
             if (motionJerk.hasChanged() && Double.compare(motionJerk.getNumber(), 0) != 0) {
                 motionMagicConfigs.MotionMagicJerk = motionJerk.getNumber();
-                motor.getConfigurator().apply(motionMagicConfigs);
+                for (TalonFX follower : followerMotors) 
+                    follower.getConfigurator().apply(motionMagicConfigs);
             }
         }
 
         SmartDashboard.putNumber(name + "/" + name + "-current-position", motor.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber(name + "/" + name + "-current-velocity", motor.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber(name + "/" + name + "-current-velocity-rps", motor.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber(name + "/" + name + "-current-velocity-rpm", motor.getVelocity().getValueAsDouble() * 60);
         SmartDashboard.putNumber(name + "/" + name + "-current-acceleration", motor.getAcceleration().getValueAsDouble());
         SmartDashboard.putNumber(name + "/" + name + "-torque-current", motor.getTorqueCurrent().getValueAsDouble());
 

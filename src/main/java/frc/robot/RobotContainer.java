@@ -11,55 +11,65 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
+// import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
 
-    public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(joystick);
+    // public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(joystick);
 
-    private final Autos autos;
+    // private final Autos autos;
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
     public RobotContainer() {
-        autos = new Autos();
+        // autos = new Autos();
 
         configureDriveBindings();
-        configureSelector();
+        // configureSelector();
     }
 
-    public void configureSelector() {
-        autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
+    // public void configureSelector() {
+    //     autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
 
-        autoChooser.addOption("Test Auto Paths", autos.testAutoPaths());
-        autoChooser.addOption("Slow Test Auto Paths", autos.slowTestAutoPaths());
+    //     autoChooser.addOption("Test Auto Paths", autos.testAutoPaths());
+    //     autoChooser.addOption("Slow Test Auto Paths", autos.slowTestAutoPaths());
 
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-    }
+    //     SmartDashboard.putData("Auto Chooser", autoChooser);
+    // }
 
     private void configureDriveBindings() {
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        joystick.start()
-            .and(joystick.back()).onTrue(drivetrain.resetHeadingCommand());
+        // joystick.start()
+        //     .and(joystick.back()).onTrue(drivetrain.resetHeadingCommand());
 
         joystick.leftTrigger(0.1).onTrue(
             Intake.getInstance().intakeCommand()
-        );
-        joystick.leftTrigger(0.1).onFalse(
+        ).onFalse(
             Intake.getInstance().stopIntakeCommand()
         );
 
         joystick.rightTrigger(0.1).onTrue(
             Intake.getInstance().reverseIntakeCommand()
+        ).onFalse(
+            Intake.getInstance().stopIntakeCommand()
         );
-        joystick.rightTrigger(0.1).onFalse(
+
+        joystick.leftBumper().onTrue(
+            Intake.getInstance().intakeRPMCommand()
+        ).onFalse(
+            Intake.getInstance().stopIntakeCommand()
+        );
+
+        joystick.rightBumper().onTrue(
+            Intake.getInstance().reverseIntakeRPMCommand()
+        ).onFalse(
             Intake.getInstance().stopIntakeCommand()
         );
     }
