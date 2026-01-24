@@ -1,9 +1,13 @@
 package frc.robot.subsystems;
 
+
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import redrocklib.logging.SmartDashboardNumber;
 import redrocklib.wrappers.RedRockTalon;
@@ -11,9 +15,9 @@ import redrocklib.wrappers.RedRockTalon;
 public class Index extends SubsystemBase{
     private static Index instance = null;
 
-    private final RedRockTalon indexFeedMotor = new RedRockTalon(0, "indexFeedMotor", "*"); //TODO
-    private final RedRockTalon indexConveyorMotor = new RedRockTalon(0, "indexConveyorMotor", "*"); //TODO
-    private final RedRockTalon indexCenterMotor = new RedRockTalon(0, "indexCenterMotor", "*"); //TODO
+    private final TalonFX m_indexFeedMotor = new TalonFX(0); //TODO
+    private final TalonFX m_indexConveyorMotor = new TalonFX(0); //TODO
+    private final TalonFX m_indexCenterMotor = new TalonFX(0); //TODO
 
     private SmartDashboardNumber feedMotorSpeed = new SmartDashboardNumber("Index/feedMotorSpeed", .1); //TODO
     private SmartDashboardNumber conveyorMotorSpeed = new SmartDashboardNumber("Index/conveyorMotorSpeed", .1); //TODO
@@ -22,53 +26,65 @@ public class Index extends SubsystemBase{
     private Index() {
         super("Index");
 
-        this.indexFeedMotor.withMotorOutputConfigs(
+        this.m_indexFeedMotor.getConfigurator().apply(
             new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive) //todo make sure it is CCW
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
-        )
+        );
 
-        this.indexConveyorMotor.withMotorOutputConfigs(
+        this.m_indexConveyorMotor.getConfigurator().apply(
             new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive) //todo make sure it is CCW
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
-        )
+        );
 
-        this.indexCenterMotor.withMotorOutputConfigs(
+        this.m_indexCenterMotor.getConfigurator().apply(
             new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive) //todo make sure it is CCW
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
-        )
+        );
 
+    }
+    public void startIndexFeed(){
+        this.m_indexFeedMotor.setControl(new DutyCycleOut(this.feedMotorSpeed.getNumber()));
+    }
 
-        public void startIndexFeed(){
-            this.indexFeedMotor.setControl(feedMotorSpeed);
-        }
+    public void stopIndexFeed(){
+        this.m_indexFeedMotor.setControl(new DutyCycleOut(0));
+    }
 
-        public void stopIndexFeed(){
-            this.indexFeedMotor.setControl(0);
-        }
+    public void startIndexConveyor(){
+        this.m_indexConveyorMotor.setControl(new DutyCycleOut(this.conveyorMotorSpeed.getNumber()));
+    }
 
-        public void startIndexConveyor(){
-            this.indexConveyorMotor.setControl(conveyorMotorSpeed);
-        }
+    public void stopIndexConveyor(){
+        this.m_indexConveyorMotor.setControl(new DutyCycleOut(0));
+    }
 
-        public Void stopIndexConveyor(){
-            this.indexConveyorMotor.setControl(0);
-        }
+    public void startIndexCenter(){
+        this.m_indexCenterMotor.setControl(new DutyCycleOut(this.centerMotorSpeed.getNumber()));
+    }
 
-        public void startIndexCenter(){
-            this.indexCenterMotor.setControl(centerMotorSpeed);
-        }
+    public void stopIndexCenter(){
+        this.m_indexCenterMotor.setControl(new DutyCycleOut(0));
+    }
 
-        public void stopIndexCenter(){
-            this.indexCenterMotor.setControl(0);
-        }
+    @Override
+    public void periodic(){
+        SmartDashboard.putNumber("Index/feedMotorSpeed", feedMotorSpeed.getNumber());
+        SmartDashboard.putNumber("Index/conveyorMotorSpeed", conveyorMotorSpeed.getNumber());
+        SmartDashboard.putNumber("Index/centerMotorSpeed", centerMotorSpeed.getNumber());
+    }
+
+    public static Index getInstance(){
+        if(instance == null)
+            instance = new Index();
+        return instance;
     }
 }
