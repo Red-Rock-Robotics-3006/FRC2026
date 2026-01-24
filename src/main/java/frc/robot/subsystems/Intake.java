@@ -17,8 +17,8 @@ import redrocklib.wrappers.RedRockTalon;
 public class Intake extends SubsystemBase{
     private static Intake instance = null;
 
-    private final RedRockTalon intakeMotor = new RedRockTalon(31, "intakeMotor", "*"); 
-    private final RedRockTalon pivotMotor = new RedRockTalon(32, "Motor", "*"); 
+    private final RedRockTalon intakeMotor = new RedRockTalon(0, "intakeMotor", "*"); //TODO 
+    private final RedRockTalon pivotMotor = new RedRockTalon(0, "Motor", "*"); //TODO
 
     private SmartDashboardNumber deployPosition = new SmartDashboardNumber("Intake/deployPosition", 28.6); //TODO
     private SmartDashboardNumber stowPosition = new SmartDashboardNumber("Intake/stowPosition", 3); //TODO
