@@ -21,8 +21,12 @@ public class LerpingSmartDashboardNumber {
     }
 
     public double getValue(double input) {
-        return (outputUpperBound.getNumber() - outputLowerBound.getNumber()) / (inputUpperBound.getNumber() - inputLowerBound.getNumber())
+        return ((outputUpperBound.getNumber() - outputLowerBound.getNumber()) / (inputUpperBound.getNumber() - inputLowerBound.getNumber()))
             * (input - inputLowerBound.getNumber()) + outputLowerBound.getNumber();
+    }
+
+    public double convertOutputByRate(double val) {
+        return ((inputUpperBound.getNumber() - inputLowerBound.getNumber()) / (outputUpperBound.getNumber() - outputLowerBound.getNumber())) * val;
     }
 
     public double getMaxOutput() {

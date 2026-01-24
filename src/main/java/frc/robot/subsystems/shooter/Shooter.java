@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
@@ -20,22 +21,43 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision.Localization;
+import redrocklib.logging.SmartDashboardNumber;
 import redrocklib.util.LerpingSmartDashboardNumber;
 import redrocklib.wrappers.RedRockTalon;
 
 public class Shooter extends SubsystemBase{
     private static Shooter instance = null;
 
+    private static final boolean kEnableShooterTuning = true;
+
     public static final Pose2d shooterOffset = new Pose2d();
 
     private static final double halfFieldY = 10;
+
+    private double targetRPM = 0;
+    private double targetTurretPositionMotorRotations = 0;
+    private double targetHoodPositionMotorRotations = 0;
+
+    private SmartDashboardNumber rpmTolerance = new SmartDashboardNumber("shooter/tolerance/rpm", 50, kEnableShooterTuning && true);
+    private SmartDashboardNumber hoodTolerance = new SmartDashboardNumber("shooter/tolerance/hood", 2, kEnableShooterTuning && true);
+    private SmartDashboardNumber turretTolerance = new SmartDashboardNumber("turret/tolerance", 2, kEnableShooterTuning && true);
 
     private RedRockTalon shooterMotor = new RedRockTalon(0);
     private RedRockTalon hoodMotor = new RedRockTalon(0);
     private RedRockTalon turretMotor = new RedRockTalon(0);
 
+    private CANcoder ccoderA = new CANcoder(29, "*"); //TODO
+    private CANcoder ccoderB = new CANcoder(30, "*"); //TODO
+    
     private LerpingSmartDashboardNumber hoodRestrictions = new LerpingSmartDashboardNumber(90, 0, 0, 1.2, 
-                        "shooter/hood/Angle-Degrees", "shooter/hood/Motor Rotations", true);
+                        "shooter/hood/Angle-Degrees", "shooter/hood/Motor Rotations", kEnableShooterTuning && true);
+    
+    private LerpingSmartDashboardNumber turretRestrictions
+        = new LerpingSmartDashboardNumber(
+            0, 0, 
+            540, 20, 
+            "turret/Angle-Degrees", "turret/motor-rotations", 
+            kEnableShooterTuning && true);
 
     private enum ShooterState {
         RESTING,
@@ -75,6 +97,8 @@ public class Shooter extends SubsystemBase{
         ).withSlot0Configs(
             new Slot0Configs()
         );
+
+        this.resetTurret();
     }
 
     /**
@@ -100,12 +124,21 @@ public class Shooter extends SubsystemBase{
             .withSlot(0)
             .withOverrideBrakeDurNeutral(true)
         );
+        this.targetHoodPositionMotorRotations = pos;
     }
 
-    public Command resetHood() {
+    public Command resetHoodCommand() {
         Command m = hoodMotor.resetMotorCommand();
         m.addRequirements(this);
         return m;
+    }
+
+    public void resetTurret() {
+        turretMotor.motor.setPosition(
+            turretRestrictions.getValue(
+                this.chineseRemainderTheorem(ccoderA.getPosition().getValueAsDouble(), ccoderB.getPosition().getValueAsDouble()).getDegrees()
+            )
+        );
     }
 
     /**
@@ -114,11 +147,24 @@ public class Shooter extends SubsystemBase{
      * @param angle Desired angle of turret. 0 is facing forward on the robot, CCW+
      */
     public void setTurretAngle(Rotation2d angle) {
-
+        this.setTurretPosition(
+            turretRestrictions.getValue(angle.getDegrees())
+        );
     }
 
+    /**
+     * sets the turret position in terms of motor rotations
+     * 
+     * @param position raw desired motor rotation of the turret
+     */
     private void setTurretPosition(double position) {
-
+        this.turretMotor.setMotionMagicPosition(
+            MathUtil.clamp(
+                position, 
+                turretRestrictions.getMinOutput(), 
+                turretRestrictions.getMaxOutput())
+        );
+        this.targetTurretPositionMotorRotations = position;
     }
 
     public void setShooterSpeed(double rpm) {
@@ -128,6 +174,7 @@ public class Shooter extends SubsystemBase{
             .withSlot(0)
             .withOverrideBrakeDurNeutral(false)
         );
+        this.targetRPM = rpm;
     }
 
     public void setShotParameter(ShotParameter shotParameter) {
@@ -136,18 +183,20 @@ public class Shooter extends SubsystemBase{
     }
 
     public boolean atShooterSpeed() {
-        return false;
+        return Math.abs(shooterMotor.motor.getVelocity().getValueAsDouble() * 60 - this.targetRPM) < this.rpmTolerance.getNumber();
     }
 
     public boolean atHoodAngle() {
-        return false;
+        return Math.abs(hoodMotor.motor.getPosition().getValueAsDouble() - this.targetHoodPositionMotorRotations)
+            < hoodRestrictions.convertOutputByRate(hoodTolerance.getNumber());
     }
 
     public boolean atTurretAngle() {
-        return false;
+        return Math.abs(turretMotor.motor.getPosition().getValueAsDouble() - this.targetTurretPositionMotorRotations)
+            < turretRestrictions.convertOutputByRate(turretTolerance.getNumber());
     }
 
-    public boolean isReadyToShoot() {
+    public boolean isReadyToSturrett() {
         return this.atHoodAngle() && this.atShooterSpeed() && this.atTurretAngle();
     }
 
@@ -176,6 +225,7 @@ public class Shooter extends SubsystemBase{
         switch (state) {
             case RESTING:
                 this.setHoodAngle(Rotation2d.kZero);
+                this.setShooterSpeed(0);
                 break;
             case LOB:
             case LOB_TRACKING:
@@ -217,6 +267,10 @@ public class Shooter extends SubsystemBase{
         shooterMotor.update();
         turretMotor.update();
         hoodMotor.update();
+    }
+
+    private Rotation2d chineseRemainderTheorem(double encoder1, double encoder2) {
+        return Rotation2d.kZero;
     }
 
     public static Shooter getInstance() {
