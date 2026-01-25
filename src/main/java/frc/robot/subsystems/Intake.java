@@ -21,8 +21,8 @@ import redrocklib.wrappers.RedRockTalon;
 public class Intake extends SubsystemBase {
     private static Intake instance = null;
 
-    private SmartDashboardNumber intakeSpeedDCO = new SmartDashboardNumber("intake speed duty cycle", 0.5).withTuningEnabled(true);
-    private SmartDashboardNumber intakeReverseSpeedDCO = new SmartDashboardNumber("intake reverse speed duty cycle", -0.5).withTuningEnabled(true);
+    private SmartDashboardNumber intakeSpeedDCO = new SmartDashboardNumber("intake speed duty cycle", 0.15).withTuningEnabled(true);
+    private SmartDashboardNumber intakeReverseSpeedDCO = new SmartDashboardNumber("intake reverse speed duty cycle", -0.15).withTuningEnabled(true);
     private SmartDashboardNumber intakeSpeedRPM = new SmartDashboardNumber("intake speed rpm", 80).withTuningEnabled(true);
     private SmartDashboardNumber intakeReverseSpeedRPM = new SmartDashboardNumber("intake reverse speed rpm", -80).withTuningEnabled(true);
 
