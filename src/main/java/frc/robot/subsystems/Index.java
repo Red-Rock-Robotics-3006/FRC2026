@@ -49,7 +49,6 @@ public class Index extends SubsystemBase{
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
         );
-
     }
     public void startIndexFeed(){
         this.m_indexFeedMotor.setControl(new DutyCycleOut(this.feedMotorSpeed.getNumber()));

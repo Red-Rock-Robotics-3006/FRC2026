@@ -26,12 +26,13 @@ import redrocklib.wrappers.RedRockTalon;
 public class Shooter extends SubsystemBase{
     private static Shooter instance = null;
 
-    public static double kMaxHoodAngle = 85,
-                         kMinHoodAngle = 50;
-    public static double kMaxHoodRotation = 1,
-                         kMinHoodRotation = 0;
+    public static double kMaxHoodAngle = 85, //todo
+                         kMinHoodAngle = 50; //todo
+    public static double kMaxHoodRotation = 1, //todo
+                         kMinHoodRotation = 0; //todo
 
-    private final RedRockTalon shooterMotor = new RedRockTalon(0, "shooterMotor", "*"); //TODO 
+    private final RedRockTalon shooterMotor1 = new RedRockTalon(0, "shooterMotor1", "*"); //TODO 
+    private final RedRockTalon shooterMotor2 = new RedRockTalon(0, "shooterMotor2", "*"); //TODO 
     private final RedRockTalon hoodMotor = new RedRockTalon(0, "hoodMotor", "*"); //TODO 
 
     private Slot0Configs shooterSlot0Configs = new Slot0Configs();
@@ -116,13 +117,13 @@ public class Shooter extends SubsystemBase{
         .withSpikeThreshold(10)
         .withCurrentLimitConfigs(
             new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(45)
+            .withSupplyCurrentLimit(80)
             .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(60)
+            .withStatorCurrentLimit(120)
             .withStatorCurrentLimitEnable(true)
         ).withTuningEnabled(false);
                 
-        this.shooterMotor.withMotorOutputConfigs(
+        this.shooterMotor1.withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive) //todo make sure CCW
             .withPeakForwardDutyCycle(1d)
@@ -147,84 +148,85 @@ public class Shooter extends SubsystemBase{
         .withSpikeThreshold(28)
         .withCurrentLimitConfigs(
             new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(45)
+            .withSupplyCurrentLimit(80)
             .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(80)
+            .withStatorCurrentLimit(120)
             .withStatorCurrentLimitEnable(true)
         ).withTuningEnabled(false);
 
+        this.shooterMotor2.withMotorOutputConfigs(
+            new MotorOutputConfigs()
+            .withInverted(InvertedValue.CounterClockwise_Positive) //todo make sure CCW
+            .withPeakForwardDutyCycle(1d)
+            .withPeakReverseDutyCycle(-1d)
+            .withNeutralMode(NeutralModeValue.Brake)
+        )
+        .withSlot0Configs(
+            new Slot0Configs()
+            .withKA(0) //TODO
+            .withKS(0) //TODO
+            .withKV(0) //TODO
+            .withKP(0.05) //TODO
+            .withKI(0) //TODO
+            .withKD(0)  //TODO
+        )
+        .withMotionMagicConfigs(
+            new MotionMagicConfigs()
 
-        // this.shooterMotor.withMotorOutputConfigs(
-        //     new MotorOutputConfigs()
-        //         .withInverted(InvertedValue.CounterClockwise_Positive)
-        //         .withPeakForwardDutyCycle(1d)
-        //         .withPeakReverseDutyCycle(-1d)
-        //         .withNeutralMode(NeutralModeValue.Brake)
-        // );
-
-        // this.hoodMotor.withMotorOutputConfigs(
-        //     new MotorOutputConfigs()
-        //         .withInverted(InvertedValue.CounterClockwise_Positive)
-        //         .withPeakForwardDutyCycle(1d)
-        //         .withPeakReverseDutyCycle(-1d)
-        //         .withNeutralMode(NeutralModeValue.Brake)
-        // ).with;
-
-
-        // this.shooterSlot0Configs = new Slot0Configs()
-        //     .withKS(shooterKs.getNumber())
-        //     .withKA(shooterKa.getNumber())
-        //     .withKV(shooterKv.getNumber())
-        //     .withKP(shooterKp.getNumber())
-        //     .withKI(shooterKi.getNumber())
-        //     .withKD(shooterKd.getNumber());
-
-        // this.hoodSlot0Configs = new Slot0Configs()
-        //     .withKS(hoodKs.getNumber())
-        //     .withKA(hoodKa.getNumber())
-        //     .withKV(hoodKv.getNumber())
-        //     .withKP(hoodKp.getNumber())
-        //     .withKI(hoodKi.getNumber())
-        //     .withKD(hoodKd.getNumber());
-
-        // this.shooterMotionMagicConfigs = new MotionMagicConfigs()
-        //     .withMotionMagicAcceleration(shooterAccel.getNumber());
-
-        // this.hoodMotionMagicConfigs = new MotionMagicConfigs()
-        //     .withMotionMagicAcceleration(hoodMotionAccel.getNumber())
-        //     .withMotionMagicCruiseVelocity(hoodMotionVelo.getNumber());
-
-        // this.shooterMotor.withSlot0Configs(shooterSlot0Configs);
-        // this.shooterMotor.withMotionMagicConfigs(shooterMotionMagicConfigs);
-        // this.shooterMotor.withCurrentLimitConfigs(shooterCurrentLimitsConfigs);
-        // this.hoodMotor.withSlot0Configs(hoodSlot0Configs);
-        // this.hoodMotor.withMotionMagicConfigs(hoodMotionMagicConfigs);
-        // this.hoodMotor.withCurrentLimitConfigs(hoodCurrentLimitsConfigs);
+            .withMotionMagicAcceleration(1300)
+            .withMotionMagicCruiseVelocity(100)
+        )
+        .withSpikeThreshold(28)
+        .withCurrentLimitConfigs(
+            new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(80)
+            .withSupplyCurrentLimitEnable(true)
+            .withStatorCurrentLimit(120)
+            .withStatorCurrentLimitEnable(true)
+        ).withTuningEnabled(false);
+        
+        this.resetHood();
     }
 
     public void setHoodAngle(double angle) {
         this.hoodMotor.setMotionMagicPosition(MathUtil.clamp(this.angleToRotation(angle), kMinHoodRotation + 0.07, kMaxHoodRotation)
-
         );
+
         this.targetHoodAngle = angle;
         this.targetPosition = this.angleToRotation(angle);
         this.nonClampedTargetRevolution = this.angleToRotation(angle);
     }
 
-    public void setShooterRPM(double rpm) {
-        this.shooterMotor.setMotionMagicPosition((rpm / 60d)
+    public void setShooter1RPM(double rpm) {
+        this.shooterMotor1.setMotionMagicPosition((rpm / 60d)
 
         );
         this.targetRPM = rpm;
     }
 
-    public void setRequestedRPM() {
-        this.setShooterRPM(this.requestedRPM);
+    public void setRequestedShooter1RPM() {
+        this.setShooter1RPM(this.requestedRPM);
     }
 
-    public void setReverseRPM() {
+    public void setShooter2RPM(double rpm) {
+        this.shooterMotor2.setMotionMagicPosition((rpm / 60d)
+
+        );
+        this.targetRPM = rpm;
+    }
+
+    public void setRequestedShooter2RPM() {
+        this.setShooter2RPM(this.requestedRPM);
+    }
+
+    public void setReverseShooter1RPM() {
         this.requestedRPM = reverseRPM.getNumber();
-        this.setRequestedRPM();
+        this.setRequestedShooter1RPM();
+    }
+
+    public void setReverseShooter2RPM() {
+        this.requestedRPM = reverseRPM.getNumber();
+        this.setRequestedShooter2RPM();
     }
 
     public void resetHood() {
@@ -243,67 +245,9 @@ public class Shooter extends SubsystemBase{
     @Override
     public void periodic() {
         this.hoodMotor.update();
-        this.shooterMotor.update();
+        this.shooterMotor1.update();
+        this.shooterMotor2.update();
 
-    //     if (shooterKs.hasChanged()
-    //     || shooterKv.hasChanged()
-    //     || shooterKp.hasChanged()
-    //     || shooterKi.hasChanged()
-    //     || shooterKd.hasChanged()
-    //     || shooterKa.hasChanged()) {
-    //         shooterSlot0Configs.kS = shooterKs.getNumber();
-    //         shooterSlot0Configs.kV = shooterKv.getNumber();
-    //         shooterSlot0Configs.kP = shooterKp.getNumber();
-    //         shooterSlot0Configs.kI = shooterKi.getNumber();
-    //         shooterSlot0Configs.kD = shooterKd.getNumber();
-    //         shooterSlot0Configs.kA = shooterKa.getNumber();
-
-    //         if (!Utils.isSimulation()) this.shooterMotor.withSlot0Configs(shooterSlot0Configs);
-    //         System.out.println("applyied");
-    //     }
-
-        // if (shooterAccel.hasChanged()) {
-        //     shooterMotionMagicConfigs.MotionMagicAcceleration = shooterAccel.getNumber();
-        //     this.shooterMotor.withMotionMagicConfigs(shooterMotionMagicConfigs);
-        // }
-
-        // SmartDashboard.putNumber("shooter/shooter-acceleration", this.shooterMotor.getAcceleration().getValueAsDouble());
-        // SmartDashboard.putNumber("shooter/shooter-velocity", this.shooterMotor.getVelocity().getValueAsDouble());
-        // SmartDashboard.putNumber("shooter/shooter-rpm-target", this.targetRPM);
-
-        // if (hoodKs.hasChanged()
-        //     || hoodKv.hasChanged()
-        //     || hoodKp.hasChanged()
-        //     || hoodKi.hasChanged()
-        //     || hoodKd.hasChanged()
-        //     || hoodKa.hasChanged()) {
-        //     hoodSlot0Configs.kS = hoodKs.getNumber();
-        //     hoodSlot0Configs.kV = hoodKv.getNumber();
-        //     hoodSlot0Configs.kP = hoodKp.getNumber();
-        //     hoodSlot0Configs.kI = hoodKi.getNumber();
-        //     hoodSlot0Configs.kD = hoodKd.getNumber();
-        //     hoodSlot0Configs.kA = hoodKa.getNumber();
-
-        //     if (!Utils.isSimulation()) this.hoodMotor.withSlot0Configs(hoodSlot0Configs);
-        //     System.out.println("applyied");
-        // }
-
-        // if (hoodMotionAccel.hasChanged() || hoodMotionVelo.hasChanged()) {
-        //     hoodMotionMagicConfigs.MotionMagicAcceleration = this.hoodMotionAccel.getNumber();
-        //     hoodMotionMagicConfigs.MotionMagicCruiseVelocity = this.hoodMotionVelo.getNumber();
-        //     this.hoodMotor.withMotionMagicConfigs(this.hoodMotionMagicConfigs);
-        // }
-
-        // SmartDashboard.putNumber("hood/hood-target-position", this.targetPosition);
-        // SmartDashboard.putNumber("hood/hood-position", this.hoodMotor.getPosition().getValueAsDouble());
-        // SmartDashboard.putNumber("hood/hood-target-angle", this.targetHoodAngle);
-        // SmartDashboard.putNumber("hood/hood-torque-current", this.hoodMotor.getTorqueCurrent().getValueAsDouble());
-        // SmartDashboard.putBoolean("hood/hood-at-spike", this.inSpikeCurrent());
-        // SmartDashboard.putBoolean("hood/hood-is-ready", this.isReady());
-
-
-        // SmartDashboard.putNumber("shooter/shooter-request-rpm", this.requestedRPM);
-    
     }
 
     public static Shooter getInstance() {
