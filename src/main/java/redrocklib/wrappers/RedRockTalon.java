@@ -147,6 +147,28 @@ public class RedRockTalon {
         return this;
     }
 
+    /**
+     * Accept raw Phoenix6 control objects so callers can do:
+     *   motor.setControl(new CoastOut());
+     *   motor.setControl(new DutyCycleOut(...));
+     */
+    public void setControl(com.ctre.phoenix6.controls.CoastOut control) {
+        this.motor.setControl(control);
+    }
+
+    public void setControl(com.ctre.phoenix6.controls.DutyCycleOut control) {
+        this.motor.setControl(control);
+    }
+
+    // optional convenience helpers
+    public void coast() {
+        this.motor.setControl(new com.ctre.phoenix6.controls.CoastOut());
+    }
+
+    public void setPercentOutput(double pct) {
+        this.motor.setControl(new com.ctre.phoenix6.controls.DutyCycleOut(pct));
+    }
+
     public RedRockTalon withSlot0Configs(Slot0Configs slot0Configs) {
         this.slot0Configs = slot0Configs;
         this.kS = new SmartDashboardNumber(name + "/" + name + "-slot0/kS", slot0Configs.kS);
