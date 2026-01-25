@@ -4,6 +4,8 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
@@ -26,8 +28,8 @@ public class Shooter extends SubsystemBase{
     private SmartDashboardNumber rpmTolerance = new SmartDashboardNumber("shooter/tolerance/rpm", 50, kEnableShooterTuning && true);
     private SmartDashboardNumber hoodTolerance = new SmartDashboardNumber("shooter/tolerance/hood", 2, kEnableShooterTuning && true);
 
-    private RedRockTalon shooterMotor = new RedRockTalon(0);
-    private RedRockTalon hoodMotor = new RedRockTalon(0);
+    private RedRockTalon shooterMotor = new RedRockTalon(0); //TODO: motor id
+    private RedRockTalon hoodMotor = new RedRockTalon(0); //TODO: motor id
     
     private LerpingSmartDashboardNumber hoodRestrictions = 
         new LerpingSmartDashboardNumber(
@@ -45,7 +47,7 @@ public class Shooter extends SubsystemBase{
             .withNeutralMode(NeutralModeValue.Coast)
         ).withSlot0Configs(
             new Slot0Configs()
-        );
+        ).withFollowerMotor(new TalonFX(0, "*"), MotorAlignmentValue.Aligned); //TODO: motor id
 
         hoodMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()
