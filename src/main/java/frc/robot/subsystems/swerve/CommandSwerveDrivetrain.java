@@ -90,7 +90,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final PIDController m_pathThetaController = new PIDController(7, 0, 0);
 
     private AutoFactory factory;
-    private boolean inAutoPath = false;
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -114,6 +113,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     );
 
     /* SysId routine for characterizing steer. This is used to find PID gains for the steer motors. */
+    @SuppressWarnings("unused")
     private final SysIdRoutine m_sysIdRoutineSteer = new SysIdRoutine(
         new SysIdRoutine.Config(
             null,        // Use default ramp rate (1 V/s)
@@ -134,6 +134,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * This is used to find PID gains for the FieldCentricFacingAngle HeadingController.
      * See the documentation of SwerveRequest.SysIdSwerveRotation for info on importing the log to SysId.
      */
+    @SuppressWarnings("unused")
     private final SysIdRoutine m_sysIdRoutineRotation = new SysIdRoutine(
         new SysIdRoutine.Config(
             /* This is in radians per second², but SysId only supports "volts per second" */
@@ -526,26 +527,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return this.runOnce(() -> this.targetAngle = target);
     }
 
-    public void setInAutoPath(boolean inAuto) {
-        if (inAuto) this.state = DriveState.AUTO;
-        else this.state = DriveState.DRIVE_FACING_ANGLE;
-    }
-
     public boolean isBlue() {
         return this.alliance == Alliance.Blue;
     }
 
-    public Command setInAutoPathCommand(boolean inAuto) {
-        return this.runOnce(() -> this.inAutoPath = inAuto);
-    }
-
     public Command followTrajectory(String pathName) {
         return Commands.sequence(
-            // this.setInAutoPathCommand(true),
             this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
             this.factory.resetOdometry(pathName),
             this.factory.trajectoryCmd(pathName),
-            // this.setInAutoPathCommand(false),
             this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation()),
             this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
         );
@@ -553,11 +543,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command followTrajectory(String pathName, int index) {
         return Commands.sequence(
-            this.setInAutoPathCommand(true),
+            this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
             this.factory.resetOdometry(pathName, index),
             this.factory.trajectoryCmd(pathName, index),
-            this.setInAutoPathCommand(false),
-            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName, index).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation())
+            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName, index).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation()),
+            this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
         );
     }
 

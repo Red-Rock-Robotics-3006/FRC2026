@@ -1,5 +1,14 @@
 package frc.robot.subsystems;
 
 public class Climber {
-    //rotate climb would be so tuff
+    private static Climber instance = null;
+
+    private Climber() {
+        
+    }
+    
+    public static Climber getInstance() {
+        if (instance == null) instance = new Climber();
+        return instance;
+    }
 }

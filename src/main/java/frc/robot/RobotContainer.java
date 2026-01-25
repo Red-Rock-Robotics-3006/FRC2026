@@ -9,26 +9,28 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+// import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.shooter.ShotParameter;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
+import frc.robot.Superstructure.RobotState;
 
 public class RobotContainer {
-
     private final CommandXboxController joystick = new CommandXboxController(0);
+
+    private final double kTriggerThreshold = 0.1;
 
     public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(joystick);
     private final Intake intake = Intake.getInstance();
+    private final Superstructure superstructure = Superstructure.getInstance();
 
-    private final Autos autos;
+    private final Autos autos = Autos.getInstance();
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
     public RobotContainer() {
-        autos = new Autos();
-
-        // configureSysIDBindings();
-        configureBindings();
         configureSelector();
+        configureBindings();
+        // configureSysIDBindings();
     }
 
     public void configureSelector() {
@@ -40,24 +42,38 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
-    private void configureSysIDBindings() {
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-    }
-
     private void configureBindings() {
         joystick.start().and(joystick.back()).onTrue(drivetrain.resetHeadingCommand());
 
-        joystick.leftTrigger(0.1).onTrue(
-            intake.startIntakeCommand()
-        ).onFalse(
-            intake.stopIntakeCommand()
-        );
+        joystick.leftTrigger(kTriggerThreshold)
+            .onTrue(intake.startIntakeCommand())
+            .onFalse(intake.stopIntakeCommand());
+
+        joystick.rightTrigger(kTriggerThreshold)
+            .onTrue(superstructure.setStateCommand(RobotState.TRACKING))
+            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+
+        joystick.rightBumper() //make more manual shots or sum
+            .onTrue(superstructure.setManualShotParameterCommand(new ShotParameter(15, 4000))) //TODO: use the setManualShotParameter() method, and find a way to get shotparameter from smartdashboard.
+            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+        
+        joystick.b()
+            .onTrue(superstructure.setStateCommand(RobotState.IDLE));
+        
+        joystick.a()
+            .onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+
+        //do smth for climb lolz
     }
+
+    // private void configureSysIDBindings() {
+    //     // Run SysId routines when holding back/start and X/Y.
+    //     // Note that each routine should be run exactly once in a single log.
+    //     joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    //     joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+    //     joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+    //     joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+    // }
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();

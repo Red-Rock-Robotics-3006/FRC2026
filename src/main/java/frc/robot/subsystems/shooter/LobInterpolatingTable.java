@@ -2,8 +2,8 @@ package frc.robot.subsystems.shooter;
 
 import static java.util.Map.entry;
 
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Unit;
+// import edu.wpi.first.math.util.Units;
+// import edu.wpi.first.units.Unit;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,7 +17,7 @@ public class LobInterpolatingTable {
         new TreeMap<>(
             Map.ofEntries(
                 entry(
-                    new Double(2),
+                    Double.valueOf(2),
                     new ShotParameter(32, 32))
                 ));
 

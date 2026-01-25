@@ -105,6 +105,18 @@ public class Index extends SubsystemBase {
         this.feedMotor.motor.setControl(new DutyCycleOut(0d));
     }
 
+    public void startIndex() {
+        startConveyor();
+        startCentering();
+        startFeed();
+    }
+
+    public void stopIndex() {
+        stopConveyor();
+        stopCentering();
+        stopFeed();
+    }
+
     public Command startConveyorCommand() {
         return Commands.runOnce(() -> startConveyor(), this);
     }

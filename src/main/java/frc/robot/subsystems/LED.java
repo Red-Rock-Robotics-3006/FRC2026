@@ -16,14 +16,14 @@ public class LED extends SubsystemBase{
 
     private final Color INIT_YELLOW = new Color(255, 165, 0);
 
-    private final Color GREEN = new Color(0, 255, 0);
-    private final Color OFF = new Color(0, 0, 0);
-    private final Color MAGENTA = new Color(255, 0, 255);
+    public final Color OFF = new Color(0, 0, 0);
+    public final Color GREEN = new Color(0, 255, 0);
+    public final Color MAGENTA = new Color(255, 0, 255);
 
-    // private final Color NOTE_ORANGE = new Color(255, 15, 0);
-    // private final Color WHITE = new Color(255, 255, 255);
-    // private final Color BLUE = new Color(0, 0, 255);
-    // private final Color RED = new Color(255, 0, 0);
+    public final Color NOTE_ORANGE = new Color(255, 15, 0);
+    public final Color WHITE = new Color(255, 255, 255);
+    public final Color BLUE = new Color(0, 0, 255);
+    public final Color RED = new Color(255, 0, 0);
 
     private int blinkControl = 0;
 
@@ -37,21 +37,6 @@ public class LED extends SubsystemBase{
         this.control.setData(buffer);
         
         this.control.start();
-    }
-
-    public enum LEDState {
-        HUB_AUTO_AIMING,
-        HUB_AUTO_AIM_READY,
-        SHOOTING,
-        LOB_AUTO_AIMING,
-        LOB_AUTO_AIMING_READY,
-        IDLE
-    }
-
-    private LEDState state = LEDState.IDLE;
-
-    public LEDState getState() {
-        return this.state;
     }
 
     public void setLights(int r, int g, int b) {
@@ -93,7 +78,7 @@ public class LED extends SubsystemBase{
     }
 
     int rainbowHue = 0;
-    private void rainbow() {
+    public void rainbow() {
         for (var i = 0; i < buffer.getLength(); i++) {
           final var hue = (rainbowHue + (i * 180 / buffer.getLength())) % 180;
           buffer.setHSV(i, hue, 255, 128);
@@ -117,39 +102,9 @@ public class LED extends SubsystemBase{
         }
         else setLights(c);
     }
-
-    public void resetLEDs() {
-        this.state = LEDState.IDLE;
-    }
     
     public void periodic() {
         blinkControl++;
-
-        LEDState oldState = state;
-
-        if (state != oldState) blinkControl = 0;
-
-        switch(state) {
-            case HUB_AUTO_AIMING:
-                blink(GREEN, 4);
-                break;
-            case HUB_AUTO_AIM_READY:
-                setLights(GREEN);
-                break;
-            case LOB_AUTO_AIMING:
-                blink(MAGENTA, 4);
-                break;
-            case LOB_AUTO_AIMING_READY:
-                setLights(MAGENTA);
-                break;
-            case SHOOTING:
-                //should this even be a state idk
-                break;
-            case IDLE:
-                rainbow();
-                break;
-        }
-
         this.control.setData(buffer);
     }
 

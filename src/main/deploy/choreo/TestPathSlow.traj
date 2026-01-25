@@ -1,6 +1,6 @@
 {
  "name":"TestPathSlow",
- "version":3,
+ "version":4,
  "snapshot":{
   "waypoints":[
     {"x":1.8689392805099487, "y":1.4441375732421875, "heading":0.0, "intervals":56, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
