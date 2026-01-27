@@ -8,9 +8,10 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import redrocklib.logging.SmartDashboardNumber;
-import redrocklib.wrappers.RedRockTalon;
 
 public class Index extends SubsystemBase{
     private static Index instance = null;
@@ -72,6 +73,30 @@ public class Index extends SubsystemBase{
 
     public void stopIndexCenter(){
         this.m_indexCenterMotor.setControl(new DutyCycleOut(0));
+    }
+
+    public Command startIndexFeedCommand(){
+        return Commands.runOnce(() -> this.startIndexFeed(), this);
+    }
+
+    public Command stopIndexFeedCommand(){
+        return Commands.runOnce(() -> this.stopIndexFeed(), this);
+    }
+
+    public Command startIndexConveyorCommand(){
+        return Commands.runOnce(() -> this.startIndexConveyor(), this);
+    }
+
+    public Command stopIndexConveyorCommand(){
+        return Commands.runOnce(() -> this.stopIndexConveyor(), this);
+    }
+
+    public Command startIndexCenterCommand(){
+        return Commands.runOnce(() -> this.startIndexCenter(), this);
+    }
+
+    public Command stopIndexCenterCommand(){
+        return Commands.runOnce(() -> this.stopIndexCenter(), this);
     }
 
     @Override
