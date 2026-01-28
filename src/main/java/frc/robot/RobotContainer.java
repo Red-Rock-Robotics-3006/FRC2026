@@ -10,7 +10,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.subsystems.Intake;
+// import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Index;
 // import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 public class RobotContainer {
@@ -21,6 +22,8 @@ public class RobotContainer {
 
     // private final Autos autos;
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
+
+    private final Index index = Index.getInstance();
 
     public RobotContainer() {
         // autos = new Autos();
@@ -49,29 +52,37 @@ public class RobotContainer {
         // joystick.start()
         //     .and(joystick.back()).onTrue(drivetrain.resetHeadingCommand());
 
-        joystick.leftTrigger(0.1).onTrue(
-            Intake.getInstance().intakeCommand()
-        ).onFalse(
-            Intake.getInstance().stopIntakeCommand()
-        );
+        joystick.leftTrigger(0.1)
+            .onTrue(index.startIndexCommand())
+            .onFalse(index.stopIndexCommand());
 
-        joystick.rightTrigger(0.1).onTrue(
-            Intake.getInstance().reverseIntakeCommand()
-        ).onFalse(
-            Intake.getInstance().stopIntakeCommand()
-        );
+        joystick.rightTrigger(0.1)
+            .onTrue(index.reverseIndexCommand())
+            .onFalse(index.stopIndexCommand());
 
-        joystick.leftBumper().onTrue(
-            Intake.getInstance().intakeRPMCommand()
-        ).onFalse(
-            Intake.getInstance().stopIntakeCommand()
-        );
+        joystick.x()
+            .onTrue(index.startConveyorCommand())
+            .onFalse(index.stopConveyorCommand());
 
-        joystick.rightBumper().onTrue(
-            Intake.getInstance().reverseIntakeRPMCommand()
-        ).onFalse(
-            Intake.getInstance().stopIntakeCommand()
-        );
+        joystick.y()
+            .onTrue(index.startCenteringCommand())
+            .onFalse(index.stopCenteringCommand());
+        
+        joystick.b()
+            .onTrue(index.startFeedCommand())
+            .onFalse(index.stopFeedCommand());
+
+        // joystick.leftBumper().onTrue(
+        //     Intake.getInstance().intakeRPMCommand()
+        // ).onFalse(
+        //     Intake.getInstance().stopIntakeCommand()
+        // );
+
+        // joystick.rightBumper().onTrue(
+        //     Intake.getInstance().reverseIntakeRPMCommand()
+        // ).onFalse(
+        //     Intake.getInstance().stopIntakeCommand()
+        // );
     }
 
     public Command getAutonomousCommand() {
