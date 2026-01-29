@@ -131,6 +131,7 @@ public class Superstructure extends SubsystemBase {
                 index.startIndex();
             case TURRET_TRACKING:
                 index.stopIndex();
+                shooter.setShotParameter(new ShotParameter(60, 0));
                 break;
             default:
                 break;

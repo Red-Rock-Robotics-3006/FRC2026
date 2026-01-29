@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.shooter.ShotParameter;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
+import redrocklib.logging.SmartDashboardNumber;
 import frc.robot.Superstructure.RobotState;
 
 public class RobotContainer {
@@ -26,6 +27,9 @@ public class RobotContainer {
 
     private final Autos autos = Autos.getInstance();
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
+
+    private SmartDashboardNumber lerpTuningHoodAngle = new SmartDashboardNumber("lerp tuning/hood angle degrees", 10);
+    private SmartDashboardNumber lerpTuningShooterSpeed = new SmartDashboardNumber("lerp tuning/shooter speed", 3000);
 
     public RobotContainer() {
         configureSelector();
@@ -52,8 +56,12 @@ public class RobotContainer {
         joystick.rightTrigger(kTriggerThreshold)
             .onTrue(superstructure.setStateCommand(RobotState.TRACKING))
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+            
+        joystick.leftBumper() //manual lerp tuning shot
+            .onTrue(superstructure.setManualShotParameterCommand(new ShotParameter(getLerpTuningHoodAngle(), getLerpTuningShooterSpeed())))
+            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
-        joystick.rightBumper() //make more manual shots or sum
+        joystick.rightBumper() //manual hub shot
             .onTrue(superstructure.setManualShotParameterCommand(new ShotParameter(15, 4000))) //TODO: use the setManualShotParameter() method, and find a way to get shotparameter from smartdashboard.
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
         
@@ -64,6 +72,14 @@ public class RobotContainer {
             .onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
         //do smth for climb lolz
+    }
+
+    private double getLerpTuningHoodAngle() {
+        return lerpTuningHoodAngle.getNumber();
+    }
+
+    private double getLerpTuningShooterSpeed() {
+        return lerpTuningShooterSpeed.getNumber();
     }
 
     // private void configureSysIDBindings() {
