@@ -79,7 +79,7 @@ public class Intake extends SubsystemBase{
             .withStatorCurrentLimitEnable(true)
         ).withTuningEnabled(true);
 
-        this.pivotMotor.motor.setPosition(0);
+        this.pivotMotor.resetMotor();
     }
 
     public void setPivotPosition(double rotations) {
