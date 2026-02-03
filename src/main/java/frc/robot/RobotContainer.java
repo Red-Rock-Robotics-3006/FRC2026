@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Index;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 public class RobotContainer {
@@ -20,6 +23,10 @@ public class RobotContainer {
 
     private final Autos autos;
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
+
+    private final Intake intake = Intake.getInstance();
+    private final Index index = Index.getInstance();
+    private final Shooter shooter = Shooter.getInstance();
 
     public RobotContainer() {
         autos = new Autos();
@@ -47,6 +54,39 @@ public class RobotContainer {
 
         joystick.start()
             .and(joystick.back()).onTrue(drivetrain.resetHeadingCommand());
+
+        this.joystick.leftTrigger() 
+            .onTrue(
+                Commands.sequence(
+                    intake.deployIntakeCommand(),
+                    intake.startIntakeCommand()
+                )
+            )
+            .onFalse(
+                Commands.sequence(
+                    intake.stopIntakeCommand(),
+                    intake.stowIntakeCommand()
+                )
+            );
+
+        this.joystick.rightTrigger()  //index and shooter
+            .onTrue(
+                Commands.sequence(
+                    index.startIndexFeedCommand(),
+                    index.startIndexConveyorCommand(),
+                    index.startIndexCenterCommand()
+                )
+            )
+            .onFalse(
+                Commands.sequence(
+                    index.stopIndexFeedCommand(),
+                    index.stopIndexConveyorCommand(),
+                    index.stopIndexCenterCommand()
+                )
+            );
+            
+            
+
     }
 
     public Command getAutonomousCommand() {
