@@ -99,6 +99,22 @@ public class Index extends SubsystemBase{
         return Commands.runOnce(() -> this.stopIndexCenter(), this);
     }
 
+    public Command startIndexCommand(){
+        return Commands.sequence(
+            this.startIndexFeedCommand(),
+            this.startIndexConveyorCommand(),
+            this.startIndexCenterCommand()
+        );
+    }
+
+    public Command stopIndexCommand(){
+        return Commands.sequence(
+            this.stopIndexFeedCommand(),
+            this.stopIndexConveyorCommand(),
+            this.stopIndexCenterCommand()
+        );
+    }
+
     @Override
     public void periodic(){
         SmartDashboard.putNumber("Index/feedMotorSpeed", feedMotorSpeed.getNumber());

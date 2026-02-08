@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Index;
-import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
+import frc.robot.subsystems.swerve.shooter.Shooter;
 
 public class RobotContainer {
 

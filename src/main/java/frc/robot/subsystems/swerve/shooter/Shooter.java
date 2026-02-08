@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.swerve.shooter;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -10,9 +10,14 @@ import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import redrocklib.logging.SmartDashboardNumber;
 import redrocklib.wrappers.RedRockTalon;
+import frc.robot.subsystems.Index;
+import frc.robot.subsystems.swerve.shooter.InterpolatingTable;
+import frc.robot.subsystems.swerve.shooter.ShotParameter;
 
 
 public class Shooter extends SubsystemBase{
@@ -35,6 +40,7 @@ public class Shooter extends SubsystemBase{
 
     private double nonClampedTargetRevolution;
     private double requestedRPM;
+    private double requestedHoodAngle;
 
     //for smartdashboard only
     private double targetHoodAngle;
@@ -162,14 +168,14 @@ public class Shooter extends SubsystemBase{
     }
 
     public void setShooter2RPM(double rpm) {
-        this.shooterMotor2.setMotionMagicPosition((rpm / 60d)
+        this.shooterMotor2.setMotionMagicPosition((-rpm / 60d)
 
         );
         this.targetRPM = rpm;
     }
 
     public void setRequestedShooter2RPM() {
-        this.setShooter2RPM(this.requestedRPM);
+        this.setShooter2RPM(-this.requestedRPM);
     }
 
     public void setReverseShooter1RPM() {
@@ -182,6 +188,15 @@ public class Shooter extends SubsystemBase{
         this.setRequestedShooter2RPM();
     }
 
+    public void setShooterRPM(double rpm) {
+        this.setShooter1RPM(rpm);
+        this.setShooter2RPM(rpm);
+    }
+
+    public void setRequestedShooterRPM() {
+        this.setShooterRPM(this.requestedRPM);
+    }
+
     public void resetHood() {
         this.hoodMotor.setControl(new CoastOut());
         this.hoodMotor.setMotionMagicPosition(0d);
@@ -191,8 +206,47 @@ public class Shooter extends SubsystemBase{
         this.hoodMotor.setControl(new DutyCycleOut(this.normalizeSpeed.getNumber()));
     }
 
+    private void getTargetRed() {
+        ShotParameter p = InterpolatingTable.getRed(3);
+        this.requestedHoodAngle = p.pivotAngleDeg;
+        this.requestedRPM = p.rpm;
+    }
+
+    private void getTargetBlue() {
+        ShotParameter p = InterpolatingTable.getBlue(3);
+        this.requestedHoodAngle = p.pivotAngleDeg;
+        this.requestedRPM = p.rpm;
+    }
+
     private double angleToRotation(double angle) {
         return ((kMaxHoodRotation - kMinHoodRotation) / (kMaxHoodAngle - kMinHoodAngle)) * (angle - kMinHoodAngle) + kMinHoodRotation;
+    }
+
+    public Command startShooterBlueCommand(){
+        return Commands.sequence(
+            //getTargetBlue
+            Commands.runOnce(() -> this.setHoodAngle(requestedHoodAngle), this),
+            Commands.runOnce(() -> this.setRequestedShooterRPM(), this),
+            Commands.waitSeconds(1.5),
+            Index.getInstance().startIndexCommand()
+        );
+    }
+
+    public Command startShooterRedCommand(){
+        return Commands.sequence(
+            //getTargetRed
+            Commands.runOnce(() -> this.setHoodAngle(requestedHoodAngle), this),
+            Commands.runOnce(() -> this.setRequestedShooterRPM(), this),
+            Commands.waitSeconds(1.5),
+            Index.getInstance().startIndexCommand()
+        );
+    }
+
+    public Command stopShooterCommand(){
+        return Commands.sequence(
+            Index.getInstance().stopIndexCommand(),
+            Commands.runOnce(() -> this.setShooterRPM(0), this)
+        );
     }
 
     @Override
