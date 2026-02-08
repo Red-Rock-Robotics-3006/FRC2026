@@ -1,4 +1,4 @@
-package frc.robot.subsystems.swerve.shooter;
+package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -16,8 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import redrocklib.logging.SmartDashboardNumber;
 import redrocklib.wrappers.RedRockTalon;
 import frc.robot.subsystems.Index;
-import frc.robot.subsystems.swerve.shooter.InterpolatingTable;
-import frc.robot.subsystems.swerve.shooter.ShotParameter;
+
 
 
 public class Shooter extends SubsystemBase{
@@ -46,6 +45,8 @@ public class Shooter extends SubsystemBase{
     private double targetHoodAngle;
     private double targetRPM;
     private double targetPosition;
+
+    public boolean onBlue = true; //TODO: set this based on alliance color
 
 
     private Shooter() {
@@ -207,13 +208,13 @@ public class Shooter extends SubsystemBase{
     }
 
     private void getTargetRed() {
-        ShotParameter p = InterpolatingTable.getRed(3);
+        ShotParameter p = InterpolatingTable.getRed(3); //todo visuals
         this.requestedHoodAngle = p.pivotAngleDeg;
         this.requestedRPM = p.rpm;
     }
 
     private void getTargetBlue() {
-        ShotParameter p = InterpolatingTable.getBlue(3);
+        ShotParameter p = InterpolatingTable.getBlue(3); //todo visuals
         this.requestedHoodAngle = p.pivotAngleDeg;
         this.requestedRPM = p.rpm;
     }
@@ -222,9 +223,17 @@ public class Shooter extends SubsystemBase{
         return ((kMaxHoodRotation - kMinHoodRotation) / (kMaxHoodAngle - kMinHoodAngle)) * (angle - kMinHoodAngle) + kMinHoodRotation;
     }
 
+    public Command getTargetRedCommand() {
+        return Commands.runOnce(() -> this.getTargetRed(), this);
+    }
+
+    public Command getTargetBlueCommand() {
+        return Commands.runOnce(() -> this.getTargetBlue(), this);
+    }
+
     public Command startShooterBlueCommand(){
         return Commands.sequence(
-            //getTargetBlue
+            this.getTargetBlueCommand(),
             Commands.runOnce(() -> this.setHoodAngle(requestedHoodAngle), this),
             Commands.runOnce(() -> this.setRequestedShooterRPM(), this),
             Commands.waitSeconds(1.5),
@@ -234,7 +243,7 @@ public class Shooter extends SubsystemBase{
 
     public Command startShooterRedCommand(){
         return Commands.sequence(
-            //getTargetRed
+            this.getTargetRedCommand(),
             Commands.runOnce(() -> this.setHoodAngle(requestedHoodAngle), this),
             Commands.runOnce(() -> this.setRequestedShooterRPM(), this),
             Commands.waitSeconds(1.5),

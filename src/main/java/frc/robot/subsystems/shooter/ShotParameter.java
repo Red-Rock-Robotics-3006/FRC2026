@@ -4,8 +4,7 @@ public class ShotParameter {
     public final double pivotAngleDeg;
     public final double rpm;
 
-    public ShotParameter(
-        double pivotAngleDeg, double rpm) {
+    public ShotParameter(double pivotAngleDeg, double rpm) {
         this.pivotAngleDeg = pivotAngleDeg;
         this.rpm = rpm;
     }

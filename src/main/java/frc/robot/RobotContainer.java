@@ -11,9 +11,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.Index;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
-import frc.robot.subsystems.swerve.shooter.Shooter;
 
 public class RobotContainer {
 
@@ -71,17 +71,10 @@ public class RobotContainer {
 
         this.joystick.rightTrigger()  //index and shooter
             .onTrue(
-                Commands.sequence(
-                    index.startIndexFeedCommand(),
-                    index.startIndexConveyorCommand(),
-                    index.startIndexCenterCommand()
-                )
+                shooter.startShooterBlueCommand()
             )
             .onFalse(
-                Commands.sequence(
-                    index.stopIndexFeedCommand(),
-                    index.stopIndexConveyorCommand(),
-                    index.stopIndexCenterCommand()
+                shooter.stopShooterCommand(
                 )
             );
             
