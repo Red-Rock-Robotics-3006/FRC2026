@@ -15,8 +15,9 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
+
+// import edu.wpi.first.apriltag.AprilTagFieldLayout;
+// import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -33,12 +34,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+
 import frc.robot.subsystems.swerve.generated.TunerConstants;
 import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.vision.Localization;
 import frc.robot.vision.Localization.RRPoseEstimate;
 import redrocklib.logging.SmartDashboardNumber;
-import redrocklib.wrappers.RedRockCamera;
+// import redrocklib.wrappers.RedRockCamera;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
