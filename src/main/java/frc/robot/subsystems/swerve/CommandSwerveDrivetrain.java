@@ -35,6 +35,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.subsystems.swerve.generated.TunerConstants;
 import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.vision.Localization;
+import frc.robot.vision.Localization.RRPoseEstimate;
 import redrocklib.logging.SmartDashboardNumber;
 import redrocklib.wrappers.RedRockCamera;
 
@@ -51,6 +53,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private Alliance alliance = Alliance.Blue;
 
     private CommandXboxController controller;
+
+    private SmartDashboardNumber poseMaxDistance = new SmartDashboardNumber("dt/dt localization/dist restriction", 3);
+    private SmartDashboardNumber poseMaxRotation = new SmartDashboardNumber("dt/dt localization/rotation restriction", 3);
 
     private SmartDashboardNumber maxDriveSpeed = new SmartDashboardNumber("dt/dt drive speeds/max drive mps", 4);
     private SmartDashboardNumber maxTurnSpeed = new SmartDashboardNumber("dt/dt drive speeds/turn rotps", 1);
@@ -94,10 +99,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private AutoFactory factory;
 
-    private final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
-
-    private RedRockCamera boogerCamera = new RedRockCamera("booger", fieldLayout);
-    private RedRockCamera gooberCamera = new RedRockCamera("goober", fieldLayout);
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -375,6 +376,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             this.setControl(this.getRequest());
         }
         SmartDashboard.putString("dt/drive state", this.state.toString());
+
+        if (this.visionEnabled) updateVisionMeasurements();
+    }
+
+    private void updateVisionMeasurements() {
+        if (this.getRotationRate() >= poseMaxRotation.getNumber()) {
+            return;
+        }
+        for (RRPoseEstimate estimate : Localization.getPoseEstimates()) {
+            if (estimate.pose.getTranslation().getDistance(this.getPose().getTranslation()) > poseMaxDistance.getNumber()) continue;
+            this.addVisionMeasurement(estimate.pose, estimate.timeStamp, estimate.stdvs);
+        }
     }
 
     private void updateDeadbands() {
@@ -456,6 +469,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private DriveState state = DriveState.DRIVE_FACING_ANGLE;
 
+    private boolean visionEnabled = false;
+
     public void setDriveState(DriveState state) {
         this.state = state;
     }
@@ -517,6 +532,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             )
         );
         this.targetAngle = Rotation2d.kZero;
+    }
+
+    public double getRotationRate() {
+        return this.getState().Speeds.omegaRadiansPerSecond;
     }
 
     public Command resetHeadingCommand() {
