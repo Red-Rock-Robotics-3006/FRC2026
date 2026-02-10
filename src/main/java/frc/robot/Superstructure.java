@@ -24,20 +24,18 @@ public class Superstructure extends SubsystemBase {
     private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     private final Turret turret = Turret.getInstance();
     private final Index index = Index.getInstance();
-    // private final Climber climber = Climber.getInstance();
 
     private SmartDashboardNumber blueAllianceZoneX = new SmartDashboardNumber("superstructure/blue alliance zone x", 4.38);
     private SmartDashboardNumber redAllianceZoneX = new SmartDashboardNumber("superstructure/red alliance zone x", 12.16);
 
     public enum RobotState {
         TURRET_TRACKING, //turret tracking
-        TRACKING, //flywheels spin up, hood tracking, turret tracking
+        FULL_TRACKING, //flywheels spin up, hood tracking, turret tracking
         SHOOTING, //index spinning, flywheels spinning, hood tracking, turret tracking
         SHOOTING_WHILE_MOVING, //flywheels spinning, hood tracking, turret tracking, dt speed > 0
 
         HUB_SHOT, //shooting from in front of hub, flywheels spinning, turret at set angle, hood at set angle
 
-        CLIMBING, //stow mechs, might need substates later
         IDLE //mechanisms all idle (on disable maybe?)
     }
 
@@ -79,7 +77,7 @@ public class Superstructure extends SubsystemBase {
                 break;
             case SHOOTING:
                 led.setLights(led.GREEN);
-            case TRACKING:
+            case FULL_TRACKING:
                 if (readyToShoot()) 
                     setState(RobotState.SHOOTING);
 
@@ -101,24 +99,10 @@ public class Superstructure extends SubsystemBase {
                 
                 led.rainbow();
                 break;
-
-            case CLIMBING:
-                //retract intake
-                //then climb logic
-                break;
             case IDLE:
                 led.rainbow();
                 break;
         }
-    }
-
-    public void setManualShotParameter(ShotParameter shot) {
-        this.shooter.setShotParameter(shot);
-        this.setState(RobotState.HUB_SHOT);
-    }
-
-    public Command setManualShotParameterCommand(ShotParameter shot) {
-        return Commands.runOnce(() -> setManualShotParameter(shot), this);
     }
 
     public void setState(RobotState state) {
@@ -131,7 +115,7 @@ public class Superstructure extends SubsystemBase {
                 index.startIndex();
             case TURRET_TRACKING:
                 index.stopIndex();
-                shooter.setShotParameter(new ShotParameter(60, 0));
+                shooter.setShotParameter(new ShotParameter(10, 0));
                 break;
             default:
                 break;
@@ -141,6 +125,19 @@ public class Superstructure extends SubsystemBase {
     
     public Command setStateCommand(RobotState state) {
         return Commands.runOnce(() -> setState(state), this);
+    }
+
+    public void setManualShotParameter(ShotParameter shot) {
+        this.shooter.setShotParameter(shot);
+        this.setState(RobotState.HUB_SHOT);
+    }
+
+    public Command setManualShotParameterCommand(ShotParameter shot) {
+        return Commands.runOnce(() -> setManualShotParameter(shot), this);
+    }
+
+    public Command resetShooterHoodCommand() {
+        return shooter.resetHoodCommand();
     }
 
     public static Superstructure getInstance() {

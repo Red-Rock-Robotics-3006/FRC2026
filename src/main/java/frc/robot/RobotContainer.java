@@ -10,10 +10,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.shooter.ShotParameter;
+import frc.robot.subsystems.shooter.EditableShotParameter;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
-import redrocklib.logging.SmartDashboardNumber;
 import frc.robot.Superstructure.RobotState;
 
 public class RobotContainer {
@@ -24,12 +25,13 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(joystick);
     private final Intake intake = Intake.getInstance();
     private final Superstructure superstructure = Superstructure.getInstance();
+    private final Climber climber = Climber.getInstance();
 
     private final Autos autos = Autos.getInstance();
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
-    private SmartDashboardNumber lerpTuningHoodAngle = new SmartDashboardNumber("lerp tuning/hood angle degrees", 10);
-    private SmartDashboardNumber lerpTuningShooterSpeed = new SmartDashboardNumber("lerp tuning/shooter speed", 3000);
+    private EditableShotParameter lerpingShotParameter = new EditableShotParameter(10, 3000, "lerping shot parameter");
+    private EditableShotParameter hubShotParameter = new EditableShotParameter(30, 3000, "hub shot parameter");
 
     public RobotContainer() {
         configureSelector();
@@ -54,15 +56,15 @@ public class RobotContainer {
             .onFalse(intake.stopIntakeCommand());
 
         joystick.rightTrigger(kTriggerThreshold)
-            .onTrue(superstructure.setStateCommand(RobotState.TRACKING))
+            .onTrue(superstructure.setStateCommand(RobotState.FULL_TRACKING))
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
             
         joystick.leftBumper() //manual lerp tuning shot
-            .onTrue(superstructure.setManualShotParameterCommand(new ShotParameter(getLerpTuningHoodAngle(), getLerpTuningShooterSpeed())))
+            .onTrue(superstructure.setManualShotParameterCommand(lerpingShotParameter)) //TODO: use the setManualShotParameter() method, and find a way to get shotparameter from smartdashboard.
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
         joystick.rightBumper() //manual hub shot
-            .onTrue(superstructure.setManualShotParameterCommand(new ShotParameter(15, 4000))) //TODO: use the setManualShotParameter() method, and find a way to get shotparameter from smartdashboard.
+            .onTrue(superstructure.setManualShotParameterCommand(hubShotParameter)) //TODO: use the setManualShotParameter() method, and find a way to get shotparameter from smartdashboard.
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
         
         joystick.b()
@@ -71,15 +73,20 @@ public class RobotContainer {
         joystick.a()
             .onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
-        //do smth for climb lolz
-    }
+        joystick.povRight()
+            .onTrue(superstructure.resetShooterHoodCommand());
 
-    private double getLerpTuningHoodAngle() {
-        return lerpTuningHoodAngle.getNumber();
-    }
+        joystick.povUp()
+            .onTrue(Commands.sequence(
+                intake.stowIntakeCommand(),
+                climber.raiseClimberCommand()))
+            .onFalse(climber.stopClimberCommand());
 
-    private double getLerpTuningShooterSpeed() {
-        return lerpTuningShooterSpeed.getNumber();
+        joystick.povDown()
+            .onTrue(Commands.sequence(
+                intake.stowIntakeCommand(),
+                climber.lowerClimberCommand()))
+            .onFalse(climber.stopClimberCommand());
     }
 
     // private void configureSysIDBindings() {

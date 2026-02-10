@@ -34,6 +34,10 @@ public class ShotParameter {
         return Rotation2d.fromDegrees(this.pivotAngleDeg);
     }
 
+    public double getShooterRPM() {
+        return this.rpm;
+    }
+
     private double lerp(double y1, double y2, double t) {
         return y1 + (t * (y2 - y1));
     }

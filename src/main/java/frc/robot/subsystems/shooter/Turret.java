@@ -8,6 +8,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import redrocklib.logging.SmartDashboardNumber;
 import redrocklib.util.LerpingSmartDashboardNumber;
 import redrocklib.wrappers.RedRockTalon;
@@ -29,7 +30,7 @@ public class Turret extends SubsystemBase{
         = new LerpingSmartDashboardNumber(
             0, 0, 
             540, 20, 
-            "turret/Angle-Degrees", "turret/motor-rotations", 
+            "turret/angle-degrees", "turret/motor-rotations", 
             kEnableTurretTuning && true);
 
     private Turret() {

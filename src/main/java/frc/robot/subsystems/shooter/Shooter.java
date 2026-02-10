@@ -33,9 +33,9 @@ public class Shooter extends SubsystemBase{
     
     private LerpingSmartDashboardNumber hoodRestrictions = 
         new LerpingSmartDashboardNumber(
-            90, 0, 
-            0, 1.2, 
-            "shooter/hood/Angle-Degrees", "shooter/hood/Motor Rotations", 
+            10, 0, 
+            45, 9, 
+            "shooter/hood/angle-degrees", "shooter/hood/motor-rotations", 
             kEnableShooterTuning && true);
     
 
@@ -56,7 +56,9 @@ public class Shooter extends SubsystemBase{
             .withNeutralMode(NeutralModeValue.Coast)
         ).withSlot0Configs(
             new Slot0Configs()
-        );
+        ).withResetSpeed(-0.2);
+
+        hoodMotor.resetMotor();
     }
 
     /**
@@ -86,9 +88,7 @@ public class Shooter extends SubsystemBase{
     }
 
     public Command resetHoodCommand() {
-        Command m = hoodMotor.resetMotorCommand();
-        m.addRequirements(this);
-        return m;
+        return hoodMotor.resetMotorCommand();
     }
 
     public void setShooterSpeed(double rpm) {

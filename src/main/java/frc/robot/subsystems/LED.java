@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import redrocklib.logging.SmartDashboardNumber;
 
 public class LED extends SubsystemBase{
@@ -19,7 +20,6 @@ public class LED extends SubsystemBase{
     public final Color OFF = new Color(0, 0, 0);
     public final Color GREEN = new Color(0, 255, 0);
     public final Color MAGENTA = new Color(255, 0, 255);
-
     public final Color NOTE_ORANGE = new Color(255, 15, 0);
     public final Color WHITE = new Color(255, 255, 255);
     public final Color BLUE = new Color(0, 0, 255);
@@ -103,6 +103,7 @@ public class LED extends SubsystemBase{
         else setLights(c);
     }
     
+    @Override
     public void periodic() {
         blinkControl++;
         this.control.setData(buffer);
