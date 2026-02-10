@@ -137,6 +137,11 @@ public class RedRockTalon {
         this.followerMotors.add(motor);
     }
 
+    public RedRockTalon withResetSpeed(double speed) {
+        this.resetSpeed = new SmartDashboardNumber(name + "/" + name + "-reset-speed", speed);
+        return this;
+    }
+
     public RedRockTalon withTuningEnabled(boolean enabled) {
         this.tuningEnabled = kEnableMotorDashboardTuning && enabled;
         return this;

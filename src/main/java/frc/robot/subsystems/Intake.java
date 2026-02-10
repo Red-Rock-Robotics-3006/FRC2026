@@ -1,109 +1,153 @@
-// package frc.robot.subsystems;
+package frc.robot.subsystems;
 
-// import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-// import com.ctre.phoenix6.configs.MotionMagicConfigs;
-// import com.ctre.phoenix6.configs.MotorOutputConfigs;
-// import com.ctre.phoenix6.configs.Slot0Configs;
-// import com.ctre.phoenix6.controls.DutyCycleOut;
-// import com.ctre.phoenix6.controls.Follower;
-// import com.ctre.phoenix6.controls.TorqueCurrentFOC;
-// import com.ctre.phoenix6.hardware.TalonFX;
-// import com.ctre.phoenix6.signals.InvertedValue;
-// import com.ctre.phoenix6.signals.MotorAlignmentValue;
-// import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import redrocklib.logging.SmartDashboardNumber;
+import redrocklib.wrappers.RedRockTalon;
 
-// import edu.wpi.first.wpilibj2.command.Command;
-// import edu.wpi.first.wpilibj2.command.Commands;
-// import edu.wpi.first.wpilibj2.command.SubsystemBase;
-// import redrocklib.logging.SmartDashboardNumber;
-// import redrocklib.wrappers.RedRockTalon;
+public class Intake extends SubsystemBase{
+    private static Intake instance = null;
 
-// public class Intake extends SubsystemBase {
-//     private static Intake instance = null;
+    // private RedRockTalon pivotMotor = new RedRockTalon(0, "intake-pivot", "*"); //TODO
+    private RedRockTalon driveMotor = new RedRockTalon(31, "intake-drive", "*"); //TODO
 
-//     private SmartDashboardNumber intakeSpeedDCO = new SmartDashboardNumber("intake speed duty cycle", 0.15).withTuningEnabled(true);
-//     private SmartDashboardNumber intakeReverseSpeedDCO = new SmartDashboardNumber("intake reverse speed duty cycle", -0.15).withTuningEnabled(true);
-//     private SmartDashboardNumber intakeSpeedRPM = new SmartDashboardNumber("intake speed rpm", 80).withTuningEnabled(true);
-//     private SmartDashboardNumber intakeReverseSpeedRPM = new SmartDashboardNumber("intake reverse speed rpm", -80).withTuningEnabled(true);
+    // private SmartDashboardNumber maxPivotRotation = new SmartDashboardNumber("intake/pivot/max rotation", 0); 
+    // private SmartDashboardNumber minPivotRotation = new SmartDashboardNumber("intake/pivot/min rotation", 0); 
+    // private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/pivot/deploy position", 10); 
+    // private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/pivot/stow position", 0); 
 
-//     private RedRockTalon intakeMotor = new RedRockTalon(31, "intake");
+    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed RPM", 0.8);
+    private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed RPM", -0.6);
 
-//     private Intake() {
-//         this.intakeMotor
-//         .withTuningEnabled(true)
-//         .withMotorOutputConfigs(
-//             new MotorOutputConfigs()
-//             .withInverted(InvertedValue.CounterClockwise_Positive)
-//             .withPeakForwardDutyCycle(1d)
-//             .withPeakReverseDutyCycle(-1d)
-//             .withNeutralMode(NeutralModeValue.Brake)
-//         )
-//         .withSlot0Configs(
-//             new Slot0Configs()
-//             .withKA(0)
-//             .withKS(0)
-//             .withKV(0)
-//             .withKP(0)
-//             .withKI(0)
-//             .withKD(0)
-//         ).withMotionMagicConfigs(
-//             new MotionMagicConfigs()
-//             .withMotionMagicCruiseVelocity(100)
-//             .withMotionMagicAcceleration(850)
-//             .withMotionMagicJerk(10000000)
-//         )
-//         .withFollowerMotor(new TalonFX(32), MotorAlignmentValue.Aligned);
-//     }
+    private Intake() {
+        super();
+        
+        // this.pivotMotor.withMotorOutputConfigs(
+        //     new MotorOutputConfigs()
+        //     .withInverted(InvertedValue.Clockwise_Positive)
+        //     .withPeakForwardDutyCycle(1d)
+        //     .withPeakReverseDutyCycle(-1d)
+        //     .withNeutralMode(NeutralModeValue.Brake)
+        // )
+        // .withSlot0Configs(
+        //     new Slot0Configs()
+        //     .withKA(0)
+        //     .withKS(0)
+        //     .withKV(0)
+        //     .withKP(0.5)
+        //     .withKI(0)
+        //     .withKD(0) //TODO tune
+        //     .withGravityType(GravityTypeValue.Arm_Cosine)
+        // )
+        // .withMotionMagicConfigs(
+        //     new MotionMagicConfigs()
+        //     .withMotionMagicAcceleration(850)
+        //     .withMotionMagicCruiseVelocity(220)
+        //     .withMotionMagicJerk(10000000)
+        // )
+        // .withSpikeThreshold(10) //TODO tune
+        // .withCurrentLimitConfigs(
+        //     new CurrentLimitsConfigs()
+        //     .withSupplyCurrentLimit(45)
+        //     .withSupplyCurrentLimitEnable(true)
+        //     .withStatorCurrentLimit(60)
+        //     .withStatorCurrentLimitEnable(true)
+        // ).withTuningEnabled(true);
+                
+        this.driveMotor.withMotorOutputConfigs(
+            new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withPeakForwardDutyCycle(1d)
+            .withPeakReverseDutyCycle(-1d)
+            .withNeutralMode(NeutralModeValue.Brake)
+        )
+        .withCurrentLimitConfigs(
+            new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(45)
+            .withSupplyCurrentLimitEnable(true)
+            .withStatorCurrentLimit(80)
+            .withStatorCurrentLimitEnable(true)
+        ).withTuningEnabled(true);
 
-//     private void startIntaking() {
-//         this.intakeMotor.motor.setControl(new DutyCycleOut(intakeSpeedDCO.getNumber()));
-//     }
+        // this.pivotMotor.resetMotor();
+    }
 
-//     private void stopIntaking() {
-//         this.intakeMotor.motor.setControl(new DutyCycleOut(0));
-//     }
+    // public void setPivotPosition(double rotations) {
+    //     this.pivotMotor.setMotionMagicPosition(MathUtil.clamp(rotations, minPivotRotation.getNumber(), maxPivotRotation.getNumber()));
+    // }
 
-//     private void reverseIntake() {
-//         this.intakeMotor.motor.setControl(new DutyCycleOut(intakeReverseSpeedDCO.getNumber()));
-//     }
+    public void setDriveSpeed(double speed) {
+        // this.driveMotor.motor.setControl(
+        //     new VelocityVoltage(speed / 60)
+        //     .withSlot(0)
+        //     .withEnableFOC(true)
+        //     .withOverrideBrakeDurNeutral(true)
+        // );
+        this.driveMotor.motor.setControl(new DutyCycleOut(speed));
+    }
 
-//     public Command intakeCommand() {
-//         return Commands.runOnce(() -> startIntaking(), this);
-//     }
+    // public void deployIntake() {
+    //     this.setPivotPosition(intakeDeployPosition.getNumber());
+    // }
 
-//     public Command stopIntakeCommand() {
-//         return Commands.runOnce(() -> stopIntaking(), this);
-//     }
+    // public void stowIntake() {
+    //     this.setPivotPosition(intakeStowPosition.getNumber());
+    // }
 
-//     public Command reverseIntakeCommand() {
-//         return Commands.runOnce(() -> reverseIntake(), this);
-//     }
+    public void startIntake() {
+        this.setDriveSpeed(intakeSpeed.getNumber());
+    }
 
-//     private void startIntakingRPM() {
-//         this.intakeMotor.setMotionMagicVelocity(this.intakeSpeedRPM.getNumber());
-//     }
+    public void reverseIntake() {
+        this.setDriveSpeed(intakeReverseSpeed.getNumber());
+    }
 
-//     private void reverseIntakeRPM() {
-//         this.intakeMotor.setMotionMagicVelocity(this.intakeReverseSpeedRPM.getNumber());
-//     }
+    public void stopIntake() {
+        this.setDriveSpeed(0);
+    }
 
-//     public Command intakeRPMCommand() {
-//         return Commands.runOnce(() -> startIntakingRPM(), this);
-//     }
+    public Command reverseIntakeCommand() {
+        return Commands.runOnce(() -> this.reverseIntake(), this);
+    }
 
-//     public Command reverseIntakeRPMCommand() {
-//         return Commands.runOnce(() -> reverseIntakeRPM(), this);
-//     }
+    public Command stopIntakeCommand() {
+        return Commands.runOnce(() -> this.stopIntake(), this);
+    }
 
-//     @Override
-//     public void periodic() {
-//         this.intakeMotor.update();
-//     }
+    public Command startIntakeCommand() {
+        return Commands.sequence( 
+                // Commands.runOnce(() -> this.deployIntake(), this),
+                Commands.runOnce(() -> this.startIntake(), this)
+            );
+    }
 
-//     public static Intake getInstance() {
-//         if (instance == null) {
-//             instance = new Intake();
-//         }
-//         return instance;
-//     }
-// }
+    // public Command stowIntakeCommand() {
+    //     return Commands.runOnce(() -> this.stowIntake(), this);
+    // }
+
+    // public Command resetPivotCommand() {
+    //     return this.pivotMotor.resetMotorCommand();
+    // }
+
+    @Override
+    public void periodic() {
+        this.driveMotor.update();
+        // this.pivotMotor.update();
+    }
+
+    public static Intake getInstance() {
+        if (instance == null) instance = new Intake();
+        return instance;
+    }
+}
