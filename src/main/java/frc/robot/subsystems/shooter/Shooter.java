@@ -52,9 +52,9 @@ public class Shooter extends SubsystemBase{
             .withNeutralMode(NeutralModeValue.Coast)
         ).withSlot0Configs(
             new Slot0Configs()
-            .withKP(0.35)
-            .withKV(0.14)
-            .withKD(0.003)
+            .withKP(0.5)
+            .withKV(0.133)
+            // .withKD(0.003)
         ).withFollowerMotor(new TalonFX(52, "*"), MotorAlignmentValue.Opposed); //TODO: motor id
 
         hoodMotor.withMotorOutputConfigs(

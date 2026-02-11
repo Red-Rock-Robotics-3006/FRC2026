@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.shooter.EditableShotParameter;
 import frc.robot.subsystems.shooter.ShotParameter;
+import frc.robot.subsystems.shooter.Turret;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import redrocklib.logging.SmartDashboardNumber;
 import frc.robot.Superstructure.RobotState;
@@ -78,6 +79,10 @@ public class RobotContainer {
 
         joystick.povDown().onTrue(
             superstructure.resetShooterHoodCommand()
+        );
+
+        joystick.y().onTrue(
+            Turret.getInstance().setTurretToZero()
         );
 
         //do smth for climb lolz
