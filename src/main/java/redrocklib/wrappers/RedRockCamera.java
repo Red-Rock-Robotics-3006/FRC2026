@@ -23,7 +23,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RedRockCamera {
-    public static final AprilTagFieldLayout defualtFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    public static final AprilTagFieldLayout defaultFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
     public final PhotonCamera camera;
     public final PhotonPoseEstimator poseEstimator;
     public final AprilTagFieldLayout fieldLayout;
@@ -40,7 +40,7 @@ public class RedRockCamera {
     private double distToTag = 0;
 
     public RedRockCamera(String cameraName) {
-        this(cameraName, defualtFieldLayout);
+        this(cameraName, defaultFieldLayout);
     }
     
     public RedRockCamera(String cameraName, AprilTagFieldLayout layout) {
