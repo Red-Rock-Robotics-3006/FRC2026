@@ -16,7 +16,7 @@ import redrocklib.wrappers.RedRockTalon;
 public class Climber extends SubsystemBase{
     private static Climber instance = null;
 
-    private RedRockTalon climbMotor = new RedRockTalon(61, "climber", "*");
+    private RedRockTalon climbMotor = new RedRockTalon(51, "climber", "*");
 
     private SmartDashboardNumber raiseSpeed = new SmartDashboardNumber("climber/raise-speed", 0.9);
     private SmartDashboardNumber lowerSpeed = new SmartDashboardNumber("climber/lower-speed", -0.9);

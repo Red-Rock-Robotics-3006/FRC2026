@@ -7,9 +7,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import redrocklib.logging.SmartDashboardNumber;
 
-public class LED extends SubsystemBase{
+public class LightEmittingDiodes extends SubsystemBase{
 
-    private static LED instance = null;
+    private static LightEmittingDiodes instance = null;
 
     private AddressableLED control = new AddressableLED(9); //TODO
     private AddressableLEDBuffer buffer = new AddressableLEDBuffer(300); //TODO
@@ -27,7 +27,7 @@ public class LED extends SubsystemBase{
 
     private int blinkControl = 0;
 
-    private LED() {
+    private LightEmittingDiodes() {
         super();
         
         this.control.setLength(this.buffer.getLength());
@@ -109,8 +109,8 @@ public class LED extends SubsystemBase{
         this.control.setData(buffer);
     }
 
-    public static LED getInstance(){
-        if (instance == null) instance = new LED();
+    public static LightEmittingDiodes getInstance(){
+        if (instance == null) instance = new LightEmittingDiodes();
         return instance;
     }
 }

@@ -28,8 +28,8 @@ public class Shooter extends SubsystemBase{
     private SmartDashboardNumber rpmTolerance = new SmartDashboardNumber("shooter/tolerance/rpm", 50, kEnableShooterTuning && true);
     private SmartDashboardNumber hoodTolerance = new SmartDashboardNumber("shooter/tolerance/hood", 2, kEnableShooterTuning && true);
 
-    private RedRockTalon shooterMotor = new RedRockTalon(0); //TODO: motor id
-    private RedRockTalon hoodMotor = new RedRockTalon(0); //TODO: motor id
+    private RedRockTalon shooterMotor = new RedRockTalon(41); //TODO: motor id
+    private RedRockTalon hoodMotor = new RedRockTalon(43); //TODO: motor id
     
     private LerpingSmartDashboardNumber hoodRestrictions = 
         new LerpingSmartDashboardNumber(
@@ -47,7 +47,7 @@ public class Shooter extends SubsystemBase{
             .withNeutralMode(NeutralModeValue.Coast)
         ).withSlot0Configs(
             new Slot0Configs()
-        ).withFollowerMotor(new TalonFX(0, "*"), MotorAlignmentValue.Opposed); //TODO: motor id
+        ).withFollowerMotor(new TalonFX(42, "*"), MotorAlignmentValue.Opposed); //TODO: motor id
 
         hoodMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()

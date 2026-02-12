@@ -21,10 +21,10 @@ public class Turret extends SubsystemBase{
 
     private SmartDashboardNumber turretTolerance = new SmartDashboardNumber("turret/tolerance", 2, kEnableTurretTuning && true);
 
-    private RedRockTalon turretMotor = new RedRockTalon(0);
+    private RedRockTalon turretMotor = new RedRockTalon(44);
 
-    private CANcoder ccoderA = new CANcoder(29, "*"); //TODO
-    private CANcoder ccoderB = new CANcoder(30, "*"); //TODO
+    private CANcoder ccoderA = new CANcoder(45, "*"); //TODO
+    private CANcoder ccoderB = new CANcoder(46, "*"); //TODO
 
     private LerpingSmartDashboardNumber turretRestrictions
         = new LerpingSmartDashboardNumber(

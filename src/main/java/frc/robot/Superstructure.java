@@ -22,7 +22,7 @@ public class Superstructure extends SubsystemBase {
     public static final boolean kPractice = true;
     public static final boolean kHubOrLob = true; //true for hub, false for lob
 
-    private final LED led = LED.getInstance();
+    private final LightEmittingDiodes led = LightEmittingDiodes.getInstance();
     private final Shooter shooter = Shooter.getInstance();
     private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     private final Turret turret = Turret.getInstance();
