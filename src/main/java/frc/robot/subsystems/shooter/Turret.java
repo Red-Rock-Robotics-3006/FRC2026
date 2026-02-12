@@ -23,8 +23,8 @@ public class Turret extends SubsystemBase{
 
     private RedRockTalon turretMotor = new RedRockTalon(44);
 
-    private CANcoder ccoderA = new CANcoder(45, "*"); //TODO
-    private CANcoder ccoderB = new CANcoder(46, "*"); //TODO
+    private CANcoder ccoderA = new CANcoder(45, "*");
+    private CANcoder ccoderB = new CANcoder(46, "*");
 
     private LerpingSmartDashboardNumber turretRestrictions
         = new LerpingSmartDashboardNumber(
