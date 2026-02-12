@@ -4,12 +4,11 @@ import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import redrocklib.logging.SmartDashboardNumber;
 
-public class LightEmittingDiodes extends SubsystemBase{
+public class SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode extends SubsystemBase{
 
-    private static LightEmittingDiodes instance = null;
+    private static SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode instance = null;
 
     private AddressableLED control = new AddressableLED(9); //TODO
     private AddressableLEDBuffer buffer = new AddressableLEDBuffer(300); //TODO
@@ -27,7 +26,7 @@ public class LightEmittingDiodes extends SubsystemBase{
 
     private int blinkControl = 0;
 
-    private LightEmittingDiodes() {
+    private SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode() {
         super();
         
         this.control.setLength(this.buffer.getLength());
@@ -109,8 +108,8 @@ public class LightEmittingDiodes extends SubsystemBase{
         this.control.setData(buffer);
     }
 
-    public static LightEmittingDiodes getInstance(){
-        if (instance == null) instance = new LightEmittingDiodes();
+    public static SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode getInstance(){
+        if (instance == null) instance = new SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode();
         return instance;
     }
 }
