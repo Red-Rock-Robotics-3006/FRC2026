@@ -7,6 +7,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.shooter.*;
+import frc.robot.subsystems.shooter.autoaim.InterpolatingTable;
+import frc.robot.subsystems.shooter.autoaim.LobInterpolatingTable;
+import frc.robot.subsystems.shooter.autoaim.ShotParameter;
 import frc.robot.subsystems.swerve.*;
 import frc.robot.vision.Localization;
 import redrocklib.logging.*;
@@ -19,7 +22,7 @@ public class Superstructure extends SubsystemBase {
     public static final boolean kPractice = true;
     public static final boolean kHubOrLob = true; //true for hub, false for lob
 
-    private final LED led = LED.getInstance();
+    private final SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode led = SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode.getInstance();
     private final Shooter shooter = Shooter.getInstance();
     private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     private final Turret turret = Turret.getInstance();
@@ -54,7 +57,7 @@ public class Superstructure extends SubsystemBase {
     private Pose2d shooterPose;
     private Pose2d targetPose = new Pose2d();
 
-    public static final Pose2d shooterOffset = new Pose2d();
+    public static final Pose2d shooterOffset = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
 
     @Override
     public void periodic() {

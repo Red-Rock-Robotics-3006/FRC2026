@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.autoaim;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 

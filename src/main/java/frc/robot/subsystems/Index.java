@@ -16,9 +16,9 @@ import redrocklib.wrappers.RedRockTalon;
 public class Index extends SubsystemBase {
     private static Index instance = null;
 
-    private RedRockTalon conveyorMotor = new RedRockTalon(0, "index-conveyor", "*"); //TODO
-    private RedRockTalon centeringMotor = new RedRockTalon(0, "index-centering", "*"); //TODO
-    private RedRockTalon feedMotor = new RedRockTalon(0, "index-feed", "*"); //TODO
+    private RedRockTalon conveyorMotor = new RedRockTalon(31, "index-conveyor", "*");
+    private RedRockTalon centeringMotor = new RedRockTalon(32, "index-centering", "*");
+    private RedRockTalon feedMotor = new RedRockTalon(33, "index-feed", "*");
 
     private SmartDashboardNumber conveyorSpeed = new SmartDashboardNumber("index/conveyor speed", 0.2).withTuningEnabled(true);
     private SmartDashboardNumber conveyorReverseSpeed = new SmartDashboardNumber("index/conveyor reverse speed", -0.2).withTuningEnabled(true);    

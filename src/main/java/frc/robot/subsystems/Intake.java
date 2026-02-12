@@ -20,8 +20,8 @@ import redrocklib.wrappers.RedRockTalon;
 public class Intake extends SubsystemBase{
     private static Intake instance = null;
 
-    private RedRockTalon pivotMotor = new RedRockTalon(0, "intake-pivot", "*"); //TODO
-    private RedRockTalon driveMotor = new RedRockTalon(0, "intake-drive", "*"); //TODO
+    private RedRockTalon driveMotor = new RedRockTalon(21, "intake-drive", "*");
+    private RedRockTalon pivotMotor = new RedRockTalon(22, "intake-pivot", "*");
 
     private SmartDashboardNumber maxPivotRotation = new SmartDashboardNumber("intake/pivot/max rotation", 0); 
     private SmartDashboardNumber minPivotRotation = new SmartDashboardNumber("intake/pivot/min rotation", 0); 

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.autoaim;
 
 import static java.util.Map.entry;
 
@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-public class LobInterpolatingTable {
+public class InterpolatingTable {
 
-    private LobInterpolatingTable() {}
+    private InterpolatingTable() {}
                 
     public static TreeMap<Double, ShotParameter> table =
         new TreeMap<>(

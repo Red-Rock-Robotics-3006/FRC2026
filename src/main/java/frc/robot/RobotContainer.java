@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.shooter.EditableShotParameter;
+import frc.robot.subsystems.shooter.autoaim.EditableShotParameter;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.Superstructure.RobotState;
 
