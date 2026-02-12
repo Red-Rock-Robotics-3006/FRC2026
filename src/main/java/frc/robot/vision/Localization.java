@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import redrocklib.wrappers.RedRockCamera;
 
 public class Localization extends SubsystemBase{
     public static final Pose2d redHub = new Pose2d();
@@ -24,7 +23,7 @@ public class Localization extends SubsystemBase{
         ArrayList<RRPoseEstimate> estimates = new ArrayList<>();
 
         for (RedRockCamera camera : cameras) {
-            if (!camera.hasTarget()) continue;
+            if (!camera.hasValidPoseEstimate()) continue;
             RRPoseEstimate est = new RRPoseEstimate();
             EstimatedRobotPose pvEst = camera.getEstimate();
             est.pose = pvEst.estimatedPose.toPose2d();
