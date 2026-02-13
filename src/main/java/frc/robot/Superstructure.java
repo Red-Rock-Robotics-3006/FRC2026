@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.shooter.*;
 import frc.robot.subsystems.swerve.*;
+import frc.robot.vision.Localization;
 // import frc.robot.vision.Localization;
 import redrocklib.logging.*;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Superstructure extends SubsystemBase {
     private static Superstructure instance = null;
+
+    public static Localization localizationInstance = new Localization();
 
     public static final boolean kPractice = true;
     public static final boolean kHubOrLob = true; //true for hub, false for lob

@@ -15,8 +15,9 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
+
+// import edu.wpi.first.apriltag.AprilTagFieldLayout;
+// import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -33,10 +34,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+
 import frc.robot.subsystems.swerve.generated.TunerConstants;
 import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.vision.Localization;
+import frc.robot.vision.Localization.RRPoseEstimate;
+import redrocklib.logging.SmartDashboardBoolean;
 import redrocklib.logging.SmartDashboardNumber;
-import redrocklib.wrappers.RedRockCamera;
+// import redrocklib.wrappers.RedRockCamera;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -52,10 +57,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private CommandXboxController controller;
 
+    private SmartDashboardNumber poseMaxDistance = new SmartDashboardNumber("dt/dt localization/dist restriction", 3);
+    private SmartDashboardNumber poseMaxRotation = new SmartDashboardNumber("dt/dt localization/rotation restriction", 3);
+
     private SmartDashboardNumber maxDriveSpeed = new SmartDashboardNumber("dt/dt drive speeds/max drive mps", 4);
     private SmartDashboardNumber maxTurnSpeed = new SmartDashboardNumber("dt/dt drive speeds/turn rotps", 1);
     private SmartDashboardNumber drivingDeadBand = new SmartDashboardNumber("dt/dt thresholds/deadband", 0.005);
-    private SmartDashboardNumber pidRotationThreshold = new SmartDashboardNumber("dt/dt thresholds/rotation threshold", 0.5); // threshold to enable heading pid again.
+    private SmartDashboardNumber pidRotationThreshold = new SmartDashboardNumber("dt/dt thresholds/rotation threshold", 1); // threshold to enable heading pid again.
 
     private SmartDashboardNumber headingP = new SmartDashboardNumber("dt/dt heading pid coeffs/kP", 4);
     private SmartDashboardNumber headingI = new SmartDashboardNumber("dt/dt heading pid coeffs/kI", 0);
@@ -94,10 +102,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private AutoFactory factory;
 
-    private final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
-
-    private RedRockCamera boogerCamera = new RedRockCamera("booger", fieldLayout);
-    private RedRockCamera gooberCamera = new RedRockCamera("goober", fieldLayout);
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -375,6 +379,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             this.setControl(this.getRequest());
         }
         SmartDashboard.putString("dt/drive state", this.state.toString());
+
+        if (this.visionEnabled.getValue()) updateVisionMeasurements();
+    }
+
+    private void updateVisionMeasurements() {
+        if (this.getRotationRate() >= poseMaxRotation.getNumber()) {
+            return;
+        }
+        for (RRPoseEstimate estimate : Localization.getPoseEstimates()) {
+            if (estimate.pose.getTranslation().getDistance(this.getPose().getTranslation()) > poseMaxDistance.getNumber()) continue;
+            this.addVisionMeasurement(estimate.pose, estimate.timeStamp, estimate.stdvs);
+        }
     }
 
     private void updateDeadbands() {
@@ -456,6 +472,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private DriveState state = DriveState.DRIVE_FACING_ANGLE;
 
+    private SmartDashboardBoolean visionEnabled = new SmartDashboardBoolean("vision-enabled", true);
+
     public void setDriveState(DriveState state) {
         this.state = state;
     }
@@ -498,14 +516,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 if (Math.abs(controller.getRightX()) <= drivingDeadBand.getNumber()) state = DriveState.DRIVE_RESIDUAL;
                 break;
             case DRIVE_RESIDUAL:
-                if (Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber()) state = DriveState.DRIVE;
-                else {
-                    SwerveDriveState driveState = this.getState();
-                    if (Math.abs(driveState.Speeds.omegaRadiansPerSecond) <= 
-                        DegreesPerSecond.of(pidRotationThreshold.getNumber()).in(RadiansPerSecond)) {
-                        targetAngle = driveState.Pose.getRotation();
-                        state = DriveState.DRIVE_FACING_ANGLE;
-                    }
+                SwerveDriveState driveState = this.getState();
+                if (Math.abs(driveState.Speeds.omegaRadiansPerSecond) <= 
+                    DegreesPerSecond.of(pidRotationThreshold.getNumber()).in(RadiansPerSecond)) {
+                    targetAngle = driveState.Pose.getRotation();
+                    state = DriveState.DRIVE_FACING_ANGLE;
                 }
                 break;
         }
@@ -520,6 +535,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             )
         );
         this.targetAngle = Rotation2d.kZero;
+    }
+
+    public double getRotationRate() {
+        return this.getState().Speeds.omegaRadiansPerSecond;
     }
 
     public Command resetHeadingCommand() {
