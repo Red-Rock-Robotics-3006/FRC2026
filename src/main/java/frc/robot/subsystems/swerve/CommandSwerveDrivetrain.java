@@ -37,8 +37,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.subsystems.swerve.generated.TunerConstants;
 import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrain;
-import frc.robot.vision.Localization;
-import frc.robot.vision.Localization.RRPoseEstimate;
+import frc.robot.subsystems.vision.Localization;
+import frc.robot.subsystems.vision.Localization.RRPoseEstimate;
 import redrocklib.logging.SmartDashboardNumber;
 // import redrocklib.wrappers.RedRockCamera;
 

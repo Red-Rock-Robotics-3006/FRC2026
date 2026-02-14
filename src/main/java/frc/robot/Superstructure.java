@@ -11,7 +11,7 @@ import frc.robot.subsystems.shooter.autoaim.InterpolatingTable;
 import frc.robot.subsystems.shooter.autoaim.LobInterpolatingTable;
 import frc.robot.subsystems.shooter.autoaim.ShotParameter;
 import frc.robot.subsystems.swerve.*;
-import frc.robot.vision.Localization;
+import frc.robot.subsystems.vision.Localization;
 import redrocklib.logging.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -22,7 +22,6 @@ public class Superstructure extends SubsystemBase {
     public static final boolean kPractice = true;
     public static final boolean kHubOrLob = true; //true for hub, false for lob
 
-    public final SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode led = SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode.getInstance();
     private final Shooter shooter = Shooter.getInstance();
     private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     private final Turret turret = Turret.getInstance();
