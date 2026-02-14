@@ -28,7 +28,7 @@ public class RedRockCamera {
     public static final SmartDashboardNumber kMaxDistToTag = new SmartDashboardNumber("localization-max dist", 3, true && kEnableCameraTuning);
     
     public static final RRStdv kDefaultStdvs = new RRStdv(0.8, 0.8, 2);
-    public static final AprilTagFieldLayout defaultFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    public static final AprilTagFieldLayout defaultFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     public final PhotonCamera camera;
     public final PhotonPoseEstimator poseEstimator;
     public final AprilTagFieldLayout fieldLayout;
