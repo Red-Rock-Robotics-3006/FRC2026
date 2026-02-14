@@ -42,8 +42,8 @@ public class RobotContainer {
     public void configureSelector() {
         autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
 
-        autoChooser.addOption("Test Auto Paths", autos.testAutoPaths());
-        autoChooser.addOption("Slow Test Auto Paths", autos.slowTestAutoPaths());
+        autoChooser.addOption("Right Steal Score Leave", autos.R_MS_L());
+        autoChooser.addOption("Right Steal Score Climb", autos.R_MS_C());
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
