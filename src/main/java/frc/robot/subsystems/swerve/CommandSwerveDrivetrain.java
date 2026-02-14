@@ -515,16 +515,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 if (Math.abs(controller.getRightX()) <= drivingDeadBand.getNumber()) state = DriveState.DRIVE_RESIDUAL;
                 break;
             case DRIVE_RESIDUAL:
-                SwerveDriveState driveState = this.getState();
-                if (Math.abs(driveState.Speeds.omegaRadiansPerSecond) <= 
-                    DegreesPerSecond.of(pidRotationThreshold.getNumber()).in(RadiansPerSecond)) {
-                    targetAngle = driveState.Pose.getRotation();
-                    state = DriveState.DRIVE_FACING_ANGLE;
+                if (Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber()) state = DriveState.DRIVE;
+                else {
+                    SwerveDriveState driveState = this.getState();
+                    if (Math.abs(driveState.Speeds.omegaRadiansPerSecond) <= 
+                        DegreesPerSecond.of(pidRotationThreshold.getNumber()).in(RadiansPerSecond)) {
+                        targetAngle = driveState.Pose.getRotation();
+                        state = DriveState.DRIVE_FACING_ANGLE;
+                    }
                 }
                 break;
         }
     }
-
     public void resetHeading() {
         this.resetPose(
             new Pose2d(
