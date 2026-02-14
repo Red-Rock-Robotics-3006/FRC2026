@@ -30,7 +30,7 @@ public class RobotContainer {
     private final Autos autos = Autos.getInstance();
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
-    private EditableShotParameter lerpingShotParameter = new EditableShotParameter(10, 3000, "lerping shot parameter");
+    private EditableShotParameter lerpingShotParameter = new EditableShotParameter(20, 3000, "lerping shot parameter");
     private EditableShotParameter hubShotParameter = new EditableShotParameter(30, 3000, "hub shot parameter");
 
     public RobotContainer() {
@@ -60,11 +60,11 @@ public class RobotContainer {
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
             
         joystick.leftBumper() //manual lerp tuning shot
-            .onTrue(superstructure.setManualShotParameterCommand(lerpingShotParameter)) //TODO: use the setManualShotParameter() method, and find a way to get shotparameter from smartdashboard.
+            .onTrue(superstructure.setManualShotParameterCommand(lerpingShotParameter))
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
         joystick.rightBumper() //manual hub shot
-            .onTrue(superstructure.setManualShotParameterCommand(hubShotParameter)) //TODO: use the setManualShotParameter() method, and find a way to get shotparameter from smartdashboard.
+            .onTrue(superstructure.setManualShotParameterCommand(hubShotParameter))
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
         
         joystick.b()

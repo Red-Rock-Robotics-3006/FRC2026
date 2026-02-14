@@ -6,7 +6,6 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -18,11 +17,11 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import redrocklib.logging.SmartDashboardNumber;
 
 public class RedRockCamera {
@@ -30,7 +29,7 @@ public class RedRockCamera {
     public static final SmartDashboardNumber kMaxDistToTag = new SmartDashboardNumber("localization-max dist", 3, true && kEnableCameraTuning);
     
     public static final RRStdv kDefaultStdvs = new RRStdv(0.8, 0.8, 2);
-    public static final AprilTagFieldLayout defaultFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    public static final AprilTagFieldLayout defaultFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     public final PhotonCamera camera;
     public final PhotonPoseEstimator poseEstimator;
     public final AprilTagFieldLayout fieldLayout;

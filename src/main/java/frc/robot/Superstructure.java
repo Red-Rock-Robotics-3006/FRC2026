@@ -22,22 +22,25 @@ public class Superstructure extends SubsystemBase {
     public static final boolean kPractice = true;
     public static final boolean kHubOrLob = true; //true for hub, false for lob
 
-    private final SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode led = SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode.getInstance();
+    public final SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode led = SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode.getInstance();
     private final Shooter shooter = Shooter.getInstance();
     private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     private final Turret turret = Turret.getInstance();
     private final Index index = Index.getInstance();
+    public final Localization localization = new Localization();
 
     private SmartDashboardNumber blueAllianceZoneX = new SmartDashboardNumber("superstructure/blue alliance zone x", 4.38);
     private SmartDashboardNumber redAllianceZoneX = new SmartDashboardNumber("superstructure/red alliance zone x", 12.16);
+
+    private final ShotParameter IDLE = new ShotParameter(10, 0);
 
     public enum RobotState {
         TURRET_TRACKING, //turret tracking
         FULL_TRACKING, //flywheels spin up, hood tracking, turret tracking
         SHOOTING, //index spinning, flywheels spinning, hood tracking, turret tracking
-        SHOOTING_WHILE_MOVING, //flywheels spinning, hood tracking, turret tracking, dt speed > 0
+        SHOOTING_WHILE_MOVING, //mostly for redundancy, flywheels spinning, hood tracking, turret tracking, dt speed > 0
 
-        HUB_SHOT, //shooting from in front of hub, flywheels spinning, turret at set angle, hood at set angle
+        MANUAL_SHOT, //any manual shot, flywheels spinning, turret at set angle, hood at set angle
 
         IDLE //mechanisms all idle (on disable maybe?)
     }
@@ -71,26 +74,20 @@ public class Superstructure extends SubsystemBase {
             new Pose2d();//will be lob poses later
 
         switch (robotState) {
-            case HUB_SHOT:
-                //set shooter, turret targets to fixed values for hub shot -> not needed
-                if (readyToShoot())
-                    index.startIndex();
+            case MANUAL_SHOT:
+                if (readyToShoot()) index.startIndex();
                 break;
             case SHOOTING_WHILE_MOVING:
                 break;
             case SHOOTING:
-                led.setLights(led.GREEN);
             case FULL_TRACKING:
-                if (readyToShoot()) 
-                    setState(RobotState.SHOOTING);
+                if (readyToShoot()) setState(RobotState.SHOOTING);
 
                 shooter.setShotParameter(
                     (this.inAllianceZone()) ? 
                         InterpolatingTable.get(shooterPose.minus(targetPose).getTranslation().getNorm()) :
                         LobInterpolatingTable.get(shooterPose.minus(targetPose).getTranslation().getNorm())
                 );
-                
-                led.blink(led.GREEN, 4);
             case TURRET_TRACKING:
                 turret.setTurretAngle(
                     shooterPose
@@ -99,11 +96,8 @@ public class Superstructure extends SubsystemBase {
                         .getAngle()
                         .minus(dtPose.getRotation())
                 );
-                
-                led.rainbow();
                 break;
             case IDLE:
-                led.rainbow();
                 break;
         }
     }
@@ -111,14 +105,15 @@ public class Superstructure extends SubsystemBase {
     public void setState(RobotState state) {
         switch (state) {
             case IDLE:
-                shooter.setShooterSpeed(0);
-                shooter.setHoodAngle(Rotation2d.kZero);
+                index.stopIndex();
+                shooter.setShotParameter(IDLE);
                 break;
             case SHOOTING:
                 index.startIndex();
+                break;
             case TURRET_TRACKING:
                 index.stopIndex();
-                shooter.setShotParameter(new ShotParameter(10, 0));
+                shooter.setShotParameter(IDLE);
                 break;
             default:
                 break;
@@ -130,9 +125,13 @@ public class Superstructure extends SubsystemBase {
         return Commands.runOnce(() -> setState(state), this);
     }
 
+    public RobotState getRobotState() {
+        return this.robotState;
+    }
+
     public void setManualShotParameter(ShotParameter shot) {
         this.shooter.setShotParameter(shot);
-        this.setState(RobotState.HUB_SHOT);
+        this.setState(RobotState.MANUAL_SHOT);
     }
 
     public Command setManualShotParameterCommand(ShotParameter shot) {

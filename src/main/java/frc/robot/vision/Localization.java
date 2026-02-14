@@ -35,9 +35,7 @@ public class Localization extends SubsystemBase{
         return estimates;
     }
 
-    private static Localization localizationInstance = new Localization();
-
-    private Localization() {
+    public Localization() {
         super("localization");
     }
 
