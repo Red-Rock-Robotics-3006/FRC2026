@@ -11,7 +11,7 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 public class Autos {
 
     /*Naming convention:
-        [starting position]_[intaking location][shoot or lob]_[climb or leave]
+        [starting position]_[intaking location][shoot or lob]_..._[climb or leave]
 
         starting position: (L)eft, (C)enter, (R)ight
         intaking location: (M)iddle, (D)epot, (O)utpost
