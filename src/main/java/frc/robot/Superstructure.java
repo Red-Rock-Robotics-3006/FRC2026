@@ -26,7 +26,7 @@ public class Superstructure extends SubsystemBase {
     private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     private final Turret turret = Turret.getInstance();
     private final Index index = Index.getInstance();
-    public final Localization localization = new Localization();
+    public final Localization localization = Localization.getInstance();
 
     private SmartDashboardNumber blueAllianceZoneX = new SmartDashboardNumber("superstructure/blue alliance zone x", 4.38);
     private SmartDashboardNumber redAllianceZoneX = new SmartDashboardNumber("superstructure/red alliance zone x", 12.16);

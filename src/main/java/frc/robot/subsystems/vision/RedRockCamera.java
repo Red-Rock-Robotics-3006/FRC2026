@@ -75,8 +75,8 @@ public class RedRockCamera {
         return this;
     }
 
-    public EstimatedRobotPose getEstimate() {
-        return visionEst.get();
+    public Optional<EstimatedRobotPose> getEstimate() {
+        return visionEst;
     }
 
     public boolean hasValidPoseEstimate() {
@@ -84,7 +84,7 @@ public class RedRockCamera {
     }
 
     public boolean hasTarget() {
-        return this.targetFound;
+        return visionEst.isPresent();
     }
 
     public Matrix<N3, N1> getStdvs() {
@@ -101,31 +101,15 @@ public class RedRockCamera {
 
         for (PhotonPipelineResult result : camera.getAllUnreadResults()) {
             if (!result.hasTargets() || result.getTimestampSeconds() < 0) continue;
-            var multiResult = result.getMultiTagResult();
-            poseEstimator.estimateCoprocMultiTagPose(result);
-            boolean useMultitag = multiResult.isPresent();
+            visionEst = poseEstimator.estimateCoprocMultiTagPose(result);
 
-            if (useMultitag) {
-                var best_tf = result.getMultiTagResult().get().estimatedPose.best;
-                var best =
-                                Pose3d.kZero
-                                        .plus(best_tf) // field-to-camera
-                                        .relativeTo(fieldLayout.getOrigin())
-                                        .plus(robotToCamera.inverse()); // field-to-robot
-                distToTag = best_tf.getTranslation().getNorm();
-                visionEst = Optional.of(
-                                new EstimatedRobotPose(
-                                        best,
-                                        result.getTimestampSeconds(),
-                                        result.getTargets(),
-                                        PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR));
-            } else {
-                poseEstimator.estimateLowestAmbiguityPose(result);
-                PhotonTrackedTarget lowestAmbiguityTarget = null;
+            if (visionEst.isEmpty()) {
+                visionEst = poseEstimator.estimateLowestAmbiguityPose(result);
 
                 double lowestAmbiguityScore = 10;
+                PhotonTrackedTarget lowestAmbiguityTarget = null;
 
-                for (PhotonTrackedTarget target : result.targets) {
+                for (PhotonTrackedTarget target : visionEst.get().targetsUsed) {
                     double targetPoseAmbiguity = target.getPoseAmbiguity();
                     // Make sure the target is a Fiducial target.
                     if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestAmbiguityScore) {
@@ -134,35 +118,81 @@ public class RedRockCamera {
                     }
                 }
 
-                // Although there are confirmed to be targets, none of them may be fiducial
-                // targets.
-                if (lowestAmbiguityTarget == null) {
-                    visionEst = Optional.empty();
-                    continue;
+                distToTag = (lowestAmbiguityTarget == null) ? distToTag : lowestAmbiguityTarget.getBestCameraToTarget().getTranslation().getNorm();
+            } else {
+                double sum = 0;
+                var targetsUsed = visionEst.get().targetsUsed;
+
+                for (PhotonTrackedTarget target : targetsUsed) {
+                    if (target.fiducialId > 0) {
+                        sum += (1.0 / target.getBestCameraToTarget().getTranslation().getNorm());
+                    }
                 }
 
-                int targetFiducialId = lowestAmbiguityTarget.getFiducialId();
-
-                Optional<Pose3d> targetPosition = fieldLayout.getTagPose(targetFiducialId);
-
-                if (targetPosition.isEmpty()) {
-                    // reportFiducialPoseError(targetFiducialId);
-                    visionEst = Optional.empty();
-                    continue;
-                }
-
-                distToTag = lowestAmbiguityTarget.getBestCameraToTarget().getTranslation().getNorm();
-
-                visionEst = Optional.of(
-                        new EstimatedRobotPose(
-                                targetPosition
-                                        .get()
-                                        .transformBy(lowestAmbiguityTarget.getBestCameraToTarget().inverse())
-                                        .transformBy(robotToCamera.inverse()),
-                                result.getTimestampSeconds(),
-                                result.getTargets(),
-                                PoseStrategy.LOWEST_AMBIGUITY));
+                distToTag = targetsUsed.size() * (1.0 / sum);
             }
+
+
+            // boolean useMultitag = multiResult.isPresent();
+
+            // if (useMultitag) {
+            //     var best_tf = result.getMultiTagResult().get().estimatedPose.best;
+            //     var best =
+            //                     Pose3d.kZero
+            //                             .plus(best_tf) // field-to-camera
+            //                             .relativeTo(fieldLayout.getOrigin())
+            //                             .plus(robotToCamera.inverse()); // field-to-robot
+            //     distToTag = best_tf.getTranslation().getNorm();
+            //     visionEst = Optional.of(
+            //                     new EstimatedRobotPose(
+            //                             best,
+            //                             result.getTimestampSeconds(),
+            //                             result.getTargets(),
+            //                             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR));
+            // } else {
+            //     poseEstimator.estimateLowestAmbiguityPose(result);
+            //     PhotonTrackedTarget lowestAmbiguityTarget = null;
+
+            //     double lowestAmbiguityScore = 10;
+
+            //     for (PhotonTrackedTarget target : result.targets) {
+            //         double targetPoseAmbiguity = target.getPoseAmbiguity();
+            //         // Make sure the target is a Fiducial target.
+            //         if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestAmbiguityScore) {
+            //             lowestAmbiguityScore = targetPoseAmbiguity;
+            //             lowestAmbiguityTarget = target;
+            //         }
+            //     }
+
+            //     // Although there are confirmed to be targets, none of them may be fiducial
+            //     // targets.
+            //     if (lowestAmbiguityTarget == null) {
+            //         visionEst = Optional.empty();
+            //         continue;
+            //     }
+
+            //     int targetFiducialId = lowestAmbiguityTarget.getFiducialId();
+
+            //     Optional<Pose3d> targetPosition = fieldLayout.getTagPose(targetFiducialId);
+
+            //     if (targetPosition.isEmpty()) {
+            //         // reportFiducialPoseError(targetFiducialId);
+            //         visionEst = Optional.empty();
+            //         continue;
+            //     }
+
+            //     distToTag = lowestAmbiguityTarget.getBestCameraToTarget().getTranslation().getNorm();
+
+            //     visionEst = Optional.of(
+            //             new EstimatedRobotPose(
+            //                     targetPosition
+            //                             .get()
+            //                             .transformBy(lowestAmbiguityTarget.getBestCameraToTarget().inverse())
+            //                             .transformBy(robotToCamera.inverse()),
+            //                     result.getTimestampSeconds(),
+            //                     result.getTargets(),
+            //                     PoseStrategy.LOWEST_AMBIGUITY));
+            // }
         }
 
         this.targetFound = !visionEst.isEmpty();
@@ -170,7 +200,7 @@ public class RedRockCamera {
         SmartDashboard.putBoolean(name + "/" + name + "-has-targets", this.targetFound);
         SmartDashboard.putNumber(name + "/" + name + "-distance-to-tag", distToTag);
 
-        if (targetFound) field2d.setRobotPose(getEstimate().estimatedPose.toPose2d());
+        if (targetFound) field2d.setRobotPose(getEstimate().get().estimatedPose.toPose2d());
         // SmartDashboard.putBoolean(name + "/" + name + "-has-targets", result.hasTargets());
     }
 

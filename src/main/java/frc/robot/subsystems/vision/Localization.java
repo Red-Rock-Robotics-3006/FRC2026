@@ -16,6 +16,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Localization extends SubsystemBase{
+    private static Localization instance = null;
     public static final Pose2d blueHub = new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84), Rotation2d.fromDegrees(0));
     public static final Pose2d redHub = new Pose2d(Units.inchesToMeters(469.11), Units.inchesToMeters(158.84), Rotation2d.fromDegrees(0));
 
@@ -30,7 +31,10 @@ public class Localization extends SubsystemBase{
         for (RedRockCamera camera : cameras) {
             if (!camera.hasValidPoseEstimate()) continue;
             RRPoseEstimate est = new RRPoseEstimate();
-            EstimatedRobotPose pvEst = camera.getEstimate();
+            EstimatedRobotPose pvEst = null;
+            if (camera.getEstimate().isPresent())
+                pvEst = camera.getEstimate().get();
+            else continue;
             est.pose = pvEst.estimatedPose.toPose2d();
             est.timeStamp = pvEst.timestampSeconds;
             est.stdvs = camera.getStdvs();
@@ -40,7 +44,7 @@ public class Localization extends SubsystemBase{
         return estimates;
     }
 
-    public Localization() {
+    private Localization() {
         super("localization");
 
         cameras.add(new RedRockCamera("Photon-Rubik-Everything")
@@ -84,6 +88,11 @@ public class Localization extends SubsystemBase{
     @Override
     public void periodic() {
         for (RedRockCamera camera : cameras) camera.update();
+    }
+
+    public static Localization getInstance() {
+        if (instance == null) instance = new Localization();
+        return instance;
     }
 
     public static class RRPoseEstimate {
