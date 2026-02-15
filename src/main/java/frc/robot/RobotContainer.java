@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode;
+import frc.robot.subsystems.LED;
 import frc.robot.subsystems.shooter.autoaim.EditableShotParameter;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.Superstructure.RobotState;
@@ -27,7 +27,7 @@ public class RobotContainer {
     private final Intake intake = Intake.getInstance();
     private final Superstructure superstructure = Superstructure.getInstance();
     private final Climber climber = Climber.getInstance();
-    public final SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode led = SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode.getInstance();
+    public final LED led = LED.getInstance();
 
     private final Autos autos = Autos.getInstance();
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();

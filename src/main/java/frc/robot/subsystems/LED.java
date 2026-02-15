@@ -9,9 +9,9 @@ import frc.robot.Superstructure;
 
 import redrocklib.logging.SmartDashboardNumber;
 
-public class SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode extends SubsystemBase{
+public class LED extends SubsystemBase{
 
-    private static SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode instance = null;
+    private static LED instance = null;
 
     private AddressableLED control = new AddressableLED(9); //TODO
     private AddressableLEDBuffer buffer = new AddressableLEDBuffer(300); //TODO
@@ -30,7 +30,7 @@ public class SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDi
 
     private final Superstructure superstructure = Superstructure.getInstance();
 
-    private SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode() {
+    private LED() {
         super();
         
         this.control.setLength(this.buffer.getLength());
@@ -101,8 +101,8 @@ public class SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDi
         this.control.setData(buffer);
     }
 
-    public static SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode getInstance(){
-        if (instance == null) instance = new SolidStateElectroluminescentPNJunctionSemiconductorPhotonEmittingDiode();
+    public static LED getInstance(){
+        if (instance == null) instance = new LED();
         return instance;
     }
 }
