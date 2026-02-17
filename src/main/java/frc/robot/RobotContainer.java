@@ -14,6 +14,7 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.Index;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
+import frc.robot.subsystems.shooter.Turret;
 
 public class RobotContainer {
 
@@ -27,6 +28,7 @@ public class RobotContainer {
     private final Intake intake = Intake.getInstance();
     private final Index index = Index.getInstance();
     private final Shooter shooter = Shooter.getInstance();
+    private final Turret turret = Turret.getInstance();
 
     public RobotContainer() {
         autos = new Autos();
@@ -71,11 +73,14 @@ public class RobotContainer {
 
         this.joystick.rightTrigger()  //index and shooter
             .onTrue(
-                shooter.startShooterBlueCommand()
+                Commands.sequence(
+                    turret.aimToTargetCommand(),
+                    shooter.startShooterBlueCommand()
+                )
+                
             )
             .onFalse(
-                shooter.stopShooterCommand(
-                )
+                shooter.stopShooterCommand()
             );
             
             

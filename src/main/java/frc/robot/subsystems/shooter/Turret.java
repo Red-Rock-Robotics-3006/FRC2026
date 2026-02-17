@@ -11,6 +11,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import redrocklib.logging.SmartDashboardNumber;
 import redrocklib.wrappers.RedRockTalon;
@@ -91,6 +93,15 @@ public class Turret extends SubsystemBase{
         double max = MathUtil.inputModulus(kMaxTurretAngle.getDegrees(), -180, 180) + 360;
         if (a < min) a += 360;
         return ((kMaxTurretRotation - kMinTurretRotation) / (max - min)) * (a - min) + kMinTurretRotation;
+    }
+
+    private void aimToTarget() {
+        Rotation2d angle;  //todo vission
+        this.setTurretPosition(new Rotation2d(/*angle.getRadians()*/));
+    }
+
+    public Command aimToTargetCommand(){
+        return Commands.runOnce(() -> this.aimToTarget(), this);
     }
 
     @Override
