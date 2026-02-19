@@ -15,7 +15,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
-
+import edu.wpi.first.math.MathUtil;
 // import edu.wpi.first.apriltag.AprilTagFieldLayout;
 // import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -68,6 +68,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private SmartDashboardNumber headingI = new SmartDashboardNumber("dt/dt heading pid coeffs/kI", 0);
     private SmartDashboardNumber headingD = new SmartDashboardNumber("dt/dt heading pid coeffs/kD", 0);
 
+    private SmartDashboardNumber poseP = new SmartDashboardNumber("dt/dt pose coeffs/kP", 0);
+    private SmartDashboardNumber poseI = new SmartDashboardNumber("dt/dt pose coeffs/kI", 0);
+    private SmartDashboardNumber poseD = new SmartDashboardNumber("dt/dt pose coeffs/kD", 0);
+
+    private SmartDashboardNumber pidToPoseMaxVelo = new SmartDashboardNumber("dt/dt pose coeffs/max velo", 3);
+
+    private PIDController poseXController;
+    private PIDController poseYController;
+
     private SmartDashboardNumber headingTolerance = new SmartDashboardNumber("dt/dt heading pid coeffs/tolerance", 0.015);
     
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -81,6 +90,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private Telemetry telemetry = new Telemetry(maxDriveSpeed.getNumber());
 
     private Rotation2d targetAngle = new Rotation2d();
+    private Pose2d targetPose = new Pose2d();
 
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
@@ -222,6 +232,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.registerTelemetry(telemetry::telemeterize);
         this.register();
         this.factory = this.createAutoFactory();
+
+        this.poseXController = new PIDController(poseP.getNumber(), poseI.getNumber(), poseD.getNumber());
+        this.poseYController = new PIDController(poseP.getNumber(), poseI.getNumber(), poseD.getNumber());
     }
 
     /**
@@ -368,6 +381,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
+        poseXController.setPID(poseP.getNumber(), poseI.getNumber(), poseD.getNumber());
+        poseYController.setPID(poseP.getNumber(), poseI.getNumber(), poseD.getNumber());
+
         telemetry.setMaxSpeed(maxDriveSpeed.getNumber());
 
         this.updateDeadbands();
@@ -466,12 +482,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         DRIVE,
         DRIVE_RESIDUAL,
         DRIVE_FACING_ANGLE,
-        AUTO
+        AUTO,
+        PID_TO_POSE
     }
 
     private DriveState state = DriveState.DRIVE_FACING_ANGLE;
 
     private boolean visionEnabled = false;
+
+    public void enablePoseTargeting(Pose2d targetPose) {
+        this.targetPose = targetPose;
+        this.setTargetHeading(targetPose.getRotation());
+        this.setDriveState(DriveState.PID_TO_POSE);
+    }
 
     public void setDriveState(DriveState state) {
         this.state = state;
@@ -495,19 +518,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         double requestedYSpeed = -controller.getLeftX() * maxDriveSpeed.getNumber();
         double requestedRotationSpeed = -controller.getRightX() * RotationsPerSecond.of(maxTurnSpeed.getNumber()).in(RadiansPerSecond);
 
+        double pidToPoseMax = pidToPoseMaxVelo.getNumber();
+
+        Pose2d dtPose = this.getPose();
         switch (state) {
             case DRIVE_RESIDUAL:
                 return drive.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withRotationalRate(0);
             case DRIVE_FACING_ANGLE:
                 return driveFacingAngle.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withTargetDirection(this.targetAngle);
-            default:
+            case DRIVE:
                 return drive.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withRotationalRate(requestedRotationSpeed);
+            case PID_TO_POSE:
+                return driveFacingAngle
+                    .withVelocityX(MathUtil.clamp(poseXController.calculate(dtPose.getX(), targetPose.getX()), -pidToPoseMax, pidToPoseMax))
+                    .withVelocityY(MathUtil.clamp(poseYController.calculate(dtPose.getY(), targetPose.getY()), -pidToPoseMax, pidToPoseMax))
+                    .withTargetDirection(targetPose.getRotation());
+            default:
+                return new SwerveRequest.Idle();
         }
     }
 
     public void updateDriveState() {
         switch (state) {
             case AUTO: break;
+            case PID_TO_POSE: break;
             case DRIVE_FACING_ANGLE:
                 if (Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber()) state = DriveState.DRIVE;
                 break;
