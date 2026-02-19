@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -9,6 +11,7 @@ import frc.robot.subsystems.*;
 import frc.robot.subsystems.shooter.*;
 import frc.robot.subsystems.shooter.autoaim.InterpolatingTable;
 import frc.robot.subsystems.shooter.autoaim.LobInterpolatingTable;
+import frc.robot.subsystems.shooter.autoaim.SOTMCalcs;
 import frc.robot.subsystems.shooter.autoaim.ShotParameter;
 import frc.robot.subsystems.swerve.*;
 import frc.robot.subsystems.vision.Localization;
@@ -63,14 +66,16 @@ public class Superstructure extends SubsystemBase {
 
     @Override
     public void periodic() {
-        dtPose = drivetrain.getPose();
+        SwerveDriveState state = drivetrain.getState();
+        dtPose = state.Pose;
         shooterPose = dtPose.plus(new Transform2d(new Pose2d(), shooterOffset.rotateBy(dtPose.getRotation()))); //this one is so clean and good
         SmartDashboard.putBoolean("superstructure/in alliance zone", inAllianceZone());
         boolean isBlue = drivetrain.isBlue();
 
-        this.targetPose = this.inAllianceZone() ? 
+        this.targetPose = (this.inAllianceZone() ? 
             ((isBlue) ? Localization.blueHub : Localization.redHub) :
-            new Pose2d();//will be lob poses later
+            new Pose2d()) //will be lob poses later
+            .transformBy(new Transform2d(SOTMCalcs.getOffset(state.Speeds.vxMetersPerSecond, state.Speeds.vyMetersPerSecond), new Rotation2d()));
 
         switch (robotState) {
             case MANUAL_SHOT:
