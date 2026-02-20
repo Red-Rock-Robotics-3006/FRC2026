@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.Index;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.shooter.Turret;
 
@@ -26,7 +25,6 @@ public class RobotContainer {
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
     private final Intake intake = Intake.getInstance();
-    private final Index index = Index.getInstance();
     private final Shooter shooter = Shooter.getInstance();
     private final Turret turret = Turret.getInstance();
 
@@ -75,9 +73,8 @@ public class RobotContainer {
             .onTrue(
                 Commands.sequence(
                     turret.aimToTargetCommand(),
-                    shooter.startShooterBlueCommand()
+                    shooter.startShooterCommand()
                 )
-                
             )
             .onFalse(
                 shooter.stopShooterCommand()

@@ -42,11 +42,11 @@ public class Shooter extends SubsystemBase{
     private double requestedHoodAngle;
 
     //for smartdashboard only
-    private double targetHoodAngle;
     private double targetRPM;
+    private double targetHoodAngle;
     private double targetPosition;
 
-    public boolean onBlue = true; //TODO: set this based on alliance color
+    public boolean onBlue = true; 
 
 
     private Shooter() {
@@ -231,25 +231,49 @@ public class Shooter extends SubsystemBase{
         return Commands.runOnce(() -> this.getTargetBlue(), this);
     }
 
-    public Command startShooterBlueCommand(){
-        return Commands.sequence(
-            this.getTargetBlueCommand(),
-            Commands.runOnce(() -> this.setHoodAngle(requestedHoodAngle), this),
-            Commands.runOnce(() -> this.setRequestedShooterRPM(), this),
-            Commands.waitSeconds(1.5),
-            Index.getInstance().startIndexCommand()
-        );
+    public Command startShooterCommand(){
+        if (onBlue){
+            return Commands.sequence(
+                this.getTargetBlueCommand(),
+                Commands.runOnce(() -> this.setHoodAngle(requestedHoodAngle), this),
+                Commands.runOnce(() -> this.setRequestedShooterRPM(), this),
+                Commands.waitSeconds(1.5),
+                Index.getInstance().startIndexCommand()
+            );
+        }
+        else{
+            return Commands.sequence(
+                this.getTargetRedCommand(),
+                Commands.runOnce(() -> this.setHoodAngle(requestedHoodAngle), this),
+                Commands.runOnce(() -> this.setRequestedShooterRPM(), this),
+                Commands.waitSeconds(1.5),
+                Index.getInstance().startIndexCommand()
+            );
+        }
+        
     }
 
-    public Command startShooterRedCommand(){
-        return Commands.sequence(
-            this.getTargetRedCommand(),
-            Commands.runOnce(() -> this.setHoodAngle(requestedHoodAngle), this),
-            Commands.runOnce(() -> this.setRequestedShooterRPM(), this),
-            Commands.waitSeconds(1.5),
-            Index.getInstance().startIndexCommand()
-        );
-    }
+    // for seprate blue and red commands
+
+    // public Command startShooterBlueCommand(){
+    //     return Commands.sequence(
+    //         this.getTargetBlueCommand(),
+    //         Commands.runOnce(() -> this.setHoodAngle(requestedHoodAngle), this),
+    //         Commands.runOnce(() -> this.setRequestedShooterRPM(), this),
+    //         Commands.waitSeconds(1.5),
+    //         Index.getInstance().startIndexCommand()
+    //     );
+    // }
+
+    // public Command startShooterRedCommand(){
+    //     return Commands.sequence(
+    //         this.getTargetRedCommand(),
+    //         Commands.runOnce(() -> this.setHoodAngle(requestedHoodAngle), this),
+    //         Commands.runOnce(() -> this.setRequestedShooterRPM(), this),
+    //         Commands.waitSeconds(1.5),
+    //         Index.getInstance().startIndexCommand()
+    //     );
+    // }
 
     public Command stopShooterCommand(){
         return Commands.sequence(
