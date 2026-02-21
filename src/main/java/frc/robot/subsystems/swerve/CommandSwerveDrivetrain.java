@@ -616,6 +616,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         );
     }
 
+    public Command pidToPoseAutoCommand(Pose2d targetPose) {
+        return Commands.sequence(
+            Commands.runOnce(() -> this.enablePoseTargeting(targetPose)),
+            Commands.waitUntil(() -> poseXController.atSetpoint() && poseYController.atSetpoint()),
+            Commands.runOnce(() -> this.setDriveState(DriveState.AUTO))
+        );
+    }
+
     public Command resetOdometryCommand(String pathName) {
         return this.factory.resetOdometry(pathName);
     }

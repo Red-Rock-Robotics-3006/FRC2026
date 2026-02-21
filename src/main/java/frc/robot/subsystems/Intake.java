@@ -4,7 +4,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -21,50 +21,18 @@ public class Intake extends SubsystemBase{
     private static Intake instance = null;
 
     private RedRockTalon driveMotor = new RedRockTalon(21, "intake-drive", "*");
-    private RedRockTalon pivotMotor = new RedRockTalon(22, "intake-pivot", "*");
+    private RedRockTalon extensionMotor = new RedRockTalon(22, "intake-extension", "*");
+    
+    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.8);
+    private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.6);
 
-    private SmartDashboardNumber maxPivotRotation = new SmartDashboardNumber("intake/pivot/max rotation", 0); 
-    private SmartDashboardNumber minPivotRotation = new SmartDashboardNumber("intake/pivot/min rotation", 0); 
-    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/pivot/deploy position", 10); 
-    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/pivot/stow position", 0); 
-
-    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed RPM", 1000);
-    private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed RPM", -400);
+    private SmartDashboardNumber maxPivotRotation = new SmartDashboardNumber("intake/extension/max rotation", 10); 
+    private SmartDashboardNumber minPivotRotation = new SmartDashboardNumber("intake/extension/min rotation", 0); 
+    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 10); 
+    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 0); 
 
     private Intake() {
         super();
-        
-        this.pivotMotor.withMotorOutputConfigs(
-            new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
-            .withPeakForwardDutyCycle(1d)
-            .withPeakReverseDutyCycle(-1d)
-            .withNeutralMode(NeutralModeValue.Brake)
-        )
-        .withSlot0Configs(
-            new Slot0Configs()
-            .withKA(0)
-            .withKS(0)
-            .withKV(0)
-            .withKP(0.5)
-            .withKI(0)
-            .withKD(0) //TODO tune
-            .withGravityType(GravityTypeValue.Arm_Cosine)
-        )
-        .withMotionMagicConfigs(
-            new MotionMagicConfigs()
-            .withMotionMagicAcceleration(850)
-            .withMotionMagicCruiseVelocity(220)
-            .withMotionMagicJerk(10000000)
-        )
-        .withSpikeThreshold(10) //TODO tune
-        .withCurrentLimitConfigs(
-            new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(45)
-            .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(60)
-            .withStatorCurrentLimitEnable(true)
-        ).withTuningEnabled(true);
                 
         this.driveMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()
@@ -72,29 +40,52 @@ public class Intake extends SubsystemBase{
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
-        )
-        .withCurrentLimitConfigs(
+        ).withCurrentLimitConfigs(
             new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(45)
             .withSupplyCurrentLimitEnable(true)
             .withStatorCurrentLimit(80)
             .withStatorCurrentLimitEnable(true)
         ).withTuningEnabled(true);
+        
+        this.extensionMotor.withMotorOutputConfigs(
+            new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withPeakForwardDutyCycle(1d)
+            .withPeakReverseDutyCycle(-1d)
+            .withNeutralMode(NeutralModeValue.Brake)
+        ).withSlot0Configs(
+            new Slot0Configs()
+            .withKA(0)
+            .withKS(0)
+            .withKV(0)
+            .withKP(0)
+            .withKI(0)
+            .withKD(0)
+            .withGravityType(GravityTypeValue.Arm_Cosine)
+        ).withMotionMagicConfigs(
+            new MotionMagicConfigs()
+            .withMotionMagicAcceleration(850)
+            .withMotionMagicCruiseVelocity(220)
+            .withMotionMagicJerk(10000000)
+        ).withSpikeThreshold(10)
+        .withCurrentLimitConfigs(
+            new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(45)
+            .withSupplyCurrentLimitEnable(true)
+            .withStatorCurrentLimit(60)
+            .withStatorCurrentLimitEnable(true)
+        ).withTuningEnabled(true);
 
-        this.pivotMotor.resetMotor();
+        this.extensionMotor.resetMotor();
     }
 
     public void setPivotPosition(double rotations) {
-        this.pivotMotor.setMotionMagicPosition(MathUtil.clamp(rotations, minPivotRotation.getNumber(), maxPivotRotation.getNumber()));
+        this.extensionMotor.setMotionMagicPosition(MathUtil.clamp(rotations, minPivotRotation.getNumber(), maxPivotRotation.getNumber()));
     }
 
     public void setDriveSpeed(double speed) {
-        this.driveMotor.motor.setControl(
-            new VelocityVoltage(speed / 60)
-            .withSlot(0)
-            .withEnableFOC(true)
-            .withOverrideBrakeDurNeutral(true)
-        );
+        this.driveMotor.motor.setControl(new DutyCycleOut(speed));
     }
 
     public void deployIntake() {
@@ -137,13 +128,13 @@ public class Intake extends SubsystemBase{
     }
 
     public Command resetPivotCommand() {
-        return this.pivotMotor.resetMotorCommand();
+        return this.extensionMotor.resetMotorCommand();
     }
 
     @Override
     public void periodic() {
         this.driveMotor.update();
-        this.pivotMotor.update();
+        this.extensionMotor.update();
     }
 
     public static Intake getInstance() {

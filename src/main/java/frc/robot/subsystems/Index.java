@@ -2,7 +2,8 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
-import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -16,58 +17,29 @@ import redrocklib.wrappers.RedRockTalon;
 public class Index extends SubsystemBase {
     private static Index instance = null;
 
-    private RedRockTalon conveyorMotor = new RedRockTalon(31, "index-conveyor", "*");
-    private RedRockTalon centeringMotor = new RedRockTalon(32, "index-centering", "*");
-    private RedRockTalon feedMotor = new RedRockTalon(33, "index-feed", "*");
+    private RedRockTalon indexMotor = new RedRockTalon(31, "index", "*");
 
-    private SmartDashboardNumber conveyorSpeed = new SmartDashboardNumber("index/conveyor speed", 0.2).withTuningEnabled(true);
-    private SmartDashboardNumber conveyorReverseSpeed = new SmartDashboardNumber("index/conveyor reverse speed", -0.2).withTuningEnabled(true);    
-    private SmartDashboardNumber centeringSpeed = new SmartDashboardNumber("index/centering speed", 0.2).withTuningEnabled(true);
-    private SmartDashboardNumber centeringReverseSpeed = new SmartDashboardNumber("index/centering reverse speed", -0.2).withTuningEnabled(true);    
-    private SmartDashboardNumber feedSpeed = new SmartDashboardNumber("index/feed speed", 0.2).withTuningEnabled(true);
-    private SmartDashboardNumber feedReverseSpeed = new SmartDashboardNumber("index/feed reverse speed", -0.2).withTuningEnabled(true);    
+    private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 4500).withTuningEnabled(true);
+    private SmartDashboardNumber indexReverseSpeed = new SmartDashboardNumber("index/index reverse speed", -3000).withTuningEnabled(true);
 
     private Index() {
         super();
 
-        this.conveyorMotor.withMotorOutputConfigs(
+        this.indexMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive)
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
-        )
-        .withCurrentLimitConfigs(
-            new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(45)
-            .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(80)
-            .withStatorCurrentLimitEnable(true)
-        ).withTuningEnabled(true);
-
-        this.centeringMotor.withMotorOutputConfigs(
-            new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
-            .withPeakForwardDutyCycle(1d)
-            .withPeakReverseDutyCycle(-1d)
-            .withNeutralMode(NeutralModeValue.Brake)
-        )
-        .withCurrentLimitConfigs(
-            new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(45)
-            .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(80)
-            .withStatorCurrentLimitEnable(true)
-        ).withTuningEnabled(true);
-
-        this.feedMotor.withMotorOutputConfigs(
-            new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
-            .withPeakForwardDutyCycle(1d)
-            .withPeakReverseDutyCycle(-1d)
-            .withNeutralMode(NeutralModeValue.Brake)
-        )
-        .withCurrentLimitConfigs(
+        ).withSlot0Configs(
+            new Slot0Configs()
+            .withKA(0)
+            .withKS(0)
+            .withKV(0)
+            .withKP(0)
+            .withKI(0)
+            .withKD(0)
+        ).withCurrentLimitConfigs(
             new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(45)
             .withSupplyCurrentLimitEnable(true)
@@ -76,107 +48,42 @@ public class Index extends SubsystemBase {
         ).withTuningEnabled(true);
     }
 
-    private void startConveyor() {
-        this.conveyorMotor.motor.setControl(new DutyCycleOut(conveyorSpeed.getNumber()));
-    }
-    private void reverseConveyor() {
-        this.conveyorMotor.motor.setControl(new DutyCycleOut(conveyorReverseSpeed.getNumber()));
-    }
-    private void stopConveyor() {
-        this.conveyorMotor.motor.setControl(new DutyCycleOut(0d));
-    }
-
-    private void startCentering() {
-        this.centeringMotor.motor.setControl(new DutyCycleOut(centeringSpeed.getNumber()));
-    }
-    private void reverseCentering() {
-        this.centeringMotor.motor.setControl(new DutyCycleOut(centeringReverseSpeed.getNumber()));
-    }
-    private void stopCentering() {
-        this.centeringMotor.motor.setControl(new DutyCycleOut(0d));
-    }
-
-    private void startFeed() {
-        this.feedMotor.motor.setControl(new DutyCycleOut(feedSpeed.getNumber()));
-    }
-    private void reverseFeed() {
-        this.feedMotor.motor.setControl(new DutyCycleOut(feedReverseSpeed.getNumber()));
-    }
-    private void stopFeed() {
-        this.feedMotor.motor.setControl(new DutyCycleOut(0d));
+    private void setIndexSpeed(double rpm) {
+        this.indexMotor.motor.setControl(
+            new VelocityVoltage(rpm / 60)
+            .withEnableFOC(true)
+            .withSlot(0)
+            .withOverrideBrakeDurNeutral(false)
+        );
     }
 
     public void startIndex() {
-        startConveyor();
-        startCentering();
-        startFeed();
+        this.setIndexSpeed(indexSpeed.getNumber());
+    }
+
+    public void reverseIndex() {
+        this.setIndexSpeed(indexReverseSpeed.getNumber());
     }
 
     public void stopIndex() {
-        stopConveyor();
-        stopCentering();
-        stopFeed();
-    }
-
-    public Command startConveyorCommand() {
-        return Commands.runOnce(() -> startConveyor(), this);
-    }
-    public Command reverseConveyorCommand() {
-        return Commands.runOnce(() -> reverseConveyor(), this);
-    }
-    public Command stopConveyorCommand() {
-        return Commands.runOnce(() -> stopConveyor(), this);
-    }
-
-    public Command startCenteringCommand() {
-        return Commands.runOnce(() -> startCentering(), this);
-    }
-    public Command reverseCenteringCommand() {
-        return Commands.runOnce(() -> reverseCentering(), this);
-    }
-    public Command stopCenteringCommand() {
-        return Commands.runOnce(() -> stopCentering(), this);
-    }
-
-    public Command startFeedCommand() {
-        return Commands.runOnce(() -> startFeed(), this);
-    }
-    public Command reverseFeedCommand() {
-        return Commands.runOnce(() -> reverseFeed(), this);
-    }
-    public Command stopFeedCommand() {
-        return Commands.runOnce(() -> stopFeed(), this);
+        this.setIndexSpeed(0);
     }
 
     public Command startIndexCommand() {
-        return Commands.sequence(
-            startConveyorCommand(),
-            startCenteringCommand(),
-            startFeedCommand()
-        );
-    }
-
-    public Command stopIndexCommand() {
-        return Commands.sequence(
-            stopConveyorCommand(),
-            stopCenteringCommand(),
-            stopFeedCommand()
-        );
+        return Commands.runOnce(() -> this.startIndex(), this);
     }
 
     public Command reverseIndexCommand() {
-        return Commands.sequence(
-            reverseConveyorCommand(),
-            reverseCenteringCommand(),
-            reverseFeedCommand()
-        );
+        return Commands.runOnce(() -> this.reverseIndex(), this);
+    }
+
+    public Command stopIndexCommand() {
+        return Commands.runOnce(() -> this.stopIndex(), this);
     }
 
     @Override
     public void periodic() {
-        this.conveyorMotor.update();
-        this.centeringMotor.update();
-        this.feedMotor.update();
+        this.indexMotor.update();
     }
 
     public static Index getInstance() {

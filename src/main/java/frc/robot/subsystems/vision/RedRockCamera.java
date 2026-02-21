@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -17,7 +16,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -34,17 +32,13 @@ public class RedRockCamera {
     public final PhotonPoseEstimator poseEstimator;
     public final AprilTagFieldLayout fieldLayout;
     public Transform3d robotToCamera = new Transform3d(new Translation3d(), new Rotation3d());
-
     private SmartDashboardNumber stdvX, stdvY, stdvTheta;
 
     private Optional<EstimatedRobotPose> visionEst = Optional.empty();
 
     public String name;
-
     private boolean targetFound = false;
-
     private double distToTag = 0;
-
     private Field2d field2d = new Field2d();
 
     public RedRockCamera(String cameraName) {

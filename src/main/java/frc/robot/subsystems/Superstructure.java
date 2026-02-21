@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.subsystems;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
@@ -7,17 +7,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.*;
-import frc.robot.subsystems.shooter.*;
-import frc.robot.subsystems.shooter.autoaim.InterpolatingTable;
-import frc.robot.subsystems.shooter.autoaim.LobInterpolatingTable;
-import frc.robot.subsystems.shooter.autoaim.SOTMCalcs;
-import frc.robot.subsystems.shooter.autoaim.ShotParameter;
-import frc.robot.subsystems.swerve.*;
-import frc.robot.subsystems.vision.Localization;
-import redrocklib.logging.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+
+import frc.robot.subsystems.shooter.*;
+import frc.robot.subsystems.shooter.autoaim.*;
+import frc.robot.subsystems.swerve.*;
+import frc.robot.subsystems.vision.Localization;
+
+import redrocklib.logging.*;
 
 public class Superstructure extends SubsystemBase {
     private static Superstructure instance = null;

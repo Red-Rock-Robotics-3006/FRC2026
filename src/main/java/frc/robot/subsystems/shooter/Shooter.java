@@ -1,10 +1,12 @@
 package frc.robot.subsystems.shooter;
 
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -47,15 +49,33 @@ public class Shooter extends SubsystemBase{
             .withNeutralMode(NeutralModeValue.Coast)
         ).withSlot0Configs(
             new Slot0Configs()
+            .withKA(0)
+            .withKS(0)
+            .withKV(0.133)
+            .withKP(0.5)
+            .withKI(0)
+            .withKD(0)
         ).withFollowerMotor(new TalonFX(42, "*"), MotorAlignmentValue.Opposed);
 
         hoodMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withPeakForwardDutyCycle(1)
             .withPeakReverseDutyCycle(-1)
-            .withNeutralMode(NeutralModeValue.Coast)
+            .withNeutralMode(NeutralModeValue.Brake)
         ).withSlot0Configs(
             new Slot0Configs()
+            .withKA(0)
+            .withKS(0)
+            .withKV(0)
+            .withKP(7)
+            .withKI(0)
+            .withKD(0)
+            .withGravityType(GravityTypeValue.Elevator_Static)
+        ).withMotionMagicConfigs(
+            new MotionMagicConfigs()
+                .withMotionMagicAcceleration(100)
+                .withMotionMagicCruiseVelocity(400)
+                .withMotionMagicJerk(10000)
         ).withResetSpeed(-0.2);
 
         hoodMotor.resetMotor();

@@ -1,11 +1,14 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
-import frc.robot.Superstructure.RobotState;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.Superstructure.RobotState;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 public class Autos {
@@ -53,8 +56,8 @@ public class Autos {
             Commands.parallel(
                 Commands.sequence(
                     drivetrain.followTrajectory("R_MS_C", 3),
-                    Commands.print("drivetrain pid to pose")
-                ),
+                    drivetrain.pidToPoseAutoCommand(new Pose2d(3006, 3006, Rotation2d.fromDegrees(3006))) //TODO: replace with actual climbing pose this'd be very bad if ran
+                    ),
                 climber.raiseClimberCommand().withTimeout(2)
             ),
             climber.lowerClimberCommand().withTimeout(2),

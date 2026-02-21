@@ -14,9 +14,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LED;
+import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.Superstructure.RobotState;
 import frc.robot.subsystems.shooter.autoaim.EditableShotParameter;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
-import frc.robot.Superstructure.RobotState;
 
 public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
@@ -51,7 +52,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        joystick.start().and(joystick.back()).onTrue(drivetrain.resetHeadingCommand());
+        joystick.back().onTrue(drivetrain.resetHeadingCommand());
 
         joystick.leftTrigger(kTriggerThreshold)
             .onTrue(intake.startIntakeCommand())

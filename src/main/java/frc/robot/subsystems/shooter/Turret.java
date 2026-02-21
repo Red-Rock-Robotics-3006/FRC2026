@@ -40,7 +40,7 @@ public class Turret extends SubsystemBase{
             new MotorOutputConfigs()
             .withPeakForwardDutyCycle(1)
             .withPeakReverseDutyCycle(-1)
-            .withNeutralMode(NeutralModeValue.Coast)
+            .withNeutralMode(NeutralModeValue.Brake)
         ).withSlot0Configs(
             new Slot0Configs()
         );
