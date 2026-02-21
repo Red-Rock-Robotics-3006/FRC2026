@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import org.photonvision.EstimatedRobotPose;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -49,17 +52,18 @@ public class Localization extends SubsystemBase{
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(-13), Units.inchesToMeters(2.45), Units.inchesToMeters(6.75)),//new Translation3d(-0.26035, 0.06223, 0.171415),
-                    new Rotation3d(Math.toRadians(0), Math.toRadians(33.2), Math.toRadians(180 - 36.2))//new Rotation3d(0, 0.5794493, 2.5097835)//
+                    // new Rotation3d(Math.toRadians(0), Math.toRadians(33.2), Math.toRadians(180 - 36.2))
+                    new Rotation3d(new Quaternion(0.297728, 0.271551, -0.088757, 0.910901))
                 )
             )
         );
         cameras.add(new RedRockCamera("Photon-Rubik-Nothing")
-            // .withRobotToCameraTransform(
-            //     new Transform3d(
-            //         new Translation3d(-0.26035, -0.06223, 0.171415),
-            //         new Rotation3d(0,0.5794493,3.7734018)
-            //     )
-            // )
+            .withRobotToCameraTransform(
+                new Transform3d(
+                    new Translation3d(Units.inchesToMeters(-13), Units.inchesToMeters(-2.45), Units.inchesToMeters(6.75)),//new Translation3d(-0.26035, 0.06223, 0.171415),
+                    new Rotation3d(new Quaternion(-0.297728, 0.271551, 0.088757, 0.910901))
+                )
+            )
         );
     }
 
