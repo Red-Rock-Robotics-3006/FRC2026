@@ -6,6 +6,7 @@ import org.photonvision.EstimatedRobotPose;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -51,7 +52,7 @@ public class Localization extends SubsystemBase{
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
-                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))
+                    new Rotation3d(new Quaternion(0, 0, 0, 0))
                 )
             )
         );
@@ -59,7 +60,7 @@ public class Localization extends SubsystemBase{
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
-                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))
+                    new Rotation3d(new Quaternion(0, 0, 0, 0))
                 )
             )
         );
@@ -68,7 +69,7 @@ public class Localization extends SubsystemBase{
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
-                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))
+                    new Rotation3d(new Quaternion(0, 0, 0, 0))
                 )
             )
         );
@@ -76,7 +77,7 @@ public class Localization extends SubsystemBase{
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
-                    new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))
+                    new Rotation3d(new Quaternion(0, 0, 0, 0))
                 )
             )
         );
