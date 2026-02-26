@@ -30,7 +30,8 @@ public class Intake extends SubsystemBase{
     private SmartDashboardNumber minPivotRotation = new SmartDashboardNumber("intake/extension/min rotation", 0); 
     private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 10); 
     private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 0); 
-
+    private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.2); 
+    
     private Intake() {
         super();
                 
@@ -84,6 +85,11 @@ public class Intake extends SubsystemBase{
         this.extensionMotor.setMotionMagicPosition(MathUtil.clamp(rotations, minPivotRotation.getNumber(), maxPivotRotation.getNumber()));
     }
 
+    public boolean atDeployPosition() {
+        return Math.abs(extensionMotor.motor.getPosition().getValueAsDouble() - this.intakeDeployPosition.getNumber())
+            < this.intakePositionTolerance.getNumber();
+    }
+
     public void setDriveSpeed(double speed) {
         this.driveMotor.motor.setControl(new DutyCycleOut(speed));
     }
@@ -112,15 +118,16 @@ public class Intake extends SubsystemBase{
         return Commands.runOnce(() -> this.reverseIntake(), this);
     }
 
-    public Command stopIntakeCommand() {
-        return Commands.runOnce(() -> this.stopIntake(), this);
-    }
-
     public Command startIntakeCommand() {
         return Commands.sequence( 
-                Commands.runOnce(() -> this.deployIntake(), this),
-                Commands.runOnce(() -> this.startIntake(), this)
-            );
+            Commands.runOnce(() -> this.deployIntake(), this),
+            Commands.runOnce(() -> this.startIntake(), this),
+            Commands.waitUntil(() -> this.atDeployPosition())
+        );
+    }
+
+    public Command stopIntakeCommand() {
+        return Commands.runOnce(() -> this.stopIntake(), this);
     }
 
     public Command stowIntakeCommand() {

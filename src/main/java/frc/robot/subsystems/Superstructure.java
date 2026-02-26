@@ -144,6 +144,13 @@ public class Superstructure extends SubsystemBase {
         return shooter.resetHoodCommand();
     }
 
+    public Command indexSafePositionCommand() {
+        return Commands.sequence(
+            index.khangaiIsAChudCommand(),
+            Commands.waitUntil(() -> index.inSafePosition())
+        );
+    }
+
     public static Superstructure getInstance() {
         if (instance == null) instance = new Superstructure();
         return instance;

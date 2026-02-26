@@ -31,7 +31,7 @@ public class Autos {
 
     public Command R_MS_L() {
         return Commands.sequence(
-            intake.startIntakeCommand().withTimeout(0.5),
+            intake.startIntakeCommand(),
             superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(2),
             superstructure.setStateCommand(RobotState.TURRET_TRACKING),
             drivetrain.followTrajectory("R_MS_L", 0),
@@ -45,7 +45,7 @@ public class Autos {
 
     public Command R_MS_C() {
         return Commands.sequence(
-            intake.startIntakeCommand().withTimeout(0.5),
+            intake.startIntakeCommand(),
             superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(2),
             superstructure.setStateCommand(RobotState.TURRET_TRACKING),
             drivetrain.followTrajectory("R_MS_C", 0),

@@ -87,6 +87,8 @@ public class RobotContainer {
 
         joystick.povDown()
             .onTrue(Commands.sequence(
+                superstructure.indexSafePositionCommand(),
+                intake.stopIntakeCommand(),
                 intake.stowIntakeCommand(),
                 climber.lowerClimberCommand()))
             .onFalse(climber.stopClimberCommand());
