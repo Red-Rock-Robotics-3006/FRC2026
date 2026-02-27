@@ -26,11 +26,16 @@ public class Intake extends SubsystemBase{
     private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.8);
     private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.6);
 
-    private SmartDashboardNumber maxPivotRotation = new SmartDashboardNumber("intake/extension/max rotation", 10); 
-    private SmartDashboardNumber minPivotRotation = new SmartDashboardNumber("intake/extension/min rotation", 0); 
-    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 10); 
-    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 0); 
-    private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.2); 
+    private SmartDashboardNumber maxPivotRotation = new SmartDashboardNumber("intake/extension/max rotation", 10);
+    private SmartDashboardNumber minPivotRotation = new SmartDashboardNumber("intake/extension/min rotation", 0);
+
+    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 10);
+    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 0);
+    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 3);
+    private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 6);
+    private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.1);
+
+    private double targetPosition = 0;
     
     private Intake() {
         super();
@@ -81,12 +86,13 @@ public class Intake extends SubsystemBase{
         this.extensionMotor.resetMotor();
     }
 
-    public void setPivotPosition(double rotations) {
+    public void setExtensionPosition(double rotations) {
         this.extensionMotor.setMotionMagicPosition(MathUtil.clamp(rotations, minPivotRotation.getNumber(), maxPivotRotation.getNumber()));
+        this.targetPosition = rotations;
     }
 
-    public boolean atDeployPosition() {
-        return Math.abs(extensionMotor.motor.getPosition().getValueAsDouble() - this.intakeDeployPosition.getNumber())
+    public boolean atTargetPosition() {
+        return Math.abs(extensionMotor.motor.getPosition().getValueAsDouble() - this.targetPosition)
             < this.intakePositionTolerance.getNumber();
     }
 
@@ -95,11 +101,19 @@ public class Intake extends SubsystemBase{
     }
 
     public void deployIntake() {
-        this.setPivotPosition(intakeDeployPosition.getNumber());
+        this.setExtensionPosition(intakeDeployPosition.getNumber());
     }
 
     public void stowIntake() {
-        this.setPivotPosition(intakeStowPosition.getNumber());
+        this.setExtensionPosition(intakeStowPosition.getNumber());
+    }
+
+    public void pushRetractIntake() {
+        this.setExtensionPosition(intakePushRetractPosition.getNumber());
+    }
+
+    public void pushDeployIntake() {
+        this.setExtensionPosition(intakePushDeployPosition.getNumber());
     }
 
     public void startIntake() {
@@ -114,16 +128,16 @@ public class Intake extends SubsystemBase{
         this.setDriveSpeed(0);
     }
 
-    public Command reverseIntakeCommand() {
-        return Commands.runOnce(() -> this.reverseIntake(), this);
-    }
-
     public Command startIntakeCommand() {
         return Commands.sequence( 
             Commands.runOnce(() -> this.deployIntake(), this),
             Commands.runOnce(() -> this.startIntake(), this),
-            Commands.waitUntil(() -> this.atDeployPosition())
+            Commands.waitUntil(() -> this.atTargetPosition())
         );
+    }
+
+    public Command reverseIntakeCommand() {
+        return Commands.runOnce(() -> this.reverseIntake(), this);
     }
 
     public Command stopIntakeCommand() {
@@ -132,6 +146,23 @@ public class Intake extends SubsystemBase{
 
     public Command stowIntakeCommand() {
         return Commands.runOnce(() -> this.stowIntake(), this);
+    }
+
+    public Command deployIntakeCommand() {
+        return Commands.runOnce(() -> this.deployIntake(), this);
+    }
+
+    public Command pulsateIntakeCommand() {
+        return Commands.sequence(
+            Commands.waitSeconds(2),
+            Commands.sequence(
+                Commands.runOnce(() -> this.pushRetractIntake(), this),
+                Commands.waitUntil(() -> this.atTargetPosition()),
+                Commands.waitSeconds(0.75),
+                Commands.runOnce(() -> this.pushDeployIntake(), this),
+                Commands.waitUntil(() -> this.atTargetPosition())
+            ).repeatedly()
+        );
     }
 
     public Command resetPivotCommand() {

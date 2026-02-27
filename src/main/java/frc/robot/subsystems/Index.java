@@ -94,7 +94,8 @@ public class Index extends SubsystemBase {
     }
 
     public boolean inSafePosition() {
-        return Math.abs(this.indexMotor.motor.getPosition().getValueAsDouble() - this.indexSafePosition.getNumber()) < this.indexSafePositionTolerance.getNumber();
+        return Math.abs(this.indexMotor.motor.getPosition().getValueAsDouble() - this.indexSafePosition.getNumber())
+            < this.indexSafePositionTolerance.getNumber();
     }
 
     public Command khangaiIsAChudCommand() {

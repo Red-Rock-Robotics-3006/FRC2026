@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.RobotState;
@@ -25,7 +24,6 @@ public class RobotContainer {
     private final double kTriggerThreshold = 0.1;
 
     public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(joystick);
-    private final Intake intake = Intake.getInstance();
     private final Superstructure superstructure = Superstructure.getInstance();
     private final Climber climber = Climber.getInstance();
     public final LED led = LED.getInstance();
@@ -55,12 +53,16 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.resetHeadingCommand());
 
         joystick.leftTrigger(kTriggerThreshold)
-            .onTrue(intake.startIntakeCommand())
-            .onFalse(intake.stopIntakeCommand());
+            .onTrue(superstructure.intake.startIntakeCommand())
+            .onFalse(superstructure.intake.stopIntakeCommand());
 
         joystick.rightTrigger(kTriggerThreshold)
-            .onTrue(superstructure.setStateCommand(RobotState.FULL_TRACKING))
-            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+            .onTrue(Commands.parallel(
+                superstructure.setStateCommand(RobotState.FULL_TRACKING),
+                superstructure.intake.pulsateIntakeCommand()))
+            .onFalse(Commands.parallel(
+                superstructure.setStateCommand(RobotState.TURRET_TRACKING),
+                superstructure.intake.deployIntakeCommand()));
             
         joystick.leftBumper() //manual lerp tuning shot
             .onTrue(superstructure.setManualShotParameterCommand(lerpingShotParameter))
@@ -75,21 +77,23 @@ public class RobotContainer {
         
         joystick.a()
             .onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+        
+        joystick.y()
+            .onTrue(superstructure.intakeSafeStowCommand());
 
         joystick.povRight()
             .onTrue(superstructure.resetShooterHoodCommand());
 
         joystick.povUp()
             .onTrue(Commands.sequence(
-                intake.stowIntakeCommand(),
+                superstructure.setStateCommand(RobotState.IDLE),
+                superstructure.intakeSafeStowCommand(),
                 climber.raiseClimberCommand()))
             .onFalse(climber.stopClimberCommand());
 
         joystick.povDown()
             .onTrue(Commands.sequence(
-                superstructure.indexSafePositionCommand(),
-                intake.stopIntakeCommand(),
-                intake.stowIntakeCommand(),
+                superstructure.intakeSafeStowCommand(),
                 climber.lowerClimberCommand()))
             .onFalse(climber.stopClimberCommand());
     }

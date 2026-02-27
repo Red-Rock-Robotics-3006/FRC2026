@@ -23,10 +23,11 @@ public class Superstructure extends SubsystemBase {
     public static final boolean kPractice = true;
     public static final boolean kHubOrLob = true; //true for hub, false for lob
 
-    private final Shooter shooter = Shooter.getInstance();
-    private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
-    private final Turret turret = Turret.getInstance();
+    public final Intake intake = Intake.getInstance();
     private final Index index = Index.getInstance();
+    private final Shooter shooter = Shooter.getInstance();
+    private final Turret turret = Turret.getInstance();
+    private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     public final Localization localization = Localization.getInstance();
 
     private SmartDashboardNumber blueAllianceZoneX = new SmartDashboardNumber("superstructure/blue alliance zone x", 4.38);
@@ -144,10 +145,13 @@ public class Superstructure extends SubsystemBase {
         return shooter.resetHoodCommand();
     }
 
-    public Command indexSafePositionCommand() {
+    public Command intakeSafeStowCommand() {
         return Commands.sequence(
+            intake.stopIntakeCommand(),
             index.khangaiIsAChudCommand(),
-            Commands.waitUntil(() -> index.inSafePosition())
+            Commands.waitUntil(() -> index.inSafePosition()),
+            intake.stowIntakeCommand(),
+            Commands.waitUntil(() -> intake.atTargetPosition())
         );
     }
 
