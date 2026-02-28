@@ -611,7 +611,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
             this.factory.resetOdometry(pathName, index),
             this.factory.trajectoryCmd(pathName, index),
-            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName, index).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation()),
+            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation()),
             this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
         );
     }

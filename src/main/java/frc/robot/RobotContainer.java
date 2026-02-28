@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Superstructure;
@@ -50,6 +50,9 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        RobotModeTriggers.disabled().onTrue(superstructure.setStateCommand(RobotState.IDLE));
+        RobotModeTriggers.teleop().onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+
         joystick.back().onTrue(drivetrain.resetHeadingCommand());
 
         joystick.leftTrigger(kTriggerThreshold)

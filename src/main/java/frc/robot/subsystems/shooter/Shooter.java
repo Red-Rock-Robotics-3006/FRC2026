@@ -30,8 +30,8 @@ public class Shooter extends SubsystemBase{
     private SmartDashboardNumber rpmTolerance = new SmartDashboardNumber("shooter/tolerance/rpm", 50, kEnableShooterTuning && true);
     private SmartDashboardNumber hoodTolerance = new SmartDashboardNumber("shooter/tolerance/hood", 2, kEnableShooterTuning && true);
 
-    private RedRockTalon shooterMotor = new RedRockTalon(41);
-    private RedRockTalon hoodMotor = new RedRockTalon(43);
+    private RedRockTalon shooterMotor = new RedRockTalon(41, "shooter-left", "*");
+    private RedRockTalon hoodMotor = new RedRockTalon(43, "shooter-hood", "*");
     
     private LerpingSmartDashboardNumber hoodRestrictions = 
         new LerpingSmartDashboardNumber(
