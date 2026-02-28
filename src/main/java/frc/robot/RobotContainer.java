@@ -4,35 +4,17 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
-import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.LED;
-import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.Superstructure.RobotState;
-import frc.robot.subsystems.shooter.autoaim.EditableShotParameter;
-import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 public class RobotContainer {
-    private final CommandXboxController joystick = new CommandXboxController(0);
 
-    private final double kTriggerThreshold = 0.1;
-
-    public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(joystick);
-    private final Superstructure superstructure = Superstructure.getInstance();
-    private final Climber climber = Climber.getInstance();
-    public final LED led = LED.getInstance();
-
-    private final Autos autos = Autos.getInstance();
-    private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
-
-    private EditableShotParameter lerpingShotParameter = new EditableShotParameter(20, 3000, "lerping shot parameter");
-    private EditableShotParameter hubShotParameter = new EditableShotParameter(30, 3000, "hub shot parameter");
+    private CommandXboxController joystick = new CommandXboxController(0);
+    private LED led = LED.getInstance();
 
     public RobotContainer() {
         configureSelector();
@@ -41,61 +23,15 @@ public class RobotContainer {
     }
 
     public void configureSelector() {
-        autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
-
-        autoChooser.addOption("Right Steal Score Leave", autos.R_MS_L());
-        autoChooser.addOption("Right Steal Score Climb", autos.R_MS_C());
-
-        SmartDashboard.putData("Auto Chooser", autoChooser);
+        
     }
 
     private void configureBindings() {
-        joystick.back().onTrue(drivetrain.resetHeadingCommand());
-
-        joystick.leftTrigger(kTriggerThreshold)
-            .onTrue(superstructure.intake.startIntakeCommand())
-            .onFalse(superstructure.intake.stopIntakeCommand());
-
-        joystick.rightTrigger(kTriggerThreshold)
-            .onTrue(Commands.parallel(
-                superstructure.setStateCommand(RobotState.FULL_TRACKING),
-                superstructure.intake.pulsateIntakeCommand()))
-            .onFalse(Commands.parallel(
-                superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-                superstructure.intake.deployIntakeCommand()));
-            
-        joystick.leftBumper() //manual lerp tuning shot
-            .onTrue(superstructure.setManualShotParameterCommand(lerpingShotParameter))
-            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
-
-        joystick.rightBumper() //manual hub shot
-            .onTrue(superstructure.setManualShotParameterCommand(hubShotParameter))
-            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
-        
-        joystick.b()
-            .onTrue(superstructure.setStateCommand(RobotState.IDLE));
-        
-        joystick.a()
-            .onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
-        
-        joystick.y()
-            .onTrue(superstructure.intakeSafeStowCommand());
-
-        joystick.povRight()
-            .onTrue(superstructure.resetShooterHoodCommand());
-
-        joystick.povUp()
-            .onTrue(Commands.sequence(
-                superstructure.setStateCommand(RobotState.IDLE),
-                superstructure.intakeSafeStowCommand(),
-                climber.raiseClimberCommand()))
-            .onFalse(climber.stopClimberCommand());
-
-        joystick.povDown()
-            .onTrue(Commands.sequence(
-                superstructure.intakeSafeStowCommand(),
-                climber.lowerClimberCommand()))
-            .onFalse(climber.stopClimberCommand());
+        joystick.rightBumper().onTrue(Commands.runOnce(() -> led.setRobotState(LED.RobotState.MANUAL_SHOT)));
+        joystick.rightTrigger(0.05).onTrue(Commands.runOnce(() -> led.setRobotState(LED.RobotState.SHOOTING)));
+        joystick.x().onTrue(Commands.runOnce(() -> led.setRobotState(LED.RobotState.FULL_TRACKING)));
+        joystick.y().onTrue(Commands.runOnce(() -> led.setRobotState(LED.RobotState.TURRET_TRACKING)));
+        joystick.a().onTrue(Commands.runOnce(() -> led.setRobotState(LED.RobotState.IDLE)));
     }
 
     // private void configureSysIDBindings() {
@@ -108,6 +44,7 @@ public class RobotContainer {
     // }
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        // return autoChooser.getSelected();
+        return Commands.none();
     }
 }
