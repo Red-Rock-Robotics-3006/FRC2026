@@ -93,6 +93,7 @@ public class Superstructure extends SubsystemBase {
             case SHOOTING_WHILE_MOVING:
                 break;
             case SHOOTING:
+                if (!readyToShoot()) setState(RobotState.FULL_TRACKING);
             case FULL_TRACKING:
                 if (readyToShoot()) setState(RobotState.SHOOTING);
 
@@ -123,6 +124,9 @@ public class Superstructure extends SubsystemBase {
                 break;
             case SHOOTING:
                 index.startIndex();
+                break;
+            case FULL_TRACKING:
+                index.stopIndex();
                 break;
             case TURRET_TRACKING:
                 index.stopIndex();

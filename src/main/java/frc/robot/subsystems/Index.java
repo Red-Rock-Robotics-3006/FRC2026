@@ -19,7 +19,7 @@ import redrocklib.wrappers.RedRockTalon;
 public class Index extends SubsystemBase {
     private static Index instance = null;
 
-    private RedRockTalon indexMotor = new RedRockTalon(31, "index", "*");
+    private RedRockTalon indexMotor = new RedRockTalon(31, "index-motor", "*");
     private Slot1Configs slot1Configs = new Slot1Configs();
 
     private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 4500).withTuningEnabled(true);

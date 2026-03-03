@@ -20,8 +20,8 @@ import redrocklib.wrappers.RedRockTalon;
 public class Intake extends SubsystemBase{
     private static Intake instance = null;
 
-    private RedRockTalon driveMotor = new RedRockTalon(21, "intake-drive", "*");
-    private RedRockTalon extensionMotor = new RedRockTalon(22, "intake-extension", "*");
+    private RedRockTalon driveMotor = new RedRockTalon(21, "intake-drive-motor", "*");
+    private RedRockTalon extensionMotor = new RedRockTalon(22, "intake-extension-motor", "*");
     
     private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.8);
     private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.6);
