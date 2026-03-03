@@ -23,7 +23,7 @@ public class LED extends SubsystemBase{
     public final Color OFF = new Color(0, 0, 0);
     public final Color GREEN = new Color(0, 255, 0);
     public final Color MAGENTA = new Color(255, 0, 255);
-    public final Color NOTE_ORANGE = new Color(255, 15, 0);
+    public final Color NOTE_ORANGE = new Color(255, 165, 0);
     public final Color WHITE = new Color(255, 255, 255);
     public final Color BLUE = new Color(0, 0, 255);
     public final Color RED = new Color(255, 0, 0);
@@ -129,21 +129,21 @@ public class LED extends SubsystemBase{
 
         switch (superstructure.getRobotState()) {
             case MANUAL_SHOT:
-                this.setLights(BLUE);
+                this.blink(BLUE, 6);
                 break;
             case SHOOTING_WHILE_MOVING:
                 break;
             case SHOOTING:
-                this.setLights(GREEN);
+                this.blink(GREEN, 6);
                 break;
             case FULL_TRACKING:
                 this.blink(RED, 6);
                 break;
             case TURRET_TRACKING:
-                this.larson(GREEN);
+                this.larson(NOTE_ORANGE);
                 break;
             case IDLE:
-                this.larson(INIT_YELLOW);
+                this.larson(WHITE);
                 break;
         }
 

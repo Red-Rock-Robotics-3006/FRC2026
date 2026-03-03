@@ -60,27 +60,29 @@ public class RobotContainer {
             .onFalse(superstructure.intake.stopIntakeCommand());
 
         joystick.rightTrigger(kTriggerThreshold)
-            .onTrue(Commands.parallel(
-                superstructure.setStateCommand(RobotState.FULL_TRACKING),
-                superstructure.intake.pulsateIntakeCommand()))
+            .onTrue(superstructure.setStateCommand(RobotState.FULL_TRACKING))
             .onFalse(Commands.parallel(
                 superstructure.setStateCommand(RobotState.TURRET_TRACKING),
                 superstructure.intake.deployIntakeCommand()));
             
-        joystick.leftBumper() //manual lerp tuning shot
-            .onTrue(superstructure.setManualShotParameterCommand(lerpingShotParameter))
-            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+        joystick.leftBumper() 
+            .onTrue(superstructure.intake.pulsateIntakeCommand())
+            .onFalse(superstructure.intake.deployIntakeCommand());
 
         joystick.rightBumper() //manual hub shot
             .onTrue(superstructure.setManualShotParameterCommand(hubShotParameter))
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
-        
+            
+        joystick.a()
+            .onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+
         joystick.b()
             .onTrue(superstructure.setStateCommand(RobotState.IDLE));
         
-        joystick.a()
-            .onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
-        
+        joystick.x() //manual lerp tuning shot
+            .onTrue(superstructure.setManualShotParameterCommand(lerpingShotParameter))
+            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+
         joystick.y()
             .onTrue(superstructure.intakeSafeStowCommand());
 
