@@ -133,6 +133,10 @@ public class Shooter extends SubsystemBase{
         return Math.abs(shooterMotor.motor.getVelocity().getValueAsDouble() * 60 - this.targetRPM) < this.rpmTolerance.getNumber();
     }
 
+    public double getTargetRPM() {
+        return this.targetRPM;
+    }
+
     public boolean atHoodAngle() {
         return Math.abs(hoodMotor.motor.getPosition().getValueAsDouble() - this.targetHoodPositionMotorRotations)
             < hoodRestrictions.convertOutputByRate(hoodTolerance.getNumber());

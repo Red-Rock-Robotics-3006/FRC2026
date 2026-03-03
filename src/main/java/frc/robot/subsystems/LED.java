@@ -30,7 +30,7 @@ public class LED extends SubsystemBase{
     
     private int loopControl = 0;
     private SmartDashboardNumber rainbowControl = new SmartDashboardNumber("led/rainbow speed", 3);
-    private SmartDashboardNumber larsonSpeed = new SmartDashboardNumber("led/larson speed", 2);
+    private SmartDashboardNumber larsonSpeed = new SmartDashboardNumber("led/larson speed", 1);
     
     private Superstructure superstructure = Superstructure.getInstance();
 
@@ -143,7 +143,7 @@ public class LED extends SubsystemBase{
                 this.larson(GREEN);
                 break;
             case IDLE:
-                this.larson(WHITE);
+                this.larson(INIT_YELLOW);
                 break;
         }
 

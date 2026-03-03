@@ -50,7 +50,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        RobotModeTriggers.disabled().onTrue(superstructure.setStateCommand(RobotState.IDLE));
+        RobotModeTriggers.disabled().onTrue(superstructure.setStateCommand(RobotState.IDLE).ignoringDisable(true));
         RobotModeTriggers.teleop().onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
         joystick.back().onTrue(drivetrain.resetHeadingCommand());

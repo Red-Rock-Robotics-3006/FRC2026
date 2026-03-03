@@ -71,10 +71,20 @@ public class Superstructure extends SubsystemBase {
         SmartDashboard.putBoolean("superstructure/in alliance zone", inAllianceZone());
         boolean isBlue = drivetrain.isBlue();
 
-        this.targetPose = (this.inAllianceZone() ? 
-            ((isBlue) ? Localization.blueHub : Localization.redHub) :
-            new Pose2d()) //will be lob poses later
-            .transformBy(new Transform2d(SOTMCalcs.getOffset(state.Speeds.vxMetersPerSecond, state.Speeds.vyMetersPerSecond), new Rotation2d()));
+        Pose2d staticPose = this.inAllianceZone() ? 
+            (isBlue ? Localization.blueHub : Localization.redHub) :
+            new Pose2d(); // will be lob poses later
+
+        double distanceToHub = shooterPose.getTranslation().getDistance(staticPose.getTranslation());
+        double exitVelocity = SOTMCalcs.rpmToExitVelocity(shooter.getTargetRPM());
+
+        this.targetPose = staticPose.transformBy(
+                new Transform2d(SOTMCalcs.getOffset(
+                    state.Speeds.vxMetersPerSecond,
+                    state.Speeds.vyMetersPerSecond,
+                    exitVelocity,
+                    distanceToHub),
+                    new Rotation2d()));
 
         switch (robotState) {
             case MANUAL_SHOT:
