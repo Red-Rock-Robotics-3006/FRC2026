@@ -4,9 +4,11 @@ import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.AddressableLEDBufferView;
 import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import redrocklib.logging.SmartDashboardNumber;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class LED extends SubsystemBase{
@@ -31,7 +33,7 @@ public class LED extends SubsystemBase{
     
     private int loopControl = 0;
     private SmartDashboardNumber rainbowControl = new SmartDashboardNumber("led/rainbow speed", 3);
-    private SmartDashboardNumber larsonSpeed = new SmartDashboardNumber("led/larson speed", 2);
+    private SmartDashboardNumber larsonSpeed = new SmartDashboardNumber("led/larson speed", 1);
 
     private LED() {
         super("LED");
@@ -46,7 +48,7 @@ public class LED extends SubsystemBase{
     }
 
     public enum RobotState {
-        MANUAL_SHOT, SHOOTING_WHILE_MOVING, SHOOTING, FULL_TRACKING, TURRET_TRACKING, IDLE
+        MANUAL_SHOT, SHOOTING_WHILE_MOVING, SHOOTING, FULL_TRACKING, TURRET_TRACKING, IDLE, POLICE
     }
 
     private RobotState robotState = RobotState.IDLE;
@@ -143,18 +145,18 @@ public class LED extends SubsystemBase{
 
         switch (this.getRobotState()) {
             case MANUAL_SHOT:
-                this.setLights(BLUE);
+                this.blink(BLUE, 6);
                 break;
             case SHOOTING_WHILE_MOVING:
                 break;
             case SHOOTING:
-                this.setLights(GREEN);
+                this.blink(GREEN, 6);
                 break;
             case FULL_TRACKING:
-                this.blink(RED, 8);
+                this.blink(RED, 6);
                 break;
             case TURRET_TRACKING:
-                this.larson(GREEN);
+                this.larson(NOTE_ORANGE);
                 break;
             case IDLE:
                 this.larson(WHITE);
@@ -164,6 +166,10 @@ public class LED extends SubsystemBase{
         this.control.setData(buffer);
 
         SmartDashboard.putString("ROBOT STATE", this.getRobotState().toString());
+    }
+
+    public Command setRobotStateCommand(RobotState rs) {
+        return Commands.runOnce(() -> this.setRobotState(rs));
     }
 
     public static LED getInstance(){
