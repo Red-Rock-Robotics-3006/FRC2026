@@ -8,25 +8,24 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import redrocklib.logging.SmartDashboardNumber;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class LED extends SubsystemBase{
 
     private static LED instance = null;
 
-    private AddressableLED control = new AddressableLED(0); //TODO
-    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(150); //TODO
+    private AddressableLED control = new AddressableLED(9);
+    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(70);
 
-    private AddressableLEDBufferView left = buffer.createView(0, 49);
-    private AddressableLEDBufferView back = buffer.createView(50, 99);
-    private AddressableLEDBufferView right = buffer.createView(100, 149);
+    public AddressableLEDBufferView left = buffer.createView(45, 69);
+    public AddressableLEDBufferView back = buffer.createView(24, 44);
+    public AddressableLEDBufferView right = buffer.createView(0, 23);
     
     public final Color INIT_YELLOW = new Color(255, 165, 0);
     public final Color OFF = new Color(0, 0, 0);
     public final Color GREEN = new Color(0, 255, 0);
     public final Color MAGENTA = new Color(255, 0, 255);
-    public final Color NOTE_ORANGE = new Color(255, 15, 0);
+    public final Color NOTE_ORANGE = new Color(255, 30, 0);
     public final Color WHITE = new Color(255, 255, 255);
     public final Color BLUE = new Color(0, 0, 255);
     public final Color RED = new Color(255, 0, 0);
@@ -34,6 +33,7 @@ public class LED extends SubsystemBase{
     private int loopControl = 0;
     private SmartDashboardNumber rainbowControl = new SmartDashboardNumber("led/rainbow speed", 3);
     private SmartDashboardNumber larsonSpeed = new SmartDashboardNumber("led/larson speed", 1);
+    private SmartDashboardNumber policeSpeed = new SmartDashboardNumber("led/police speed", 6);
 
     private LED() {
         super("LED");
@@ -96,8 +96,8 @@ public class LED extends SubsystemBase{
     }
 
     private int larsonPosition = 0;
-    private int larsonDirection = 1;
-    private final int LARSON_SIZE = 15;
+    private int larsonDirection = 2;
+    private final int LARSON_SIZE = 6;
 
     public void larson(Color c) {
         larson(left, c);
@@ -131,11 +131,39 @@ public class LED extends SubsystemBase{
             larsonPosition += larsonDirection;
             if (larsonPosition >= view.getLength() - 1) {
                 larsonPosition = view.getLength() - 1;
-                larsonDirection = -1;
+                larsonDirection = -2;
             } else if (larsonPosition <= 0) {
                 larsonPosition = 0;
-                larsonDirection = 1;
+                larsonDirection = 2;
             }
+        }
+    }
+
+    private void police() {
+        police(left);
+        police(back);
+        police(right);
+    }
+
+    private void police(AddressableLEDBufferView view) {
+        int length = view.getLength();
+        int halfLength = length / 2;
+        int quarterLength = halfLength / 2;
+
+        int state = (loopControl / (int) policeSpeed.getNumber()) % 8;
+
+        for (int i = 0; i < length; i++) {
+            view.setLED(i, OFF);
+        }
+
+        if (state == 0 || state == 2) {
+            for (int i = 0; i < quarterLength; i++) view.setLED(i, RED);
+            for (int i = halfLength; i < halfLength + quarterLength; i++);
+        }
+        
+        else if (state == 4 || state == 6) {
+            for (int i = quarterLength; i < halfLength; i++) view.setLED(i, RED);
+            for (int i = halfLength + quarterLength; i < length; i++) view.setLED(i, BLUE);
         }
     }
     
@@ -145,21 +173,24 @@ public class LED extends SubsystemBase{
 
         switch (this.getRobotState()) {
             case MANUAL_SHOT:
-                this.blink(BLUE, 6);
+                this.blink(BLUE, 10);
                 break;
             case SHOOTING_WHILE_MOVING:
                 break;
             case SHOOTING:
-                this.blink(GREEN, 6);
+                this.blink(GREEN, 10);
                 break;
             case FULL_TRACKING:
-                this.blink(RED, 6);
+                this.blink(RED, 10);
                 break;
             case TURRET_TRACKING:
-                this.larson(NOTE_ORANGE);
+                this.larson(WHITE);
                 break;
             case IDLE:
-                this.larson(WHITE);
+                this.larson(NOTE_ORANGE);
+                break;
+            case POLICE:
+                this.police();
                 break;
         }
 

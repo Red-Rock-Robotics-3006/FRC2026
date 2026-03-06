@@ -7,8 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+// import edu.wpi.first.wpilibj2.command.Commands;
+// import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.subsystems.LED;
@@ -16,7 +16,7 @@ import frc.robot.subsystems.LED.RobotState;
 
 public class RobotContainer {
 
-    private CommandXboxController joystick = new CommandXboxController(0);
+    // private CommandXboxController joystick = new CommandXboxController(0);
     private LED led = LED.getInstance();
 
     
@@ -34,6 +34,7 @@ public class RobotContainer {
         ledModeChooser.addOption("SHOOTING", led.setRobotStateCommand(RobotState.SHOOTING));
         ledModeChooser.addOption("FULL_TRACKING", led.setRobotStateCommand(RobotState.FULL_TRACKING));
         ledModeChooser.addOption("TURRET_TRACKING", led.setRobotStateCommand(RobotState.TURRET_TRACKING));
+        ledModeChooser.addOption("POLICE", led.setRobotStateCommand(RobotState.POLICE));
 
         SmartDashboard.putData("LED Mode Chooser", ledModeChooser);
     }
