@@ -80,7 +80,7 @@ public class RobotContainer {
             .onTrue(superstructure.setStateCommand(RobotState.IDLE));
         
         joystick.x() //manual lerp tuning shot
-            .onTrue(superstructure.setManualShotParameterCommand(lerpingShotParameter))
+            .onTrue(superstructure.setLerpTuneShotParameterCommand(lerpingShotParameter))
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
         joystick.y()
@@ -101,6 +101,9 @@ public class RobotContainer {
                 superstructure.intakeSafeStowCommand(),
                 climber.lowerClimberCommand()))
             .onFalse(climber.stopClimberCommand());
+
+        joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
+            .onTrue(led.togglePoliceCommand());
     }
 
     // private void configureSysIDBindings() {

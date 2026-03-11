@@ -65,15 +65,7 @@ public class Localization extends SubsystemBase{
             )
         );
 
-        cameras.add(new RedRockCamera("Photon-Rubik-Goober")
-            .withRobotToCameraTransform(
-                new Transform3d(
-                    new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
-                    new Rotation3d(new Quaternion(0, 0, 0, 0))
-                )
-            )
-        );
-        cameras.add(new RedRockCamera("Photon-Rubik-Booger")
+        cameras.add(new RedRockCamera("Photon-Rubik-Booger") //is on a turret
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),

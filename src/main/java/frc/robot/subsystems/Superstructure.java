@@ -43,6 +43,8 @@ public class Superstructure extends SubsystemBase {
 
         MANUAL_SHOT, //any manual shot, flywheels spinning, turret at set angle, hood at set angle
 
+        LERP_TUNING, //for tuning the lerp table (prob dont need this state for comp), turret tracking, hood at set angle, flywheels at set rpm
+
         IDLE //mechanisms all idle (on disable maybe?)
     }
 
@@ -86,8 +88,21 @@ public class Superstructure extends SubsystemBase {
                     distanceToHub),
                     new Rotation2d()));
 
+        SmartDashboard.putNumberArray("superstructure/target pose", targetPose.toMatrix().getData()); //for tuning, prob dont need for comp
+        SmartDashboard.putNumber("superstructure/distance to hub", distanceToHub); //for tuning, prob dont need for comp
+
         switch (robotState) {
             case MANUAL_SHOT:
+                if (readyToShoot()) index.startIndex();
+                break;
+            case LERP_TUNING:
+                turret.setTurretAngle(
+                    shooterPose
+                        .relativeTo(targetPose)
+                        .getTranslation()
+                        .getAngle()
+                        .minus(dtPose.getRotation())
+                );
                 if (readyToShoot()) index.startIndex();
                 break;
             case SHOOTING_WHILE_MOVING:
@@ -153,6 +168,15 @@ public class Superstructure extends SubsystemBase {
 
     public Command setManualShotParameterCommand(ShotParameter shot) {
         return Commands.runOnce(() -> setManualShotParameter(shot), this);
+    }
+
+    public void setLerpTuneShotParameter(ShotParameter shot) {
+        this.shooter.setShotParameter(shot);
+        this.setState(RobotState.LERP_TUNING);
+    }
+
+    public Command setLerpTuneShotParameterCommand(ShotParameter shot) {
+        return Commands.runOnce(() -> setLerpTuneShotParameter(shot), this);
     }
 
     public Command resetShooterHoodCommand() {

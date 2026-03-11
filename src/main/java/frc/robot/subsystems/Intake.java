@@ -75,6 +75,7 @@ public class Intake extends SubsystemBase{
             .withMotionMagicCruiseVelocity(220)
             .withMotionMagicJerk(10000000)
         ).withSpikeThreshold(10)
+        .withResetSpeed(0.1)
         .withCurrentLimitConfigs(
             new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(45)
@@ -149,7 +150,10 @@ public class Intake extends SubsystemBase{
     }
 
     public Command deployIntakeCommand() {
-        return Commands.runOnce(() -> this.deployIntake(), this);
+        return Commands.sequence(
+            Commands.runOnce(() -> this.deployIntake(), this),
+            extensionMotor.resetMotorCommand()
+        );
     }
 
     public Command pulsateIntakeCommand() {
