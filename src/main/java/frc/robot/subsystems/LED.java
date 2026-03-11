@@ -15,11 +15,11 @@ public class LED extends SubsystemBase{
     private static LED instance = null;
 
     private AddressableLED control = new AddressableLED(9);
-    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(70);
+    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(69);
 
-    public AddressableLEDBufferView left = buffer.createView(45, 69);
-    public AddressableLEDBufferView back = buffer.createView(24, 44);
-    public AddressableLEDBufferView right = buffer.createView(0, 23);
+    public AddressableLEDBufferView left = buffer.createView(44, 68);
+    public AddressableLEDBufferView back = buffer.createView(24, 43);
+    public AddressableLEDBufferView right = buffer.createView(0, 22);
     
     public final Color INIT_YELLOW = new Color(255, 165, 0);
     public final Color OFF = new Color(0, 0, 0);
@@ -38,13 +38,7 @@ public class LED extends SubsystemBase{
     private LED() {
         super("LED");
         
-        this.control.setLength(this.buffer.getLength());
-        this.control.setColorOrder(AddressableLED.ColorOrder.kRGB);
-
-        this.setLights(INIT_YELLOW);
-        this.control.setData(buffer);
-        
-        this.control.start();
+        this.initializeLights();
     }
 
     public enum RobotState {
@@ -66,6 +60,17 @@ public class LED extends SubsystemBase{
         for (int i = 0; i < buffer.getLength(); i++) {
             buffer.setLED(i, c);
         }
+    }
+
+    public void initializeLights() {
+        this.control.setLength(this.buffer.getLength());
+        this.control.setColorOrder(AddressableLED.ColorOrder.kRGB);
+
+        this.setLights(INIT_YELLOW);
+        this.buffer.setLED(23, OFF);
+        this.control.setData(buffer);
+        
+        this.control.start();
     }
 
     public void blink(Color c, int freq) {
@@ -95,46 +100,53 @@ public class LED extends SubsystemBase{
         rainbowHue %= 180;
     }
 
-    private int larsonPosition = 0;
-    private int larsonDirection = 2;
     private final int LARSON_SIZE = 6;
 
-    public void larson(Color c) {
-        larson(left, c);
-        larson(back, c);
-        larson(right, c);
+    private static class LarsonState {
+        int position = 0;
+        int direction = 2;
     }
 
-    public void larson(AddressableLEDBufferView view, Color c) {
+    private final LarsonState leftLarsonState  = new LarsonState();
+    private final LarsonState rightLarsonState = new LarsonState();
+    private final LarsonState backLarsonState  = new LarsonState();
+
+    public void larson(Color c) {
+        larson(left,  leftLarsonState,  c);
+        larson(right, rightLarsonState, c);
+        larson(back,  backLarsonState,  c);
+    }
+
+    public void larson(AddressableLEDBufferView view, LarsonState state, Color c) {
         for (int i = 0; i < view.getLength(); i++) {
             view.setLED(i, new Color(
-                view.getLED(i).red * 0.5,
+                view.getLED(i).red   * 0.5,
                 view.getLED(i).green * 0.5,
-                view.getLED(i).blue * 0.5
+                view.getLED(i).blue  * 0.5
             ));
         }
 
         for (int offset = -(LARSON_SIZE / 2); offset <= LARSON_SIZE / 2; offset++) {
-            int index = larsonPosition + offset;
+            int index = state.position + offset;
             if (index < 0 || index >= view.getLength()) continue;
 
             double brightness = 1.0 - (Math.abs(offset) / (double)(LARSON_SIZE / 2 + 1));
 
             view.setLED(index, new Color(
-                c.red * brightness,
+                c.red   * brightness,
                 c.green * brightness,
-                c.blue * brightness
+                c.blue  * brightness
             ));
         }
 
         if (loopControl % larsonSpeed.getNumber() == 0) {
-            larsonPosition += larsonDirection;
-            if (larsonPosition >= view.getLength() - 1) {
-                larsonPosition = view.getLength() - 1;
-                larsonDirection = -2;
-            } else if (larsonPosition <= 0) {
-                larsonPosition = 0;
-                larsonDirection = 2;
+            state.position += state.direction;
+            if (state.position >= view.getLength() - 1) {
+                state.position   = view.getLength() - 1;
+                state.direction  = -2;
+            } else if (state.position <= 0) {
+                state.position  = 0;
+                state.direction = 2;
             }
         }
     }
@@ -158,7 +170,7 @@ public class LED extends SubsystemBase{
 
         if (state == 0 || state == 2) {
             for (int i = 0; i < quarterLength; i++) view.setLED(i, RED);
-            for (int i = halfLength; i < halfLength + quarterLength; i++);
+            for (int i = halfLength; i < halfLength + quarterLength; i++) view.setLED(i, BLUE);
         }
         
         else if (state == 4 || state == 6) {
@@ -181,7 +193,7 @@ public class LED extends SubsystemBase{
                 this.blink(GREEN, 10);
                 break;
             case FULL_TRACKING:
-                this.blink(RED, 10);
+                this.setLights(GREEN);
                 break;
             case TURRET_TRACKING:
                 this.larson(WHITE);
