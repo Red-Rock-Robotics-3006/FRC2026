@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter.autoaim;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class SOTMCalcs {
@@ -14,12 +15,19 @@ public class SOTMCalcs {
         if (exitVelocity <= 0) return new Translation2d();
 
         double flightTime = distance / exitVelocity;
-        return new Translation2d(-velocityX * flightTime, -velocityY * flightTime);
+        return new Translation2d(-velocityX * flightTime * kFudgeFactor, -velocityY * flightTime * kFudgeFactor);
     }
 
     private static final double kFudgeFactor = 1;
     
     public static Translation2d getOffset(double velocityX, double velocityY) {
         return new Translation2d(-kFudgeFactor * velocityX, -kFudgeFactor * velocityY);
+    }
+
+    public static double[] rotate(double x, double y, Rotation2d rotation) {
+        return new double[]{
+            rotation.getCos() * x - rotation.getSin() * y,
+            rotation.getSin() * x + rotation.getCos() * y
+        };
     }
 }

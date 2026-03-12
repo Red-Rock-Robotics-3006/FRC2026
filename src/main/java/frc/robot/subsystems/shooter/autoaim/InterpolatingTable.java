@@ -17,8 +17,21 @@ public class InterpolatingTable {
         new TreeMap<>(
             Map.ofEntries(
                 entry(
+                    Double.valueOf(0),
+                    new ShotParameter(10, 3000)
+                ),
+                entry(
+                    Double.valueOf(1),
+                    new ShotParameter(20, 3500)
+                ),
+                entry(
                     Double.valueOf(2),
-                    new ShotParameter(32, 32))
+                    new ShotParameter(30, 4500)
+                ),
+                entry(
+                    Double.valueOf(4),
+                    new ShotParameter(45, 5000)
+                )
                 ));
 
     public static ShotParameter get(double distanceToTarget) {
