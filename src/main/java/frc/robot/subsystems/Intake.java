@@ -131,9 +131,9 @@ public class Intake extends SubsystemBase{
 
     public Command startIntakeCommand() {
         return Commands.sequence( 
-            Commands.runOnce(() -> this.deployIntake(), this),
-            Commands.runOnce(() -> this.startIntake(), this),
-            Commands.waitUntil(() -> this.atTargetPosition())
+            // Commands.runOnce(() -> this.deployIntake(), this),
+            Commands.runOnce(() -> this.startIntake(), this)//,
+            // Commands.waitUntil(() -> this.atTargetPosition())
         );
     }
 

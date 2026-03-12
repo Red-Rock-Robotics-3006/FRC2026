@@ -1,218 +1,218 @@
-package frc.robot.subsystems;
+// package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.AddressableLEDBufferView;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import redrocklib.logging.SmartDashboardNumber;
+// import edu.wpi.first.wpilibj.AddressableLED;
+// import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+// import edu.wpi.first.wpilibj.AddressableLEDBufferView;
+// import edu.wpi.first.wpilibj.util.Color;
+// import edu.wpi.first.wpilibj2.command.Command;
+// import edu.wpi.first.wpilibj2.command.Commands;
+// import edu.wpi.first.wpilibj2.command.SubsystemBase;
+// import redrocklib.logging.SmartDashboardNumber;
 
-public class LED extends SubsystemBase{
+// public class LED extends SubsystemBase{
 
-    private static LED instance = null;
+//     private static LED instance = null;
 
-    private AddressableLED control = new AddressableLED(0);
-    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(69);
+//     private AddressableLED control = new AddressableLED(0);
+//     private AddressableLEDBuffer buffer = new AddressableLEDBuffer(69);
 
-    public AddressableLEDBufferView left = buffer.createView(44, 68);
-    public AddressableLEDBufferView back = buffer.createView(24, 43);
-    public AddressableLEDBufferView right = buffer.createView(0, 22);
+//     public AddressableLEDBufferView left = buffer.createView(44, 68);
+//     public AddressableLEDBufferView back = buffer.createView(24, 43);
+//     public AddressableLEDBufferView right = buffer.createView(0, 22);
 
-    private Superstructure superstructure = Superstructure.getInstance();
+//     private Superstructure superstructure = Superstructure.getInstance();
     
-    public final Color INIT_YELLOW = new Color(255, 165, 0);
-    public final Color OFF = new Color(0, 0, 0);
-    public final Color GREEN = new Color(0, 255, 0);
-    public final Color MAGENTA = new Color(255, 0, 255);
-    public final Color NOTE_ORANGE = new Color(255, 30, 0);
-    public final Color WHITE = new Color(255, 255, 255);
-    public final Color BLUE = new Color(0, 0, 255);
-    public final Color RED = new Color(255, 0, 0);
+//     public final Color INIT_YELLOW = new Color(255, 165, 0);
+//     public final Color OFF = new Color(0, 0, 0);
+//     public final Color GREEN = new Color(0, 255, 0);
+//     public final Color MAGENTA = new Color(255, 0, 255);
+//     public final Color NOTE_ORANGE = new Color(255, 30, 0);
+//     public final Color WHITE = new Color(255, 255, 255);
+//     public final Color BLUE = new Color(0, 0, 255);
+//     public final Color RED = new Color(255, 0, 0);
     
-    private int loopControl = 0;
-    private SmartDashboardNumber rainbowControl = new SmartDashboardNumber("led/rainbow speed", 3);
-    private SmartDashboardNumber larsonSpeed = new SmartDashboardNumber("led/larson speed", 1);
-    private SmartDashboardNumber policeSpeed = new SmartDashboardNumber("led/police speed", 6);
+//     private int loopControl = 0;
+//     private SmartDashboardNumber rainbowControl = new SmartDashboardNumber("led/rainbow speed", 3);
+//     private SmartDashboardNumber larsonSpeed = new SmartDashboardNumber("led/larson speed", 1);
+//     private SmartDashboardNumber policeSpeed = new SmartDashboardNumber("led/police speed", 6);
 
-    private LED() {
-        super("LED");
+//     private LED() {
+//         super("LED");
 
-        this.control.setLength(this.buffer.getLength());
-        this.control.setColorOrder(AddressableLED.ColorOrder.kRGB);
+//         this.control.setLength(this.buffer.getLength());
+//         this.control.setColorOrder(AddressableLED.ColorOrder.kRGB);
 
-        this.setLights(INIT_YELLOW);
-        this.control.setData(buffer);
+//         this.setLights(INIT_YELLOW);
+//         this.control.setData(buffer);
         
-        this.control.start();
-    }
+//         this.control.start();
+//     }
 
-    public void setLights(Color c) {
-        for (int i = 0; i < buffer.getLength(); i++) {
-            buffer.setLED(i, c);
-        }
-    }
+//     public void setLights(Color c) {
+//         for (int i = 0; i < buffer.getLength(); i++) {
+//             buffer.setLED(i, c);
+//         }
+//     }
 
-    public void blink(Color c, int freq) {
-        if (loopControl % freq * 2 < freq) this.setLights(c);
-        else this.setLights(OFF);
-    }
+//     public void blink(Color c, int freq) {
+//         if (loopControl % freq * 2 < freq) this.setLights(c);
+//         else this.setLights(OFF);
+//     }
 
-    public void blinkSetLights(Color c, int blinks, int freq) {
-        if (loopControl < freq * blinks) {
-            if (loopControl % freq * 2 < freq) this.setLights(c);
-            else this.setLights(OFF);
-        }
-        else setLights(c);
-    }
+//     public void blinkSetLights(Color c, int blinks, int freq) {
+//         if (loopControl < freq * blinks) {
+//             if (loopControl % freq * 2 < freq) this.setLights(c);
+//             else this.setLights(OFF);
+//         }
+//         else setLights(c);
+//     }
 
-    private int rainbowHue = 0;
+//     private int rainbowHue = 0;
 
-    public void increaseHueControl() {rainbowControl.putNumber(rainbowControl.getNumber() + 1);}
-    public void decreaseHueControl() {rainbowControl.putNumber(rainbowControl.getNumber() - 1);}
+//     public void increaseHueControl() {rainbowControl.putNumber(rainbowControl.getNumber() + 1);}
+//     public void decreaseHueControl() {rainbowControl.putNumber(rainbowControl.getNumber() - 1);}
 
-    public void rainbow() {
-        for (var i = 0; i < buffer.getLength(); i++) {
-          final var hue = (rainbowHue + (i * 180 / buffer.getLength())) % 180;
-          buffer.setHSV(i, hue, 255, 128);
-        }
-        rainbowHue += rainbowControl.getNumber();
-        rainbowHue %= 180;
-    }
+//     public void rainbow() {
+//         for (var i = 0; i < buffer.getLength(); i++) {
+//           final var hue = (rainbowHue + (i * 180 / buffer.getLength())) % 180;
+//           buffer.setHSV(i, hue, 255, 128);
+//         }
+//         rainbowHue += rainbowControl.getNumber();
+//         rainbowHue %= 180;
+//     }
 
-    private final int LARSON_SIZE = 6;
+//     private final int LARSON_SIZE = 6;
 
-    private static class LarsonState {
-        int position = 0;
-        int direction = 2;
-    }
+//     private static class LarsonState {
+//         int position = 0;
+//         int direction = 2;
+//     }
 
-    private final LarsonState leftLarsonState  = new LarsonState();
-    private final LarsonState rightLarsonState = new LarsonState();
-    private final LarsonState backLarsonState  = new LarsonState();
+//     private final LarsonState leftLarsonState  = new LarsonState();
+//     private final LarsonState rightLarsonState = new LarsonState();
+//     private final LarsonState backLarsonState  = new LarsonState();
 
-    public void larson(Color c) {
-        larson(left,  leftLarsonState,  c);
-        larson(right, rightLarsonState, c);
-        larson(back,  backLarsonState,  c);
-    }
+//     public void larson(Color c) {
+//         larson(left,  leftLarsonState,  c);
+//         larson(right, rightLarsonState, c);
+//         larson(back,  backLarsonState,  c);
+//     }
 
-    public void larson(AddressableLEDBufferView view, LarsonState state, Color c) {
-        for (int i = 0; i < view.getLength(); i++) {
-            view.setLED(i, new Color(
-                view.getLED(i).red   * 0.5,
-                view.getLED(i).green * 0.5,
-                view.getLED(i).blue  * 0.5
-            ));
-        }
+//     public void larson(AddressableLEDBufferView view, LarsonState state, Color c) {
+//         for (int i = 0; i < view.getLength(); i++) {
+//             view.setLED(i, new Color(
+//                 view.getLED(i).red   * 0.5,
+//                 view.getLED(i).green * 0.5,
+//                 view.getLED(i).blue  * 0.5
+//             ));
+//         }
 
-        for (int offset = -(LARSON_SIZE / 2); offset <= LARSON_SIZE / 2; offset++) {
-            int index = state.position + offset;
-            if (index < 0 || index >= view.getLength()) continue;
+//         for (int offset = -(LARSON_SIZE / 2); offset <= LARSON_SIZE / 2; offset++) {
+//             int index = state.position + offset;
+//             if (index < 0 || index >= view.getLength()) continue;
 
-            double brightness = 1.0 - (Math.abs(offset) / (double)(LARSON_SIZE / 2 + 1));
+//             double brightness = 1.0 - (Math.abs(offset) / (double)(LARSON_SIZE / 2 + 1));
 
-            view.setLED(index, new Color(
-                c.red   * brightness,
-                c.green * brightness,
-                c.blue  * brightness
-            ));
-        }
+//             view.setLED(index, new Color(
+//                 c.red   * brightness,
+//                 c.green * brightness,
+//                 c.blue  * brightness
+//             ));
+//         }
 
-        if (loopControl % larsonSpeed.getNumber() == 0) {
-            state.position += state.direction;
-            if (state.position >= view.getLength() - 1) {
-                state.position   = view.getLength() - 1;
-                state.direction  = -2;
-            } else if (state.position <= 0) {
-                state.position  = 0;
-                state.direction = 2;
-            }
-        }
-    }
+//         if (loopControl % larsonSpeed.getNumber() == 0) {
+//             state.position += state.direction;
+//             if (state.position >= view.getLength() - 1) {
+//                 state.position   = view.getLength() - 1;
+//                 state.direction  = -2;
+//             } else if (state.position <= 0) {
+//                 state.position  = 0;
+//                 state.direction = 2;
+//             }
+//         }
+//     }
 
-    private boolean policeEnabled = false;
+//     private boolean policeEnabled = false;
 
-    private void police() {
-        policeFancy(left);
-        policeAlternate(back);
-        policeFancy(right);
-    }
+//     private void police() {
+//         policeFancy(left);
+//         policeAlternate(back);
+//         policeFancy(right);
+//     }
 
-    private void policeFancy(AddressableLEDBufferView view) {
-        int length = view.getLength();
-        int halfLength = length / 2;
-        int quarterLength = halfLength / 2;
+//     private void policeFancy(AddressableLEDBufferView view) {
+//         int length = view.getLength();
+//         int halfLength = length / 2;
+//         int quarterLength = halfLength / 2;
 
-        int state = (loopControl / (int) policeSpeed.getNumber()) % 8;
+//         int state = (loopControl / (int) policeSpeed.getNumber()) % 8;
 
-        for (int i = 0; i < length; i++) view.setLED(i, OFF);
+//         for (int i = 0; i < length; i++) view.setLED(i, OFF);
 
-        if (state == 0 || state == 2) {
-            for (int i = 0; i < quarterLength; i++) view.setLED(i, RED);
-            for (int i = halfLength; i < halfLength + quarterLength; i++) view.setLED(i, BLUE);
-        }
+//         if (state == 0 || state == 2) {
+//             for (int i = 0; i < quarterLength; i++) view.setLED(i, RED);
+//             for (int i = halfLength; i < halfLength + quarterLength; i++) view.setLED(i, BLUE);
+//         }
         
-        else if (state == 4 || state == 6) {
-            for (int i = quarterLength; i < halfLength; i++) view.setLED(i, RED);
-            for (int i = halfLength + quarterLength; i < length; i++) view.setLED(i, BLUE);
-        }
-    }
+//         else if (state == 4 || state == 6) {
+//             for (int i = quarterLength; i < halfLength; i++) view.setLED(i, RED);
+//             for (int i = halfLength + quarterLength; i < length; i++) view.setLED(i, BLUE);
+//         }
+//     }
 
-    private void policeAlternate(AddressableLEDBufferView view) {
-        int length = view.getLength();
-        int state = (loopControl / (int) policeSpeed.getNumber()) % 8;
+//     private void policeAlternate(AddressableLEDBufferView view) {
+//         int length = view.getLength();
+//         int state = (loopControl / (int) policeSpeed.getNumber()) % 8;
 
-        for (int i = 0; i < length; i++) view.setLED(i, OFF);
+//         for (int i = 0; i < length; i++) view.setLED(i, OFF);
 
-        if (state == 0 || state == 2) for (int i = 0; i < length; i++) view.setLED(i, BLUE);
-        else if (state == 4 || state == 6) for (int i = 0; i < length; i++) view.setLED(i, RED);
-    }
+//         if (state == 0 || state == 2) for (int i = 0; i < length; i++) view.setLED(i, BLUE);
+//         else if (state == 4 || state == 6) for (int i = 0; i < length; i++) view.setLED(i, RED);
+//     }
 
-    private void togglePolice() {
-        policeEnabled = !policeEnabled;
-    }
+//     private void togglePolice() {
+//         policeEnabled = !policeEnabled;
+//     }
 
-    public Command togglePoliceCommand() {
-        return Commands.runOnce(() -> this.togglePolice());
-    }
+//     public Command togglePoliceCommand() {
+//         return Commands.runOnce(() -> this.togglePolice());
+//     }
     
-    @Override
-    public void periodic() {
-        loopControl++;
+//     @Override
+//     public void periodic() {
+//         loopControl++;
 
-        switch (superstructure.getRobotState()) {
-            case MANUAL_SHOT:
-                this.blink(BLUE, 10);
-                break;
-            case LERP_TUNING:
-                this.blink(GREEN, 20);
-                break;
-            case SHOOTING_WHILE_MOVING:
-                break;
-            case SHOOTING:
-                this.blink(GREEN, 10);
-                break;
-            case FULL_TRACKING:
-                this.setLights(GREEN);
-                break;
-            case TURRET_TRACKING:
-                this.larson(WHITE);
-                break;
-            case IDLE:
-                this.larson(NOTE_ORANGE);
-                break;
-        }
+//         switch (superstructure.getRobotState()) {
+//             case MANUAL_SHOT:
+//                 this.blink(BLUE, 10);
+//                 break;
+//             case LERP_TUNING:
+//                 this.blink(GREEN, 20);
+//                 break;
+//             case SHOOTING_WHILE_MOVING:
+//                 break;
+//             case SHOOTING:
+//                 this.blink(GREEN, 10);
+//                 break;
+//             case FULL_TRACKING:
+//                 this.setLights(GREEN);
+//                 break;
+//             case TURRET_TRACKING:
+//                 this.larson(WHITE);
+//                 break;
+//             case IDLE:
+//                 this.larson(NOTE_ORANGE);
+//                 break;
+//         }
 
-        if (policeEnabled) this.police();
-        this.buffer.setLED(23, OFF);
+//         if (policeEnabled) this.police();
+//         this.buffer.setLED(23, OFF);
 
-        this.control.setData(buffer);
-    }
+//         this.control.setData(buffer);
+//     }
 
-    public static LED getInstance(){
-        if (instance == null) instance = new LED();
-        return instance;
-    }
-}
+//     public static LED getInstance(){
+//         if (instance == null) instance = new LED();
+//         return instance;
+//     }
+// }
