@@ -23,7 +23,7 @@ public class Intake extends SubsystemBase{
     private RedRockTalon driveMotor = new RedRockTalon(21, "intake-drive-motor", "*");
     private RedRockTalon extensionMotor = new RedRockTalon(22, "intake-extension-motor", "*");
     
-    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.8);
+    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.8333);
     private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.6);
 
     private SmartDashboardNumber maxPivotRotation = new SmartDashboardNumber("intake/extension/max rotation", 10);
@@ -31,7 +31,7 @@ public class Intake extends SubsystemBase{
 
     private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 10);
     private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 0);
-    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 3);
+    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 4);
     private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 6);
     private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.1);
 

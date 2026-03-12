@@ -34,7 +34,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
+import frc.robot.subsystems.shooter.autoaim.SOTMCalcs;
 import frc.robot.subsystems.swerve.generated.TunerConstants;
 import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.vision.Localization;
@@ -97,9 +97,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private double m_lastSimTime;
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
-    private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
+    // private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
     /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
-    private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
+    // private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
@@ -370,15 +370,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // if (DriverStation.isAutonomous()) return;
 
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-            DriverStation.getAlliance().ifPresent(allianceColor -> {
-                setOperatorPerspectiveForward(
-                    allianceColor == Alliance.Red
-                        ? kRedAlliancePerspectiveRotation
-                        : kBlueAlliancePerspectiveRotation
-                );
+            // DriverStation.getAlliance().ifPresent(allianceColor -> {
+            //     setOperatorPerspectiveForward(
+            //         allianceColor == Alliance.Red
+            //             ? kRedAlliancePerspectiveRotation
+            //             : kBlueAlliancePerspectiveRotation
+            //     );
                 m_hasAppliedOperatorPerspective = true;
-                alliance = allianceColor;
-            });
+                if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
+                    this.alliance = Alliance.Red;
+                    this.fieldCentricSeedOffset = Rotation2d.k180deg;
+                } else {
+                    this.alliance = Alliance.Blue;
+                    this.fieldCentricSeedOffset = Rotation2d.kZero;
+                }
         }
 
         poseXController.setPID(poseP.getNumber(), poseI.getNumber(), poseD.getNumber());
@@ -394,6 +399,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             this.setControl(this.getRequest());
         }
         SmartDashboard.putString("dt/drive state", this.state.toString());
+        SmartDashboard.putNumber("dt/field centric offset", this.fieldCentricSeedOffset.getDegrees());
+        SmartDashboard.putString("alliance", this.alliance.toString());
 
         if (this.visionEnabled) updateVisionMeasurements();
     }
@@ -488,6 +495,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private DriveState state = DriveState.DRIVE_FACING_ANGLE;
 
+    private Rotation2d fieldCentricSeedOffset = new Rotation2d();
+
     private boolean visionEnabled = false;
 
     public void enablePoseTargeting(Pose2d targetPose) {
@@ -516,6 +525,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public SwerveRequest getRequest() {
         double requestedXSpeed = -controller.getLeftY() * maxDriveSpeed.getNumber();
         double requestedYSpeed = -controller.getLeftX() * maxDriveSpeed.getNumber();
+
+        double[] rotatedRequestedSpeed = SOTMCalcs.rotate(requestedXSpeed, requestedYSpeed, fieldCentricSeedOffset);
+
+        requestedXSpeed = rotatedRequestedSpeed[0];
+        requestedYSpeed = rotatedRequestedSpeed[1];
+
         double requestedRotationSpeed = -controller.getRightX() * RotationsPerSecond.of(maxTurnSpeed.getNumber()).in(RadiansPerSecond);
 
         double pidToPoseMax = pidToPoseMaxVelo.getNumber();
@@ -588,8 +603,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void setTargetHeading(Rotation2d target) {
         this.targetAngle = target;
     }
+
+    public void setTargetHeadingToCurrentHeading() {
+        this.targetAngle = this.getPose().getRotation();
+        // this.targetAngle = Rotation2d.fromDegrees(90);
+        System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" + this.getPose().getRotation());
+    }
+
     public Command setTargetHeadingCommand(Rotation2d target) {
         return this.runOnce(() -> this.targetAngle = target);
+    }
+
+    public Command setTargetHeadingToCurrentHeadingCommand() {
+        return this.runOnce(() -> this.setTargetHeadingToCurrentHeading());
     }
 
     public boolean isBlue() {
@@ -601,7 +627,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
             this.factory.resetOdometry(pathName),
             this.factory.trajectoryCmd(pathName),
-            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation()),
+            this.setTargetHeadingToCurrentHeadingCommand(),
             this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
         );
     }
@@ -611,7 +637,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
             this.factory.resetOdometry(pathName, index),
             this.factory.trajectoryCmd(pathName, index),
-            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation()),
+            this.setTargetHeadingToCurrentHeadingCommand(),
             this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
         );
     }

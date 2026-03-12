@@ -30,7 +30,7 @@ public class Shooter extends SubsystemBase{
     private SmartDashboardNumber rpmTolerance = new SmartDashboardNumber("shooter/tolerance/rpm", 50, kEnableShooterTuning && true);
     private SmartDashboardNumber hoodTolerance = new SmartDashboardNumber("shooter/tolerance/hood", 2, kEnableShooterTuning && true);
 
-    private RedRockTalon shooterMotor = new RedRockTalon(41, "shooter-left-motor", "*");
+    private RedRockTalon shooterLeftMotor = new RedRockTalon(41, "shooter-left-motor", "*");
     private RedRockTalon hoodMotor = new RedRockTalon(43, "shooter-hood-motor", "*");
     
     private LerpingSmartDashboardNumber hoodRestrictions = 
@@ -42,7 +42,7 @@ public class Shooter extends SubsystemBase{
     
 
     private Shooter() {
-        shooterMotor.withMotorOutputConfigs(
+        shooterLeftMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withPeakForwardDutyCycle(1)
             .withPeakReverseDutyCycle(-1)
@@ -112,7 +112,7 @@ public class Shooter extends SubsystemBase{
     }
 
     public void setShooterSpeed(double rpm) {
-        this.shooterMotor.motor.setControl(
+        this.shooterLeftMotor.motor.setControl(
             new VelocityVoltage(rpm / 60)
             .withEnableFOC(true)
             .withSlot(0)
@@ -130,7 +130,7 @@ public class Shooter extends SubsystemBase{
     }
 
     public boolean atShooterSpeed() {
-        return Math.abs(shooterMotor.motor.getVelocity().getValueAsDouble() * 60 - this.targetRPM) < this.rpmTolerance.getNumber();
+        return Math.abs(shooterLeftMotor.motor.getVelocity().getValueAsDouble() * 60 - this.targetRPM) < this.rpmTolerance.getNumber();
     }
 
     public double getTargetRPM() {
@@ -149,7 +149,7 @@ public class Shooter extends SubsystemBase{
 
     @Override
     public void periodic() {
-        shooterMotor.update();
+        shooterLeftMotor.update();
         hoodMotor.update();
     }
 

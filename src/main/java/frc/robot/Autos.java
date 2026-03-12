@@ -40,6 +40,13 @@ public class Autos {
         );
     }
 
+    public Command R_MS_L_Paths() {
+        return Commands.sequence(
+            drivetrain.followTrajectory("R_FarMidtake"),
+            drivetrain.followTrajectory("R_Leave")
+        );
+    }
+
     public Command R_MS_MS_L() {
         return Commands.sequence(
             superstructure.intake.startIntakeCommand(),
@@ -57,6 +64,14 @@ public class Autos {
         );
     }
 
+    public Command R_MS_MS_L_Paths() {
+        return Commands.sequence(
+            drivetrain.followTrajectory("R_FarMidtake"),
+            drivetrain.followTrajectory("R_CloseMidtake"),
+            drivetrain.followTrajectory("R_Leave")
+        );
+    }
+
     public Command R_MS_OS() {
         return Commands.sequence(
             superstructure.intake.startIntakeCommand(),
@@ -65,15 +80,18 @@ public class Autos {
             superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(7),
             superstructure.setStateCommand(RobotState.TURRET_TRACKING),
 
-            drivetrain.followTrajectory("R_CloseMidtake"),
-            superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(5),
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-
             drivetrain.followTrajectory("R_Outposttake"),
             superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(5),
             superstructure.setStateCommand(RobotState.TURRET_TRACKING),
 
             superstructure.intake.stopIntakeCommand()
+        );
+    }
+
+    public Command R_MS_OS_Paths() {
+        return Commands.sequence(
+            drivetrain.followTrajectory("R_FarMidtake"),
+            drivetrain.followTrajectory("R_Outposttake")
         );
     }
 
@@ -94,6 +112,14 @@ public class Autos {
             superstructure.setStateCommand(RobotState.TURRET_TRACKING),
 
             superstructure.intake.stopIntakeCommand()
+        );
+    }
+
+    public Command R_MS_MS_OS_Paths() {
+        return Commands.sequence(
+            drivetrain.followTrajectory("R_FarMidtake"),
+            drivetrain.followTrajectory("R_CloseMidtake"),
+            drivetrain.followTrajectory("R_Outposttake")
         );
     }
 
