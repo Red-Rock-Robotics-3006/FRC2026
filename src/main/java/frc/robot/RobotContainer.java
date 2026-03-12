@@ -43,8 +43,11 @@ public class RobotContainer {
     public void configureSelector() {
         autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
 
-        autoChooser.addOption("Right Steal Score Leave", autos.R_MS_L());
-        autoChooser.addOption("Right Steal Score Climb", autos.R_MS_C());
+        autoChooser.addOption("Right Midtake Leave", autos.R_MS_L());
+        autoChooser.addOption("Right Two Midtakes Leave", autos.R_MS_MS_L());
+        autoChooser.addOption("Right Midtake Outpost", autos.R_MS_OS());
+        autoChooser.addOption("Right Two Midtakes Outpost", autos.R_MS_MS_OS());
+        // autoChooser.addOption("Right Steal Score Climb", autos.R_MS_C());
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }

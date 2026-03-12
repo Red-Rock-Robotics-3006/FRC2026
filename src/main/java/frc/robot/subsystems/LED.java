@@ -13,7 +13,7 @@ public class LED extends SubsystemBase{
 
     private static LED instance = null;
 
-    private AddressableLED control = new AddressableLED(9);
+    private AddressableLED control = new AddressableLED(0);
     private AddressableLEDBuffer buffer = new AddressableLEDBuffer(69);
 
     public AddressableLEDBufferView left = buffer.createView(44, 68);
@@ -38,25 +38,20 @@ public class LED extends SubsystemBase{
 
     private LED() {
         super("LED");
+
+        this.control.setLength(this.buffer.getLength());
+        this.control.setColorOrder(AddressableLED.ColorOrder.kRGB);
+
+        this.setLights(INIT_YELLOW);
+        this.control.setData(buffer);
         
-        this.initializeLights();
+        this.control.start();
     }
 
     public void setLights(Color c) {
         for (int i = 0; i < buffer.getLength(); i++) {
             buffer.setLED(i, c);
         }
-    }
-
-    public void initializeLights() {
-        this.control.setLength(this.buffer.getLength());
-        this.control.setColorOrder(AddressableLED.ColorOrder.kRGB);
-
-        this.setLights(INIT_YELLOW);
-        this.buffer.setLED(23, OFF);
-        this.control.setData(buffer);
-        
-        this.control.start();
     }
 
     public void blink(Color c, int freq) {
@@ -140,21 +135,19 @@ public class LED extends SubsystemBase{
     private boolean policeEnabled = false;
 
     private void police() {
-        police(left);
-        police(back);
-        police(right);
+        policeFancy(left);
+        policeAlternate(back);
+        policeFancy(right);
     }
 
-    private void police(AddressableLEDBufferView view) {
+    private void policeFancy(AddressableLEDBufferView view) {
         int length = view.getLength();
         int halfLength = length / 2;
         int quarterLength = halfLength / 2;
 
         int state = (loopControl / (int) policeSpeed.getNumber()) % 8;
 
-        for (int i = 0; i < length; i++) {
-            view.setLED(i, OFF);
-        }
+        for (int i = 0; i < length; i++) view.setLED(i, OFF);
 
         if (state == 0 || state == 2) {
             for (int i = 0; i < quarterLength; i++) view.setLED(i, RED);
@@ -165,6 +158,16 @@ public class LED extends SubsystemBase{
             for (int i = quarterLength; i < halfLength; i++) view.setLED(i, RED);
             for (int i = halfLength + quarterLength; i < length; i++) view.setLED(i, BLUE);
         }
+    }
+
+    private void policeAlternate(AddressableLEDBufferView view) {
+        int length = view.getLength();
+        int state = (loopControl / (int) policeSpeed.getNumber()) % 8;
+
+        for (int i = 0; i < length; i++) view.setLED(i, OFF);
+
+        if (state == 0 || state == 2) for (int i = 0; i < length; i++) view.setLED(i, BLUE);
+        else if (state == 4 || state == 6) for (int i = 0; i < length; i++) view.setLED(i, RED);
     }
 
     private void togglePolice() {
@@ -203,6 +206,7 @@ public class LED extends SubsystemBase{
         }
 
         if (policeEnabled) this.police();
+        this.buffer.setLED(23, OFF);
 
         this.control.setData(buffer);
     }
