@@ -74,7 +74,9 @@ public class RobotContainer {
 
         joystick.rightBumper() //manual hub shot
             .onTrue(superstructure.setManualShotParameterCommand(hubShotParameter))
-            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+            .onFalse(Commands.parallel(
+                superstructure.setStateCommand(RobotState.IDLE),
+                superstructure.intake.deployIntakeCommand()));
             
         joystick.a()
             .onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
@@ -92,14 +94,14 @@ public class RobotContainer {
         joystick.povRight()
             .onTrue(superstructure.resetShooterHoodCommand());
 
-        joystick.povUp()
+        joystick.povUp() //left paddle
             .onTrue(Commands.sequence(
                 superstructure.setStateCommand(RobotState.IDLE),
                 superstructure.intakeSafeStowCommand(),
                 climber.raiseClimberCommand()))
             .onFalse(climber.stopClimberCommand());
 
-        joystick.povDown()
+        joystick.povDown() //right paddle
             .onTrue(Commands.sequence(
                 superstructure.intakeSafeStowCommand(),
                 climber.lowerClimberCommand()))

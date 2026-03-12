@@ -26,6 +26,7 @@ public class Superstructure extends SubsystemBase {
 
     public static final boolean kPractice = false;
     public static final boolean kHubOrLob = true; //true for hub, false for lob
+    public static final boolean kTuning = true;
 
     public final Intake intake = Intake.getInstance();
     private final Index index = Index.getInstance();
@@ -34,13 +35,13 @@ public class Superstructure extends SubsystemBase {
     private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     public final Localization localization = Localization.getInstance();
 
-    private SmartDashboardNumber blueAllianceZoneX = new SmartDashboardNumber("superstructure/blue alliance zone x", 4.38);
-    private SmartDashboardNumber redAllianceZoneX = new SmartDashboardNumber("superstructure/red alliance zone x", 12.16);
+    private SmartDashboardNumber blueAllianceZoneX = new SmartDashboardNumber("superstructure/blue alliance zone x", 4.38, kTuning);
+    private SmartDashboardNumber redAllianceZoneX = new SmartDashboardNumber("superstructure/red alliance zone x", 12.16, kTuning);
 
     private final ShotParameter IDLE = new ShotParameter(10, 0);
 
     private Field2d field2d = new Field2d();
-    private FieldObject2d fieldObject2d;
+    private FieldObject2d fieldObject2d = field2d.getObject("poses");
 
     public enum RobotState {
         TURRET_TRACKING, //turret tracking
@@ -59,9 +60,6 @@ public class Superstructure extends SubsystemBase {
 
     private Superstructure() {
         super("Superstructure");
-
-        fieldObject2d = field2d.getObject("poses");
-
         SmartDashboard.putData("superstructure/field", field2d);
     }
 
@@ -76,37 +74,36 @@ public class Superstructure extends SubsystemBase {
 
     private Pose2d dtPose;
     private Pose2d shooterPose;
-    private Pose2d targetPose = new Pose2d();
+    private Pose2d dynamicTargetPose = new Pose2d();
 
     public static final Pose2d shooterOffset = new Pose2d(0.0254, 0, Rotation2d.fromDegrees(0));
-    // public static final Pose2d shooterOffset = new Pose2d(1, 0, Rotation2d.fromDegrees(0));
 
     @Override
     public void periodic() {
         SwerveDriveState state = drivetrain.getState();
+        boolean isBlue = drivetrain.isBlue();
+
         dtPose = state.Pose;
         Rotation2d dtRotation = dtPose.getRotation();
         shooterPose = new Pose2d(
-                dtPose.getX() + dtRotation.getCos() * shooterOffset.getX() - dtRotation.getSin() * shooterOffset.getY(),
-                dtPose.getY() + dtRotation.getSin() * shooterOffset.getX() + dtRotation.getCos() * shooterOffset.getY(),
-                new Rotation2d()
+            dtPose.getX() + dtRotation.getCos() * shooterOffset.getX() - dtRotation.getSin() * shooterOffset.getY(),
+            dtPose.getY() + dtRotation.getSin() * shooterOffset.getX() + dtRotation.getCos() * shooterOffset.getY(),
+            new Rotation2d()
         );
-        SmartDashboard.putBoolean("superstructure/in alliance zone", inAllianceZone());
-        boolean isBlue = drivetrain.isBlue();
 
-        Pose2d staticPose = this.inAllianceZone() ? 
+        Pose2d staticTargetPose = this.inAllianceZone() ? 
             (isBlue ? Localization.blueHub : Localization.redHub) :
             new Pose2d(); // will be lob poses later
 
-        ShotParameter shotParameter =  (this.inAllianceZone()) ? 
-                        InterpolatingTable.get(shooterPose.minus(staticPose).getTranslation().getNorm()) :
-                        LobInterpolatingTable.get(shooterPose.minus(staticPose).getTranslation().getNorm()); 
-                        //calculates exit velocity using static pose
+        ShotParameter staticShotParameter =  (this.inAllianceZone()) ? 
+            InterpolatingTable.get(shooterPose.minus(staticTargetPose).getTranslation().getNorm()) :
+            LobInterpolatingTable.get(shooterPose.minus(staticTargetPose).getTranslation().getNorm()); 
+            //calculates exit velocity using static pose
         
-        double distanceToHub = shooterPose.getTranslation().getDistance(staticPose.getTranslation());
-        double exitVelocity = SOTMCalcs.rpmToExitVelocity(shotParameter.getShooterRPM());
+        double distanceToHub = shooterPose.getTranslation().getDistance(staticTargetPose.getTranslation());
+        double exitVelocity = SOTMCalcs.rpmToExitVelocity(staticShotParameter.getShooterRPM());
 
-        double[] trueRobotVelocity = SOTMCalcs.rotate(state.Speeds.vxMetersPerSecond, state.Speeds.vyMetersPerSecond, dtRotation);
+        double[] fieldCentricRobotVelocity = SOTMCalcs.rotate(state.Speeds.vxMetersPerSecond, state.Speeds.vyMetersPerSecond, dtRotation);
 
         double r = shooterOffset.getTranslation().getNorm();
         double omega = state.Speeds.omegaRadiansPerSecond;
@@ -117,66 +114,33 @@ public class Superstructure extends SubsystemBase {
             omega * r * tangentialAngle.getSin()
         };
 
-        SmartDashboard.putNumber("auto aim/shooter velo/x", shooterPoseVelocity[0]);
-        SmartDashboard.putNumber("auto aim/shooter velo/y", shooterPoseVelocity[1]);
-
-        SmartDashboard.putNumber("auto aim/lerp/rpm", shotParameter.getShooterRPM());
-        SmartDashboard.putNumber("auto aim/lerp/deg", shotParameter.pivotAngleDeg);
-
-        SmartDashboard.putNumber("auto aim/exit velocity", exitVelocity);
-
-
         Transform2d sotmOffset = new Transform2d(SOTMCalcs.getOffset(
-                    trueRobotVelocity[0] + shooterPoseVelocity[0],
-                    trueRobotVelocity[1] + shooterPoseVelocity[1],
-                    exitVelocity,
-                    distanceToHub),
-                    new Rotation2d());
+            fieldCentricRobotVelocity[0] + shooterPoseVelocity[0],
+            fieldCentricRobotVelocity[1] + shooterPoseVelocity[1],
+            exitVelocity,
+            distanceToHub),
+            new Rotation2d());
 
-        SmartDashboard.putNumber("auto aim/sotm offset/x", sotmOffset.getX());
-        SmartDashboard.putNumber("auto aim/sotm offset/y", sotmOffset.getY());
+        this.dynamicTargetPose = staticTargetPose.transformBy(sotmOffset);
 
-        SmartDashboard.putNumber("auto aim/velo/x", state.Speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("auto aim/velo/y", state.Speeds.vyMetersPerSecond);
-
-        SmartDashboard.putNumber("auto aim/true velo/x", trueRobotVelocity[0]);
-        SmartDashboard.putNumber("auto aim/true velo/y", trueRobotVelocity[1]);
-
-
-        this.targetPose = staticPose.transformBy(
-                        sotmOffset
-                    );
-
-        ShotParameter trueShotParameter =  (this.inAllianceZone()) ? 
-                        InterpolatingTable.get(shooterPose.minus(targetPose).getTranslation().getNorm()) :
-                        LobInterpolatingTable.get(shooterPose.minus(targetPose).getTranslation().getNorm());
-                        // actual shot parameter for adjusted sotm pose
+        ShotParameter dynamicShotParameter =  (this.inAllianceZone()) ? 
+            InterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm()) :
+            LobInterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm());
+            // actual shot parameter for adjusted sotm pose
 
         Rotation2d turretTargetAngle = 
-                    Rotation2d.fromRadians(
-                        Math.atan2(
-                            targetPose.getY() - shooterPose.getY(), 
-                            targetPose.getX() - shooterPose.getX())
-                    ).minus(dtRotation);
-
-        SmartDashboard.putNumberArray("superstructure/target pose", targetPose.toMatrix().getData()); //for tuning, prob dont need for comp
-        SmartDashboard.putNumber("superstructure/distance to hub", distanceToHub); //for tuning, prob dont need for comp
-
-        ArrayList<Pose2d> poses = new ArrayList<>();
-        poses.add(dtPose);
-        poses.add(new Pose2d(shooterPose.getX(), shooterPose.getY(), turretTargetAngle.plus(dtRotation)));
-        poses.add(targetPose);
-        poses.add(staticPose);
-        fieldObject2d.setPoses(poses);
+            Rotation2d.fromRadians(
+                Math.atan2(
+                    dynamicTargetPose.getY() - shooterPose.getY(), 
+                    dynamicTargetPose.getX() - shooterPose.getX())
+            ).minus(dtRotation);
 
         switch (robotState) {
             case MANUAL_SHOT:
                 if (readyToShoot()) index.startIndex();
                 break;
             case LERP_TUNING:
-                turret.setTurretAngle(
-                    turretTargetAngle
-                );
+                turret.setTurretAngle(turretTargetAngle);
                 if (readyToShoot()) index.startIndex();
                 break;
             case SHOOTING_WHILE_MOVING:
@@ -184,22 +148,53 @@ public class Superstructure extends SubsystemBase {
             case SHOOTING:
                 if (!readyToShoot()) setState(RobotState.FULL_TRACKING);
             case FULL_TRACKING:
-                shooter.setShotParameter(
-                    trueShotParameter
-                );
+                shooter.setShotParameter(dynamicShotParameter);
 
                 if (readyToShoot()) setState(RobotState.SHOOTING);
             case TURRET_TRACKING:
-                turret.setTurretAngle(
-                    turretTargetAngle
-                );
+                turret.setTurretAngle(turretTargetAngle);
                 break;
             case IDLE:
                 break;
         }
 
+
+        // SMARTDASHBOARD LOGGING | COMPETITION
+
         SmartDashboard.putString("ROBOT STATE", this.robotState.toString());
         SmartDashboard.putBoolean("superstructure/ready to shoot", this.readyToShoot());
+        SmartDashboard.putBoolean("superstructure/in alliance zone", inAllianceZone());
+
+        // SMARTDASHBOARD LOGGING | TUNING
+
+        if (kTuning) {
+            ArrayList<Pose2d> poses = new ArrayList<>();
+            poses.add(dtPose);
+            poses.add(new Pose2d(shooterPose.getX(), shooterPose.getY(), turretTargetAngle.plus(dtRotation)));
+            poses.add(dynamicTargetPose);
+            poses.add(staticTargetPose);
+            fieldObject2d.setPoses(poses);
+            
+            SmartDashboard.putNumberArray("superstructure/target pose", dynamicTargetPose.toMatrix().getData()); //for tuning, prob dont need for comp
+            SmartDashboard.putNumber("superstructure/distance to hub", distanceToHub); //for tuning, prob dont need for comp
+            
+            SmartDashboard.putNumber("auto aim/sotm offset/x", sotmOffset.getX());
+            SmartDashboard.putNumber("auto aim/sotm offset/y", sotmOffset.getY());
+
+            SmartDashboard.putNumber("auto aim/velo/x", state.Speeds.vxMetersPerSecond);
+            SmartDashboard.putNumber("auto aim/velo/y", state.Speeds.vyMetersPerSecond);
+
+            SmartDashboard.putNumber("auto aim/true velo/x", fieldCentricRobotVelocity[0]);
+            SmartDashboard.putNumber("auto aim/true velo/y", fieldCentricRobotVelocity[1]);
+            
+            SmartDashboard.putNumber("auto aim/shooter velo/x", shooterPoseVelocity[0]);
+            SmartDashboard.putNumber("auto aim/shooter velo/y", shooterPoseVelocity[1]);
+
+            SmartDashboard.putNumber("auto aim/lerp/rpm", staticShotParameter.getShooterRPM());
+            SmartDashboard.putNumber("auto aim/lerp/deg", staticShotParameter.pivotAngleDeg);
+
+            SmartDashboard.putNumber("auto aim/exit velocity", exitVelocity);
+        }
     }
 
     public void setState(RobotState state) {
