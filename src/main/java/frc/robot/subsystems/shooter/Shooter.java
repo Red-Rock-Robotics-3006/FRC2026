@@ -3,10 +3,12 @@ package frc.robot.subsystems.shooter;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -14,6 +16,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.shooter.autoaim.EditableShotParameter;
 import frc.robot.subsystems.shooter.autoaim.ShotParameter;
 import redrocklib.logging.SmartDashboardNumber;
 import redrocklib.util.LerpingSmartDashboardNumber;
@@ -32,11 +35,13 @@ public class Shooter extends SubsystemBase{
 
     private RedRockTalon shooterLeftMotor = new RedRockTalon(41, "shooter-left-motor", "*");
     private RedRockTalon hoodMotor = new RedRockTalon(43, "shooter-hood-motor", "*");
+
+    private EditableShotParameter hubShotParameter = new EditableShotParameter(30, 200, "hubShot True Parameter");
     
     private LerpingSmartDashboardNumber hoodRestrictions = 
         new LerpingSmartDashboardNumber(
-            10, 0, 
-            45, 9, 
+            13, 0,
+            50, 10.1,
             "shooter/hood/angle-degrees", "shooter/hood/motor-rotations", 
             kEnableShooterTuning && true);
     
@@ -47,12 +52,13 @@ public class Shooter extends SubsystemBase{
             .withPeakForwardDutyCycle(1)
             .withPeakReverseDutyCycle(-1)
             .withNeutralMode(NeutralModeValue.Coast)
+            .withInverted(InvertedValue.CounterClockwise_Positive)
         ).withSlot0Configs(
             new Slot0Configs()
             .withKA(0)
-            .withKS(0)
-            .withKV(0.133)
-            .withKP(0.5)
+            .withKS(0.25)
+            .withKV(0.127)
+            .withKP(0.25)
             .withKI(0)
             .withKD(0)
         ).withFollowerMotor(new TalonFX(42, "*"), MotorAlignmentValue.Opposed);
@@ -62,20 +68,21 @@ public class Shooter extends SubsystemBase{
             .withPeakForwardDutyCycle(1)
             .withPeakReverseDutyCycle(-1)
             .withNeutralMode(NeutralModeValue.Brake)
+            .withInverted(InvertedValue.CounterClockwise_Positive)
         ).withSlot0Configs(
             new Slot0Configs()
             .withKA(0)
             .withKS(0)
             .withKV(0)
-            .withKP(7)
+            .withKP(3)
             .withKI(0)
             .withKD(0)
             .withGravityType(GravityTypeValue.Elevator_Static)
         ).withMotionMagicConfigs(
             new MotionMagicConfigs()
-                .withMotionMagicAcceleration(100)
-                .withMotionMagicCruiseVelocity(400)
-                .withMotionMagicJerk(10000)
+                .withMotionMagicAcceleration(1900)
+                .withMotionMagicCruiseVelocity(50)
+                .withMotionMagicJerk(9999)
         ).withResetSpeed(-0.2);
 
         hoodMotor.resetMotor();
@@ -112,6 +119,12 @@ public class Shooter extends SubsystemBase{
     }
 
     public void setShooterSpeed(double rpm) {
+        if (Double.compare(0, rpm) == 0) {
+            this.shooterLeftMotor.motor.setControl(
+                new CoastOut()
+            );
+            return;
+        }
         this.shooterLeftMotor.motor.setControl(
             new VelocityVoltage(rpm / 60)
             .withEnableFOC(true)
@@ -140,6 +153,11 @@ public class Shooter extends SubsystemBase{
     public boolean atHoodAngle() {
         return Math.abs(hoodMotor.motor.getPosition().getValueAsDouble() - this.targetHoodPositionMotorRotations)
             < hoodRestrictions.convertOutputByRate(hoodTolerance.getNumber());
+    }
+
+    public void setHubShot() {
+        this.setHoodAngle(hubShotParameter.getHoodAngle());
+        this.setShooterSpeed(hubShotParameter.getShooterRPM());
     }
 
     @Deprecated

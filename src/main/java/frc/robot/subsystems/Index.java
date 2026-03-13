@@ -4,6 +4,8 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -22,7 +24,7 @@ public class Index extends SubsystemBase {
     private RedRockTalon indexMotor = new RedRockTalon(31, "index-motor", "*");
     private Slot1Configs slot1Configs = new Slot1Configs();
 
-    private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 4500).withTuningEnabled(true);
+    private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 0.5).withTuningEnabled(true); //SHOULD BE RPM FOR VELOCITY VOLTAGE
     private SmartDashboardNumber indexReverseSpeed = new SmartDashboardNumber("index/index reverse speed", -3000).withTuningEnabled(true);
 
     private final double dyeRotorGearRatio = 25 * 44 / 24;
@@ -77,7 +79,8 @@ public class Index extends SubsystemBase {
     }
 
     public void startIndex() {
-        this.setIndexSpeed(indexSpeed.getNumber());
+        // this.setIndexSpeed(indexSpeed.getNumber());
+        this.indexMotor.motor.setControl(new DutyCycleOut(indexSpeed.getNumber()));
     }
 
     public void reverseIndex() {
@@ -85,7 +88,7 @@ public class Index extends SubsystemBase {
     }
 
     public void stopIndex() {
-        this.setIndexSpeed(0);
+        this.indexMotor.motor.setControl(new NeutralOut());
     }
 
     public void khangaiIsAChud() {

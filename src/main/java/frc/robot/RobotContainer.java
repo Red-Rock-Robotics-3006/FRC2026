@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Intake;
-// import frc.robot.subsystems.Superstructure;
-// import frc.robot.subsystems.Superstructure.RobotState;
+import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.Superstructure.RobotState;
 import frc.robot.subsystems.shooter.autoaim.EditableShotParameter;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
@@ -24,11 +24,11 @@ public class RobotContainer {
     private final double kTriggerThreshold = 0.1;
 
     public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(joystick);
-    // private final Superstructure superstructure = Superstructure.getInstance();
+    private final Superstructure superstructure = Superstructure.getInstance();
     private final Climber climber = Climber.getInstance();
     // public final LED led = LED.getInstance();
 
-    private final Intake intake = Intake.getInstance();
+    // private final Intake intake = Intake.getInstance();
 
     // private final Autos autos = Autos.getInstance();
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
@@ -69,8 +69,8 @@ public class RobotContainer {
         // joystick.back().onTrue(drivetrain.resetHeadingCommand());
 
         joystick.leftTrigger(kTriggerThreshold)
-            .onTrue(intake.startIntakeCommand())
-            .onFalse(intake.stopIntakeCommand());
+            .onTrue(superstructure.intake.startIntakeCommand())
+            .onFalse(superstructure.intake.stopIntakeCommand());
 
         // joystick.rightTrigger(kTriggerThreshold)
         //     .onTrue(superstructure.setStateCommand(RobotState.FULL_TRACKING))
@@ -78,15 +78,24 @@ public class RobotContainer {
         //         superstructure.setStateCommand(RobotState.TURRET_TRACKING),
         //         superstructure.intake.deployIntakeCommand()));
             
-        // joystick.leftBumper() 
-        //     .onTrue(superstructure.intake.pulsateIntakeCommand())
-        //     .onFalse(superstructure.intake.deployIntakeCommand());
+        joystick.leftBumper() 
+            .onTrue(superstructure.intake.pulsateIntakeCommand())
+            .onFalse(superstructure.intake.deployIntakeCommand());
 
-        // joystick.rightBumper() //manual hub shot
-        //     .onTrue(superstructure.setManualShotParameterCommand(hubShotParameter))
-        //     .onFalse(Commands.parallel(
-        //         superstructure.setStateCommand(RobotState.IDLE),
-        //         superstructure.intake.deployIntakeCommand()));
+        joystick.a()
+            .onTrue(superstructure.intake.deployIntakeCommand());
+
+        joystick.x()
+            .onTrue(superstructure.intake.pushRetractIntakeCommand());
+
+        joystick.b()
+            .onTrue(superstructure.intake.resetIntakeExtensionCommand());
+
+        joystick.rightBumper() //manual hub shot
+            .onTrue(superstructure.setManualShotParameterCommand())
+            .onFalse(Commands.parallel(
+                superstructure.setStateCommand(RobotState.IDLE)));
+                // superstructure.intake.deployIntakeCommand()));
             
         // joystick.a()
         //     .onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
@@ -104,18 +113,18 @@ public class RobotContainer {
         // joystick.povRight()
         //     .onTrue(superstructure.resetShooterHoodCommand());
 
-        joystick.povUp() //left paddle
-            .onTrue(Commands.sequence(
-                // superstructure.setStateCommand(RobotState.IDLE),
-                // superstructure.intakeSafeStowCommand(),
-                climber.raiseClimberCommand()))
-            .onFalse(climber.stopClimberCommand());
+        // joystick.povUp() //left paddle
+        //     .onTrue(Commands.sequence(
+        //         // superstructure.setStateCommand(RobotState.IDLE),
+        //         // superstructure.intakeSafeStowCommand(),
+        //         climber.raiseClimberCommand()))
+        //     .onFalse(climber.stopClimberCommand());
 
-        joystick.povDown() //right paddle
-            .onTrue(Commands.sequence(
-                // superstructure.intakeSafeStowCommand(),
-                climber.lowerClimberCommand()))
-            .onFalse(climber.stopClimberCommand());
+        // joystick.povDown() //right paddle
+        //     .onTrue(Commands.sequence(
+        //         // superstructure.intakeSafeStowCommand(),
+        //         climber.lowerClimberCommand()))
+        //     .onFalse(climber.stopClimberCommand());
 
         // joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
         //     .onTrue(led.togglePoliceCommand());
