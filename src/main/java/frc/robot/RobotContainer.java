@@ -10,12 +10,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.Intake;
+// import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.RobotState;
-import frc.robot.subsystems.shooter.autoaim.EditableShotParameter;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 public class RobotContainer {
@@ -32,9 +30,6 @@ public class RobotContainer {
 
     // private final Autos autos = Autos.getInstance();
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
-
-    private EditableShotParameter lerpingShotParameter = new EditableShotParameter(20, 3000, "lerping shot parameter");
-    private EditableShotParameter hubShotParameter = new EditableShotParameter(30, 3000, "hub shot parameter");
 
     public RobotContainer() {
         configureSelector();
@@ -85,9 +80,6 @@ public class RobotContainer {
         joystick.a()
             .onTrue(superstructure.intake.deployIntakeCommand());
 
-        joystick.x()
-            .onTrue(superstructure.intake.pushRetractIntakeCommand());
-
         joystick.b()
             .onTrue(superstructure.intake.resetIntakeExtensionCommand());
 
@@ -103,9 +95,9 @@ public class RobotContainer {
         // joystick.b()
         //     .onTrue(superstructure.setStateCommand(RobotState.IDLE));
         
-        // joystick.x() //manual lerp tuning shot
-        //     .onTrue(superstructure.setLerpTuneShotParameterCommand(lerpingShotParameter))
-        //     .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+        joystick.x() //manual lerp tuning shot
+            .onTrue(superstructure.setLerpTuneParameterCommand())
+            .onFalse(superstructure.setStateCommand(RobotState.IDLE));
 
         // joystick.y()
         //     .onTrue(superstructure.intakeSafeStowCommand());
@@ -113,18 +105,18 @@ public class RobotContainer {
         // joystick.povRight()
         //     .onTrue(superstructure.resetShooterHoodCommand());
 
-        // joystick.povUp() //left paddle
-        //     .onTrue(Commands.sequence(
-        //         // superstructure.setStateCommand(RobotState.IDLE),
-        //         // superstructure.intakeSafeStowCommand(),
-        //         climber.raiseClimberCommand()))
-        //     .onFalse(climber.stopClimberCommand());
+        joystick.povUp() //left paddle
+            .onTrue(Commands.sequence(
+                // superstructure.setStateCommand(RobotState.IDLE),
+                // superstructure.intakeSafeStowCommand(),
+                climber.raiseClimberCommand()))
+            .onFalse(climber.stopClimberCommand());
 
-        // joystick.povDown() //right paddle
-        //     .onTrue(Commands.sequence(
-        //         // superstructure.intakeSafeStowCommand(),
-        //         climber.lowerClimberCommand()))
-        //     .onFalse(climber.stopClimberCommand());
+        joystick.povDown() //right paddle
+            .onTrue(Commands.sequence(
+                // superstructure.intakeSafeStowCommand(),
+                climber.lowerClimberCommand()))
+            .onFalse(climber.stopClimberCommand());
 
         // joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
         //     .onTrue(led.togglePoliceCommand());

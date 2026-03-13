@@ -93,7 +93,7 @@ public class Index extends SubsystemBase {
 
     public void khangaiIsAChud() {
         this.indexMotor.motor.setPosition(this.indexMotor.motor.getPosition().getValueAsDouble() % dyeRotorGearRatio);
-        this.indexMotor.motor.setControl(new PositionVoltage(indexSafePosition.getNumber()).withSlot(1));
+        this.indexMotor.motor.setControl(new PositionVoltage(indexSafePosition.getNumber()).withSlot(0).withEnableFOC(true).withOverrideBrakeDurNeutral(true));
     }
 
     public boolean inSafePosition() {

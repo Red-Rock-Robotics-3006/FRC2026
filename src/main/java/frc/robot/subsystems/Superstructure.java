@@ -227,29 +227,18 @@ public class Superstructure extends SubsystemBase {
         return this.robotState;
     }
 
-    public void setManualShotParameter(ShotParameter shot) {
-        this.shooter.setShotParameter(shot);
-        this.setState(RobotState.MANUAL_SHOT);
-    }
-
-    public Command setManualShotParameterCommand(ShotParameter shot) {
-        return Commands.runOnce(() -> setManualShotParameter(shot), this);
-    }
-
     public Command setManualShotParameterCommand() {
         return Commands.sequence(
-            Commands.runOnce(() -> this.shooter.setHubShot(), this, this.shooter),
+            Commands.runOnce(() -> this.shooter.setManualShot(), this, this.shooter),
             Commands.runOnce(() -> this.setState(RobotState.MANUAL_SHOT))
         );
     }
 
-    public void setLerpTuneShotParameter(ShotParameter shot) {
-        this.shooter.setShotParameter(shot);
-        this.setState(RobotState.LERP_TUNING);
-    }
-
-    public Command setLerpTuneShotParameterCommand(ShotParameter shot) {
-        return Commands.runOnce(() -> setLerpTuneShotParameter(shot), this);
+    public Command setLerpTuneParameterCommand() {
+        return Commands.sequence(
+            Commands.runOnce(() -> this.shooter.setLerpTuneShot(), this, this.shooter),
+            Commands.runOnce(() -> this.setState(RobotState.MANUAL_SHOT))
+        );
     }
 
     public Command resetShooterHoodCommand() {

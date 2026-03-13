@@ -36,7 +36,8 @@ public class Shooter extends SubsystemBase{
     private RedRockTalon shooterLeftMotor = new RedRockTalon(41, "shooter-left-motor", "*");
     private RedRockTalon hoodMotor = new RedRockTalon(43, "shooter-hood-motor", "*");
 
-    private EditableShotParameter hubShotParameter = new EditableShotParameter(30, 200, "hubShot True Parameter");
+    private EditableShotParameter manualShotParameter = new EditableShotParameter(30, 200, "shooter/manual shot parameter");
+    private EditableShotParameter lerpShotParameter = new EditableShotParameter(30, 200, "shooter/lerp shot parameter");
     
     private LerpingSmartDashboardNumber hoodRestrictions = 
         new LerpingSmartDashboardNumber(
@@ -155,9 +156,14 @@ public class Shooter extends SubsystemBase{
             < hoodRestrictions.convertOutputByRate(hoodTolerance.getNumber());
     }
 
-    public void setHubShot() {
-        this.setHoodAngle(hubShotParameter.getHoodAngle());
-        this.setShooterSpeed(hubShotParameter.getShooterRPM());
+    public void setManualShot() {
+        this.setHoodAngle(manualShotParameter.getHoodAngle());
+        this.setShooterSpeed(manualShotParameter.getShooterRPM());
+    }
+
+    public void setLerpTuneShot() {
+        this.setHoodAngle(lerpShotParameter.getHoodAngle());
+        this.setShooterSpeed(lerpShotParameter.getShooterRPM());
     }
 
     @Deprecated

@@ -47,17 +47,15 @@ public class Intake extends SubsystemBase{
             .withKP(7)
             .withKI(0)
             .withKD(0);
-        
+
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
             .withMotionMagicAcceleration(150)
             .withMotionMagicCruiseVelocity(50)
             .withMotionMagicJerk(10000000);
 
         boolean enableTuning = true;
-
-        double resetSpeed = -0.2;
-
-        double spikeThreshold = 10;
+        double resetSpeed = -0.1;
+        double spikeThreshold = 30;
                 
         this.driveMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()
@@ -79,11 +77,9 @@ public class Intake extends SubsystemBase{
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
-        ).withSlot0Configs(
-            slot0COnfigs
-        ).withMotionMagicConfigs(
-            motionMagicConfigs
-        ).withSpikeThreshold(spikeThreshold)
+        ).withSlot0Configs(slot0COnfigs)
+        .withMotionMagicConfigs(motionMagicConfigs)
+        .withSpikeThreshold(spikeThreshold)
         .withResetSpeed(resetSpeed)
         .withCurrentLimitConfigs(
             new CurrentLimitsConfigs()
@@ -99,11 +95,9 @@ public class Intake extends SubsystemBase{
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
-        ).withSlot0Configs(
-            slot0COnfigs
-        ).withMotionMagicConfigs(
-            motionMagicConfigs
-        ).withSpikeThreshold(spikeThreshold)
+        ).withSlot0Configs(slot0COnfigs)
+        .withMotionMagicConfigs(motionMagicConfigs)
+        .withSpikeThreshold(spikeThreshold)
         .withResetSpeed(resetSpeed)
         .withCurrentLimitConfigs(
             new CurrentLimitsConfigs()
@@ -146,10 +140,6 @@ public class Intake extends SubsystemBase{
         this.setExtensionPosition(intakePushRetractPosition.getNumber());
     }
 
-    public Command pushRetractIntakeCommand() { //FOR TESTING ONLY
-        return Commands.runOnce(() -> pushRetractIntake());
-    }
-
     public void pushDeployIntake() {
         this.setExtensionPosition(intakePushDeployPosition.getNumber());
     }
@@ -169,17 +159,8 @@ public class Intake extends SubsystemBase{
     public Command startIntakeCommand() {
         return Commands.sequence( 
             Commands.runOnce(() -> this.deployIntake(), this),
-            Commands.runOnce(() -> this.startIntake(), this),
-            Commands.waitUntil(() -> this.atTargetPosition()),
-            this.resetIntakeExtensionCommand()
+            Commands.runOnce(() -> this.startIntake(), this)
         );
-    }
-
-    public Command resetIntakeExtensionCommand() {
-        return Commands.parallel(
-            extensionLeftMotor.resetMotorCommand(),
-            extensionRightMotor.resetMotorCommand()
-            );
     }
 
     public Command reverseIntakeCommand() {
@@ -195,20 +176,28 @@ public class Intake extends SubsystemBase{
     }
 
     public Command deployIntakeCommand() {
-        return Commands.sequence(
+        return Commands.sequence( 
             Commands.runOnce(() -> this.deployIntake(), this),
+            Commands.waitUntil(() -> this.atTargetPosition() || this.extensionLeftMotor.aboveSpikeThreshold() || this.extensionRightMotor.aboveSpikeThreshold()),
             this.resetIntakeExtensionCommand()
         );
     }
 
     public Command pulsateIntakeCommand() {
         return Commands.sequence(
-                Commands.runOnce(() -> this.pushRetractIntake(), this),
-                Commands.waitUntil(() -> this.atTargetPosition()),
-                Commands.waitSeconds(0.15),
-                Commands.runOnce(() -> this.pushDeployIntake(), this),
-                Commands.waitUntil(() -> this.atTargetPosition())
+            Commands.runOnce(() -> this.pushRetractIntake(), this),
+            Commands.waitUntil(() -> this.atTargetPosition()),
+            Commands.waitSeconds(0.15),
+            Commands.runOnce(() -> this.pushDeployIntake(), this),
+            Commands.waitUntil(() -> this.atTargetPosition())
         ).repeatedly();
+    }
+
+    public Command resetIntakeExtensionCommand() {
+        return Commands.parallel(
+            extensionLeftMotor.resetMotorCommand(),
+            extensionRightMotor.resetMotorCommand()
+        );
     }
 
     @Override
