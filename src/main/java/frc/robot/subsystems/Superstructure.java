@@ -7,6 +7,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -38,7 +39,15 @@ public class Superstructure extends SubsystemBase {
     private SmartDashboardNumber blueAllianceZoneX = new SmartDashboardNumber("superstructure/blue alliance zone x", 4.38, kTuning);
     private SmartDashboardNumber redAllianceZoneX = new SmartDashboardNumber("superstructure/red alliance zone x", 12.16, kTuning);
 
-    private final ShotParameter IDLE = new ShotParameter(14, 0);
+    private SmartDashboardNumber lobDisableZoneUpperY = new SmartDashboardNumber("superstructure/lob disable zone upper y", 4.5, kTuning);
+    private SmartDashboardNumber lobDisableZoneLowerY = new SmartDashboardNumber("superstructure/lob disable zone lower y", 3.44, kTuning);
+    private final double midfieldY = Units.inchesToMeters(158.845);
+
+    private final double blueTrenchX = Units.inchesToMeters(182.11);
+    private final double redTrenchX = Units.inchesToMeters(469.11);
+    private SmartDashboardNumber trenchZoneTolerance = new SmartDashboardNumber("superstructure/trench zone tolerance", 0.5, kTuning); //tolerance for hood near trench, probably best to be generous with this one
+
+    private final ShotParameter SHOOTER_IDLE_PARAMETER = new ShotParameter(14, 0);
 
     private Field2d field2d = new Field2d();
     private FieldObject2d fieldObject2d = field2d.getObject("poses");
@@ -50,7 +59,6 @@ public class Superstructure extends SubsystemBase {
         SHOOTING_WHILE_MOVING, //mostly for redundancy, flywheels spinning, hood tracking, turret tracking, dt speed > 0
 
         MANUAL_SHOT, //any manual shot, flywheels spinning, turret at set angle, hood at set angle
-
         LERP_TUNING, //for tuning the lerp table (prob dont need this state for comp), turret tracking, hood at set angle, flywheels at set rpm
 
         IDLE //mechanisms all idle (on disable maybe?)
@@ -68,8 +76,22 @@ public class Superstructure extends SubsystemBase {
         return drivetrain.isBlue() ? shooterPose.getX() < blueAllianceZoneX.getNumber() : shooterPose.getX() > redAllianceZoneX.getNumber();
     }
 
+    private boolean inLobEnabledZone() {
+        return shooterPose.getY() > lobDisableZoneUpperY.getNumber() || shooterPose.getY() < lobDisableZoneLowerY.getNumber();
+    }
+
+    private boolean inLobUpperZone() {
+        return shooterPose.getY() > midfieldY;
+    }
+
+    private boolean nearTrench() {
+        return drivetrain.isBlue() ?
+            (shooterPose.getX() > blueTrenchX - trenchZoneTolerance.getNumber() && shooterPose.getX() < blueTrenchX + trenchZoneTolerance.getNumber()) :
+            (shooterPose.getX() > redTrenchX - trenchZoneTolerance.getNumber() && shooterPose.getX() < redTrenchX + trenchZoneTolerance.getNumber());
+    }
+
     private boolean readyToShoot() {
-        return shooter.atHoodAngle() && shooter.atShooterSpeed();// && turret.atTurretAngle();
+        return shooter.atHoodAngle() && shooter.atShooterSpeed();// && turret.atTurretAngle(); //UNCOMMENT ONCE TURRET IS DONE MECHANICALLY AND IS TUNED
     }
 
     private Pose2d dtPose;
@@ -91,16 +113,19 @@ public class Superstructure extends SubsystemBase {
             new Rotation2d()
         );
 
-        Pose2d staticTargetPose = this.inAllianceZone() ? 
-            (isBlue ? Localization.blueHub : Localization.redHub) :
-            new Pose2d(); // will be lob poses later
+        Pose2d staticTargetPose = 
+            this.inAllianceZone() ? 
+                (isBlue ? Localization.blueHub : Localization.redHub) :
+                (isBlue ? 
+                    (inLobUpperZone() ? Localization.blueLobTargets[0] : Localization.blueLobTargets[1]) : 
+                    (inLobUpperZone() ? Localization.redLobTargets[0] : Localization.redLobTargets[1]));
 
         ShotParameter staticShotParameter =  (this.inAllianceZone()) ? 
             InterpolatingTable.get(shooterPose.minus(staticTargetPose).getTranslation().getNorm()) :
             LobInterpolatingTable.get(shooterPose.minus(staticTargetPose).getTranslation().getNorm()); 
             //calculates exit velocity using static pose
         
-        double distanceToHub = shooterPose.getTranslation().getDistance(staticTargetPose.getTranslation());
+        double distanceToTarget = shooterPose.getTranslation().getDistance(staticTargetPose.getTranslation());
         double exitVelocity = SOTMCalcs.rpmToExitVelocity(staticShotParameter.getShooterRPM());
 
         double[] fieldCentricRobotVelocity = SOTMCalcs.rotate(state.Speeds.vxMetersPerSecond, state.Speeds.vyMetersPerSecond, dtRotation);
@@ -118,16 +143,17 @@ public class Superstructure extends SubsystemBase {
             fieldCentricRobotVelocity[0] + shooterPoseVelocity[0],
             fieldCentricRobotVelocity[1] + shooterPoseVelocity[1],
             exitVelocity,
-            distanceToHub),
+            distanceToTarget),
             new Rotation2d());
 
         this.dynamicTargetPose = staticTargetPose.transformBy(sotmOffset);
 
+        // ACTUAL SHOT PARAMETER FOR ADJUSTED SOTM POSE
         ShotParameter dynamicShotParameter =  (this.inAllianceZone()) ? 
             InterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm()) :
             LobInterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm());
-            // actual shot parameter for adjusted sotm pose
-
+            
+        // ACTUAL TURRET ANGLE FOR ADJUSTED SOTM POSE
         Rotation2d turretTargetAngle = 
             Rotation2d.fromRadians(
                 Math.atan2(
@@ -139,24 +165,27 @@ public class Superstructure extends SubsystemBase {
             case MANUAL_SHOT:
                 if (readyToShoot()) index.startIndex();
                 break;
-            case LERP_TUNING:
+            case LERP_TUNING: //UNCOMMENT ONCE TURRET IS DONE MECHANICALLY AND IS TUNED
                 // turret.setTurretAngle(turretTargetAngle);
-                // if (readyToShoot()) index.startIndex();
+                if (readyToShoot()) index.startIndex();
                 break;
             case SHOOTING_WHILE_MOVING:
                 break;
             case SHOOTING:
                 if (!readyToShoot()) setState(RobotState.FULL_TRACKING);
             case FULL_TRACKING:
-                shooter.setShotParameter(dynamicShotParameter);
+                if (!inAllianceZone() && !inLobEnabledZone()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
+                else {shooter.setShotParameter(dynamicShotParameter);}
 
                 if (readyToShoot()) setState(RobotState.SHOOTING);
             case TURRET_TRACKING:
-                // turret.setTurretAngle(turretTargetAngle);
+                // turret.setTurretAngle(turretTargetAngle); //UNCOMMENT ONCE TURRET IS DONE MECHANICALLY AND IS TUNED
                 break;
             case IDLE:
                 break;
         }
+
+        if (nearTrench()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
 
 
         // SMARTDASHBOARD LOGGING | COMPETITION
@@ -175,8 +204,8 @@ public class Superstructure extends SubsystemBase {
             poses.add(staticTargetPose);
             fieldObject2d.setPoses(poses);
             
-            SmartDashboard.putNumberArray("superstructure/target pose", dynamicTargetPose.toMatrix().getData()); //for tuning, prob dont need for comp
-            SmartDashboard.putNumber("superstructure/distance to hub", distanceToHub); //for tuning, prob dont need for comp
+            SmartDashboard.putNumberArray("superstructure/target pose", dynamicTargetPose.toMatrix().getData());
+            SmartDashboard.putNumber("superstructure/distance to hub", distanceToTarget);
             
             SmartDashboard.putNumber("auto aim/sotm offset/x", sotmOffset.getX());
             SmartDashboard.putNumber("auto aim/sotm offset/y", sotmOffset.getY());
@@ -201,17 +230,17 @@ public class Superstructure extends SubsystemBase {
         switch (state) {
             case IDLE:
                 index.stopIndex();
-                shooter.setShotParameter(IDLE);
+                shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);
                 break;
             case SHOOTING:
-                // index.startIndex();
+                index.startIndex();
                 break;
             case FULL_TRACKING:
-                // index.stopIndex();
+                index.stopIndex();
                 break;
             case TURRET_TRACKING:
-                // index.stopIndex();
-                shooter.setShotParameter(IDLE);
+                index.stopIndex();
+                shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);
                 break;
             default:
                 break;
@@ -237,15 +266,15 @@ public class Superstructure extends SubsystemBase {
     public Command setLerpTuneParameterCommand() {
         return Commands.sequence(
             Commands.runOnce(() -> this.shooter.setLerpTuneShot(), this, this.shooter),
-            Commands.runOnce(() -> this.setState(RobotState.MANUAL_SHOT))
+            Commands.runOnce(() -> this.setState(RobotState.LERP_TUNING))
         );
     }
 
-    public Command resetShooterHoodCommand() {
+    public Command resetShooterHoodCommand() { //for tuning, delete or reimplement this for comp
         return shooter.resetHoodCommand();
     }
 
-    public Command intakeSafeStowCommand() {
+    public Command intakeSafeStowCommand() { //TODO: test this
         return Commands.sequence(
             // intake.stopIntakeCommand(),
             // index.khangaiIsAChudCommand(),

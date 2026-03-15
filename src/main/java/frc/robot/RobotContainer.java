@@ -26,8 +26,6 @@ public class RobotContainer {
     private final Climber climber = Climber.getInstance();
     // public final LED led = LED.getInstance();
 
-    // private final Intake intake = Intake.getInstance();
-
     // private final Autos autos = Autos.getInstance();
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
@@ -58,10 +56,13 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+
+        // COMP BINDINGS
+
         // RobotModeTriggers.disabled().onTrue(superstructure.setStateCommand(RobotState.IDLE).ignoringDisable(true));
         // RobotModeTriggers.teleop().onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
-        // joystick.back().onTrue(drivetrain.resetHeadingCommand());
+        joystick.back().onTrue(drivetrain.resetHeadingCommand());
 
         joystick.leftTrigger(kTriggerThreshold)
             .onTrue(superstructure.intake.startIntakeCommand())
@@ -76,12 +77,6 @@ public class RobotContainer {
         joystick.leftBumper() 
             .onTrue(superstructure.intake.pulsateIntakeCommand())
             .onFalse(superstructure.intake.deployIntakeCommand());
-
-        joystick.a()
-            .onTrue(superstructure.intake.deployIntakeCommand());
-
-        joystick.b()
-            .onTrue(superstructure.intake.resetIntakeExtensionCommand());
 
         joystick.rightBumper() //manual hub shot
             .onTrue(superstructure.setManualShotParameterCommand())
@@ -120,6 +115,18 @@ public class RobotContainer {
 
         // joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
         //     .onTrue(led.togglePoliceCommand());
+
+        // TESTING BINDINGS
+
+        joystick.a()
+            .onTrue(superstructure.intake.stowIntakeCommand());
+
+        joystick.b()
+            .onTrue(superstructure.intake.resetIntakeExtensionCommand());
+
+        joystick.y()
+            .onTrue(superstructure.intake.reverseIntakeCommand())
+            .onFalse(superstructure.intake.stopIntakeCommand());
     }
 
     // private void configureSysIDBindings() {

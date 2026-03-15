@@ -1,13 +1,13 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -24,7 +24,7 @@ public class Index extends SubsystemBase {
     private RedRockTalon indexMotor = new RedRockTalon(31, "index-motor", "*");
     private Slot1Configs slot1Configs = new Slot1Configs();
 
-    private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 0.5).withTuningEnabled(true); //SHOULD BE RPM FOR VELOCITY VOLTAGE
+    private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 1).withTuningEnabled(true); //SHOULD BE RPM FOR MM VELOCITY VOLTAGE
     private SmartDashboardNumber indexReverseSpeed = new SmartDashboardNumber("index/index reverse speed", -3000).withTuningEnabled(true);
 
     private final double dyeRotorGearRatio = 25 * 44 / 24;
@@ -48,6 +48,11 @@ public class Index extends SubsystemBase {
             .withKP(0)
             .withKI(0)
             .withKD(0)
+        ).withMotionMagicConfigs(
+            new MotionMagicConfigs()
+            .withMotionMagicAcceleration(0)
+            .withMotionMagicCruiseVelocity(0)
+            .withMotionMagicJerk(0)
         ).withCurrentLimitConfigs(
             new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(45)
@@ -70,12 +75,7 @@ public class Index extends SubsystemBase {
     }
 
     private void setIndexSpeed(double rpm) {
-        this.indexMotor.motor.setControl(
-            new VelocityVoltage(rpm / 60)
-            .withEnableFOC(true)
-            .withSlot(0)
-            .withOverrideBrakeDurNeutral(false)
-        );
+        this.indexMotor.setMotionMagicVelocity(rpm);
     }
 
     public void startIndex() {
@@ -91,7 +91,7 @@ public class Index extends SubsystemBase {
         this.indexMotor.motor.setControl(new NeutralOut());
     }
 
-    public void khangaiIsAChud() {
+    public void khangaiIsAChud() { //TODO: run dutycycleout and tune mm for position for this command, then tune mm for velocity
         this.indexMotor.motor.setPosition(this.indexMotor.motor.getPosition().getValueAsDouble() % dyeRotorGearRatio);
         this.indexMotor.motor.setControl(new PositionVoltage(indexSafePosition.getNumber()).withSlot(0).withEnableFOC(true).withOverrideBrakeDurNeutral(true));
     }

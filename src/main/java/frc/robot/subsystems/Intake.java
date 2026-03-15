@@ -23,16 +23,16 @@ public class Intake extends SubsystemBase{
     private RedRockTalon extensionLeftMotor = new RedRockTalon(22, "intake-extension-left-motor", "*");
     private RedRockTalon extensionRightMotor = new RedRockTalon(23, "intake-extension-right-motor", "*");
 
-    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.5);
+    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.83333);
     private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.5);
 
-    private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 3.666016);
+    private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 4.71);
     private SmartDashboardNumber minExtensionRotation = new SmartDashboardNumber("intake/extension/min rotation", 0);
 
-    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0);
-    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 3.6);
-    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 3.4);
-    private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 1.5);
+    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0.2);
+    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 4.5);
+    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 4);
+    private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 2);
     private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.1);
 
     private double targetPosition = 0;
@@ -52,6 +52,12 @@ public class Intake extends SubsystemBase{
             .withMotionMagicAcceleration(150)
             .withMotionMagicCruiseVelocity(50)
             .withMotionMagicJerk(10000000);
+
+        CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(45)
+            .withSupplyCurrentLimitEnable(true)
+            .withStatorCurrentLimit(60)
+            .withStatorCurrentLimitEnable(true);
 
         boolean enableTuning = true;
         double resetSpeed = -0.1;
@@ -77,17 +83,13 @@ public class Intake extends SubsystemBase{
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
-        ).withSlot0Configs(slot0COnfigs)
+        )
+        .withSlot0Configs(slot0COnfigs)
         .withMotionMagicConfigs(motionMagicConfigs)
         .withSpikeThreshold(spikeThreshold)
         .withResetSpeed(resetSpeed)
-        .withCurrentLimitConfigs(
-            new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(45)
-            .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(60)
-            .withStatorCurrentLimitEnable(true)
-        ).withTuningEnabled(enableTuning);
+        .withCurrentLimitConfigs(currentLimitsConfigs)
+        .withTuningEnabled(enableTuning);
 
         this.extensionRightMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()
@@ -95,17 +97,13 @@ public class Intake extends SubsystemBase{
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
-        ).withSlot0Configs(slot0COnfigs)
+        )
+        .withSlot0Configs(slot0COnfigs)
         .withMotionMagicConfigs(motionMagicConfigs)
         .withSpikeThreshold(spikeThreshold)
         .withResetSpeed(resetSpeed)
-        .withCurrentLimitConfigs(
-            new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(45)
-            .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(60)
-            .withStatorCurrentLimitEnable(true)
-        ).withTuningEnabled(enableTuning);
+        .withCurrentLimitConfigs(currentLimitsConfigs)
+        .withTuningEnabled(enableTuning);
 
         this.extensionLeftMotor.motor.setPosition(maxExtensionRotation.getNumber());
         this.extensionRightMotor.motor.setPosition(maxExtensionRotation.getNumber());

@@ -18,11 +18,20 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Localization extends SubsystemBase{
     private static Localization instance = null;
+
     public static final Pose2d blueHub = new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84), Rotation2d.fromDegrees(0));
     public static final Pose2d redHub = new Pose2d(Units.inchesToMeters(469.11), Units.inchesToMeters(158.84), Rotation2d.fromDegrees(0));
 
-    public static final Pose2d[] redLobTargets = {new Pose2d(), new Pose2d()};
-    public static final Pose2d[] blueLobTargets = {new Pose2d(), new Pose2d()};
+    // first pose is UPPER lob pose, second pose is LOWER lob pose
+    public static final Pose2d[] redLobTargets = {
+        new Pose2d(Units.inchesToMeters(0), Units.inchesToMeters(0), Rotation2d.fromDegrees(0)),
+        new Pose2d(Units.inchesToMeters(0), Units.inchesToMeters(0), Rotation2d.fromDegrees(0))};
+        
+    public static final Pose2d[] blueLobTargets = {
+        // new Pose2d(Units.inchesToMeters(0), Units.inchesToMeters(0), Rotation2d.fromDegrees(0)),
+        // new Pose2d(Units.inchesToMeters(0), Units.inchesToMeters(0), Rotation2d.fromDegrees(0))};
+        new Pose2d(3, 6.4, Rotation2d.fromDegrees(0)),
+        new Pose2d(3, 1.7, Rotation2d.fromDegrees(0))};
 
     private static ArrayList<RedRockCamera> cameras = new ArrayList<>();
 
@@ -48,7 +57,7 @@ public class Localization extends SubsystemBase{
     private Localization() {
         super("localization");
 
-        cameras.add(new RedRockCamera("Photon-Rubik-Everything")
+        cameras.add(new RedRockCamera("Photon-Rubik-Everything") //thriftycam on right side
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
@@ -56,7 +65,7 @@ public class Localization extends SubsystemBase{
                 )
             )
         );
-        cameras.add(new RedRockCamera("Photon-Rubik-Nothing")
+        cameras.add(new RedRockCamera("Photon-Rubik-Nothing") //thriftycam on left side
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
@@ -65,7 +74,7 @@ public class Localization extends SubsystemBase{
             )
         );
 
-        cameras.add(new RedRockCamera("Photon-Rubik-Booger") //is on a turret
+        cameras.add(new RedRockCamera("Photon-Rubik-Booger") //limelight 4 on turret
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
