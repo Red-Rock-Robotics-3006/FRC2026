@@ -66,7 +66,9 @@ public class Turret extends SubsystemBase{
 
     private double crtDegrees() {
         double e1 = ccoderA.getPosition().getValueAsDouble();
+        if (e1 < 0) e1 = 1 - e1;
         double e2 = ccoderB.getPosition().getValueAsDouble();
+        if (e2 < 0) e2 = 1 - e2;
 
         double tooth1 = e1 * kCcoderAToothCount;
         double remainder = tooth1 - (int)(tooth1);
