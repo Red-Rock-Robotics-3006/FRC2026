@@ -30,35 +30,33 @@ public class RobotContainer {
     private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
     public RobotContainer() {
-        configureSelector();
-        configureBindings();
+        configureCompSelector();
+        configureCompBindings();
+
+        configureTestSelector();
+        configureTestBindings();
         // configureSysIDBindings();
     }
 
-    public void configureSelector() {
+    private void configureCompSelector() {
         autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
-
-        // REAL AUTOS
 
         // autoChooser.addOption("Right Midtake Leave", autos.R_MS_L());
         // autoChooser.addOption("Right Two Midtakes Leave", autos.R_MS_MS_L());
         // autoChooser.addOption("Right Midtake Outpost", autos.R_MS_OS());
         // autoChooser.addOption("Right Two Midtakes Outpost", autos.R_MS_MS_OS());
 
-        // // PATHS AUTOS
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+    }
 
+    private void configureTestSelector() {
         // autoChooser.addOption("PATHS - Right Midtake Leave", autos.R_MS_L_Paths());
         // autoChooser.addOption("PATHS - Right Two Midtakes Leave", autos.R_MS_MS_L_Paths());
         // autoChooser.addOption("PATHS - Right Midtake Outpost", autos.R_MS_OS_Paths());
         // autoChooser.addOption("PATHS - Right Two Midtakes Outpost", autos.R_MS_MS_OS_Paths());
-
-        SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
-    private void configureBindings() {
-
-        // COMP BINDINGS
-
+    private void configureCompBindings() {
         // RobotModeTriggers.disabled().onTrue(superstructure.setStateCommand(RobotState.IDLE).ignoringDisable(true));
         // RobotModeTriggers.teleop().onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
@@ -81,8 +79,8 @@ public class RobotContainer {
         joystick.rightBumper() //manual hub shot
             .onTrue(superstructure.setManualShotParameterCommand())
             .onFalse(Commands.parallel(
-                superstructure.setStateCommand(RobotState.IDLE)));
-                // superstructure.intake.deployIntakeCommand()));
+                superstructure.setStateCommand(RobotState.IDLE),
+                superstructure.intake.deployIntakeCommand()));
             
         // joystick.a()
         //     .onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
@@ -112,11 +110,11 @@ public class RobotContainer {
                 // superstructure.intakeSafeStowCommand(),
                 climber.lowerClimberCommand()))
             .onFalse(climber.stopClimberCommand());
+    }
 
+    private void configureTestBindings() {
         // joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
         //     .onTrue(led.togglePoliceCommand());
-
-        // TESTING BINDINGS
 
         joystick.a()
             .onTrue(superstructure.intake.stowIntakeCommand());
