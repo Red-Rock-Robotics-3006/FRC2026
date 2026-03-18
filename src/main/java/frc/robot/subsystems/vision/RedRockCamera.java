@@ -16,6 +16,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,8 +32,11 @@ public class RedRockCamera {
     public final PhotonCamera camera;
     public final PhotonPoseEstimator poseEstimator;
     public final AprilTagFieldLayout fieldLayout;
-    public Transform3d robotToCamera = new Transform3d(new Translation3d(), new Rotation3d());
+    private Transform3d robotToCamera = new Transform3d(new Translation3d(), new Rotation3d());
     private SmartDashboardNumber stdvX, stdvY, stdvTheta;
+
+    private Translation3d robotToCameraTranslation = new Translation3d();
+    private Rotation3d robotToCameraRotation = new Rotation3d();
 
     private Optional<EstimatedRobotPose> visionEst = Optional.empty();
 
@@ -65,6 +69,17 @@ public class RedRockCamera {
 
     public RedRockCamera withRobotToCameraTransform(Transform3d transform) {
         robotToCamera = transform;
+        robotToCameraTranslation = transform.getTranslation();
+        robotToCameraRotation = transform.getRotation();
+        poseEstimator.setRobotToCameraTransform(robotToCamera);
+        return this;
+    }
+
+    public RedRockCamera withDynamicRotationTransform(Rotation2d rotation) {
+        robotToCamera = new Transform3d(
+            robotToCameraTranslation, 
+            robotToCameraRotation
+                .rotateBy(new Rotation3d(rotation)));
         poseEstimator.setRobotToCameraTransform(robotToCamera);
         return this;
     }

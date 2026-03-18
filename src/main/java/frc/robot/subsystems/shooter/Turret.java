@@ -7,6 +7,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import redrocklib.logging.SmartDashboardNumber;
@@ -35,8 +36,8 @@ public class Turret extends SubsystemBase{
 
     private LerpingSmartDashboardNumber turretRestrictions
         = new LerpingSmartDashboardNumber(
-            0, 0, 
-            540, 20, 
+            -180, 0, 
+            270, 20, 
             "turret/angle-degrees", "turret/motor-rotations", 
             kEnableTurretTuning && true);
 
@@ -88,8 +89,17 @@ public class Turret extends SubsystemBase{
      * @param angle Desired angle of turret. 0 is facing forward on the robot, CCW+
      */
     public void setTurretAngle(Rotation2d angle) {
+        double currentAngle = this.getTruePositionDegrees();
+        double targetDeg = angle.getDegrees();
+
+        double dist = ((targetDeg - currentAngle + 180) % 360 + 360) % 360 - 180;
+        targetDeg = currentAngle + dist;
+
+        if (targetDeg < turretRestrictions.getMinInput()) targetDeg += 360;
+        else if (targetDeg > turretRestrictions.getMaxInput()) targetDeg -= 360;
+
         this.setTurretPosition(
-            turretRestrictions.getValue(angle.getDegrees())
+            turretRestrictions.getValue(targetDeg)
         );
     }
 
@@ -113,9 +123,24 @@ public class Turret extends SubsystemBase{
             < turretRestrictions.convertOutputByRate(turretTolerance.getNumber());
     }
 
+    public double getTruePositionDegrees() {
+        return turretRestrictions.getValueInverse(
+                this.turretMotor.motor.getPosition().getValueAsDouble()
+            );
+    }
+
+    public Rotation2d getRotation() {
+        return Rotation2d.fromDegrees(
+            this.getTruePositionDegrees()
+        );
+    }
+
     @Override
     public void periodic() {
         turretMotor.update();
+
+        SmartDashboard.putNumber("Turret/motor degrees", this.getTruePositionDegrees());
+        SmartDashboard.putNumber("Turret/CRT degrees", this.crtDegrees());
     }
 
     public static class TurretCalcs {
