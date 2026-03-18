@@ -13,12 +13,12 @@ public class LED extends SubsystemBase{
 
     private static LED instance = null;
 
-    private AddressableLED control = new AddressableLED(0);
-    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(69);
+    private AddressableLED control = new AddressableLED(9);
+    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(118);
 
-    public AddressableLEDBufferView left = buffer.createView(44, 68);
-    public AddressableLEDBufferView back = buffer.createView(24, 43);
-    public AddressableLEDBufferView right = buffer.createView(0, 22);
+    public AddressableLEDBufferView left = buffer.createView(79, 117);
+    public AddressableLEDBufferView back = buffer.createView(40, 78);
+    public AddressableLEDBufferView right = buffer.createView(1, 39);
 
     private Superstructure superstructure = Superstructure.getInstance();
     
@@ -67,24 +67,38 @@ public class LED extends SubsystemBase{
         ));
     }
 
+    public void blink(Color c1, Color c2, int freq) {
+        int fullCycle = freq * 2;
+        int segment = loopControl / fullCycle;
+        int cycle = loopControl % fullCycle;
+
+        double brightness = (cycle < freq)
+            ? (double) cycle / freq
+            : (double) (fullCycle - cycle) / freq;
+
+        Color active = (segment % 2 == 0) ? c1 : c2;
+
+        setLights(new Color(
+            active.red * brightness,
+            active.green * brightness,
+            active.blue * brightness
+        ));
+    }
+
+    public void blinkHard(Color c, int freq) {
+        if (loopControl % freq * 2 < freq) this.setLights(c);
+        else this.setLights(OFF);
+    }
+
     public void blinkSetLights(Color c, int blinks, int freq) {
         if (loopControl < freq * blinks) {
-            int cycle = loopControl % (freq * 2);
-            double brightness = cycle < freq
-                ? (double) cycle / freq
-                : (double)(freq * 2 - cycle) / freq;
-
-            setLights(new Color(
-                c.red * brightness,
-                c.green * brightness,
-                c.blue * brightness
-            ));
+            if (loopControl % freq * 2 < freq) this.setLights(c);
+            else this.setLights(OFF);
         }
         else setLights(c);
     }
 
     private int rainbowHue = 0;
-
     public void increaseHueControl() {rainbowControl.putNumber(rainbowControl.getNumber() + 1);}
     public void decreaseHueControl() {rainbowControl.putNumber(rainbowControl.getNumber() - 1);}
 
@@ -112,6 +126,7 @@ public class LED extends SubsystemBase{
         larson(left,  leftLarsonState,  c);
         larson(right, rightLarsonState, c);
         larson(back,  backLarsonState,  c);
+        this.buffer.setLED(0, OFF);
     }
 
     public void larson(AddressableLEDBufferView view, LarsonState state, Color c) {
@@ -151,12 +166,13 @@ public class LED extends SubsystemBase{
     private boolean policeEnabled = false;
 
     private void police() {
-        policeFancy(left);
-        policeAlternate(back);
-        policeFancy(right);
+        police(left);
+        police(back);
+        police(right);
+        this.buffer.setLED(0, OFF);
     }
 
-    private void policeFancy(AddressableLEDBufferView view) {
+    private void police(AddressableLEDBufferView view) {
         int length = view.getLength();
         int halfLength = length / 2;
         int quarterLength = halfLength / 2;
@@ -176,16 +192,6 @@ public class LED extends SubsystemBase{
         }
     }
 
-    private void policeAlternate(AddressableLEDBufferView view) {
-        int length = view.getLength();
-        int state = (loopControl / (int) policeSpeed.getNumber()) % 8;
-
-        for (int i = 0; i < length; i++) view.setLED(i, OFF);
-
-        if (state == 0 || state == 2) for (int i = 0; i < length; i++) view.setLED(i, BLUE);
-        else if (state == 4 || state == 6) for (int i = 0; i < length; i++) view.setLED(i, RED);
-    }
-
     private void togglePolice() {
         policeEnabled = !policeEnabled;
     }
@@ -200,15 +206,15 @@ public class LED extends SubsystemBase{
 
         switch (superstructure.getRobotState()) {
             case MANUAL_SHOT:
-                this.blink(BLUE, 10);
+                this.blink(BLUE, 5);
                 break;
             case LERP_TUNING:
-                this.blink(GREEN, 20);
+                this.blink(GREEN, 10);
                 break;
             case SHOOTING_WHILE_MOVING:
                 break;
             case SHOOTING:
-                this.blink(GREEN, 10);
+                this.blink(GREEN, 5);
                 break;
             case FULL_TRACKING:
                 this.setLights(GREEN);
@@ -222,8 +228,7 @@ public class LED extends SubsystemBase{
         }
 
         if (policeEnabled) this.police();
-        this.buffer.setLED(23, OFF);
-
+        
         this.control.setData(buffer);
     }
 

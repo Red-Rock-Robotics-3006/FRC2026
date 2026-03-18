@@ -121,6 +121,7 @@ public class Turret extends SubsystemBase{
     public static class TurretCalcs {
         public static double solveCRT(double e1, double e2) {
             int m1 = kCcoderAToothCount, m2 = kCcoderBToothCount;
+            @SuppressWarnings("unused")
             double M = m1 * m2; // 240.0
 
             // Brute-force search over k1: x = e1 + 15*k1, check if (x - e2) divisible by 16
