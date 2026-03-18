@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import redrocklib.logging.SmartDashboardNumber;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class LED extends SubsystemBase{
@@ -15,11 +16,11 @@ public class LED extends SubsystemBase{
     private static LED instance = null;
 
     private AddressableLED control = new AddressableLED(9);
-    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(69);
+    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(118);
 
-    public AddressableLEDBufferView left = buffer.createView(44, 68);
-    public AddressableLEDBufferView back = buffer.createView(24, 43);
-    public AddressableLEDBufferView right = buffer.createView(0, 22);
+    public AddressableLEDBufferView left = buffer.createView(79, 117);
+    public AddressableLEDBufferView back = buffer.createView(40, 78);
+    public AddressableLEDBufferView right = buffer.createView(1, 39);
     
     public final Color INIT_YELLOW = new Color(255, 165, 0);
     public final Color OFF = new Color(0, 0, 0);
@@ -35,10 +36,13 @@ public class LED extends SubsystemBase{
     private SmartDashboardNumber larsonSpeed = new SmartDashboardNumber("led/larson speed", 1);
     private SmartDashboardNumber policeSpeed = new SmartDashboardNumber("led/police speed", 6);
 
+    private SendableChooser<RobotState> ledModeChooser = new SendableChooser<RobotState>();
+
     private LED() {
         super("LED");
         
         this.initializeLights();
+        this.configureSelector();
     }
 
     public enum RobotState {
@@ -62,33 +66,61 @@ public class LED extends SubsystemBase{
         }
     }
 
+    public void configureSelector() {
+        ledModeChooser.setDefaultOption("IDLE", RobotState.IDLE);
+        ledModeChooser.setDefaultOption("TURRET_TRACKING", RobotState.TURRET_TRACKING);
+        ledModeChooser.setDefaultOption("FULL_TRACKING", RobotState.FULL_TRACKING);
+        ledModeChooser.setDefaultOption("SHOOTING", RobotState.SHOOTING);
+        ledModeChooser.setDefaultOption("MANUAL_SHOT", RobotState.MANUAL_SHOT);
+        ledModeChooser.setDefaultOption("POLICE", RobotState.POLICE);
+
+        SmartDashboard.putData("LED Mode Chooser", ledModeChooser);
+    }
+
     public void initializeLights() {
         this.control.setLength(this.buffer.getLength());
         this.control.setColorOrder(AddressableLED.ColorOrder.kRGB);
 
         this.setLights(INIT_YELLOW);
-        this.buffer.setLED(23, OFF);
         this.control.setData(buffer);
         
         this.control.start();
     }
 
-    // public void blink(Color c, int freq) {
-    //     if (loopControl % freq * 2 < freq) this.setLights(c);
-    //     else this.setLights(OFF);
-    // }
-
     public void blink(Color c, int freq) {
         int cycle = loopControl % (freq * 2);
         double brightness = cycle < freq
-            ? (double) cycle / freq          // fade in
-            : (double)(freq * 2 - cycle) / freq; // fade out
+            ? (double) cycle / freq
+            : (double)(freq * 2 - cycle) / freq;
 
         setLights(new Color(
             c.red * brightness,
             c.green * brightness,
             c.blue * brightness
         ));
+    }
+
+    public void blink(Color c1, Color c2, int freq) {
+        int fullCycle = freq * 2;
+        int segment = loopControl / fullCycle;
+        int cycle = loopControl % fullCycle;
+
+        double brightness = (cycle < freq)
+            ? (double) cycle / freq
+            : (double) (fullCycle - cycle) / freq;
+
+        Color active = (segment % 2 == 0) ? c1 : c2;
+
+        setLights(new Color(
+            active.red * brightness,
+            active.green * brightness,
+            active.blue * brightness
+        ));
+    }
+
+    public void blinkHard(Color c, int freq) {
+        if (loopControl % freq * 2 < freq) this.setLights(c);
+        else this.setLights(OFF);
     }
 
     public void blinkSetLights(Color c, int blinks, int freq) {
@@ -113,7 +145,7 @@ public class LED extends SubsystemBase{
         rainbowHue %= 180;
     }
 
-    private final int LARSON_SIZE = 6;
+    private final int LARSON_SIZE = 12;
 
     private static class LarsonState {
         int position = 0;
@@ -128,6 +160,7 @@ public class LED extends SubsystemBase{
         larson(left,  leftLarsonState,  c);
         larson(right, rightLarsonState, c);
         larson(back,  backLarsonState,  c);
+        this.buffer.setLED(0, OFF);
     }
 
     public void larson(AddressableLEDBufferView view, LarsonState state, Color c) {
@@ -166,8 +199,9 @@ public class LED extends SubsystemBase{
 
     private void police() {
         policeFancy(left);
-        policeAlternate(back);
+        policeFancy(back);
         policeFancy(right);
+        this.buffer.setLED(0, OFF);
     }
 
     private void policeFancy(AddressableLEDBufferView view) {
@@ -190,23 +224,23 @@ public class LED extends SubsystemBase{
         }
     }
 
-    private void policeAlternate(AddressableLEDBufferView view) {
-        int length = view.getLength();
-        int state = (loopControl / (int) policeSpeed.getNumber()) % 8;
+    // private void policeAlternate(AddressableLEDBufferView view) {
+    //     int length = view.getLength();
+    //     int state = (loopControl / (int) policeSpeed.getNumber()) % 8;
 
-        for (int i = 0; i < length; i++) view.setLED(i, OFF);
+    //     for (int i = 0; i < length; i++) view.setLED(i, OFF);
 
-        if (state == 0 || state == 2) for (int i = 0; i < length; i++) view.setLED(i, BLUE);
-        else if (state == 4 || state == 6) for (int i = 0; i < length; i++) view.setLED(i, RED);
-    }
+    //     if (state == 0 || state == 2) for (int i = 0; i < length; i++) view.setLED(i, BLUE);
+    //     else if (state == 4 || state == 6) for (int i = 0; i < length; i++) view.setLED(i, RED);
+    // }
 
     @Override
     public void periodic() {
         loopControl++;
 
-        switch (this.getRobotState()) {
+        switch (ledModeChooser.getSelected()) {
             case MANUAL_SHOT:
-                this.blink(BLUE, 10);
+                this.blink(BLUE, 5);
                 break;
             // case LERP_TUNING:
             //     this.blink(GREEN, 20);
@@ -214,7 +248,7 @@ public class LED extends SubsystemBase{
             case SHOOTING_WHILE_MOVING:
                 break;
             case SHOOTING:
-                this.blink(GREEN, 10);
+                this.blink(GREEN, 5);
                 break;
             case FULL_TRACKING:
                 this.setLights(GREEN);
@@ -229,9 +263,8 @@ public class LED extends SubsystemBase{
                 this.police();
         }
 
-        this.buffer.setLED(23, OFF);
-
         this.control.setData(buffer);
+        SmartDashboard.putString("robot state", this.getRobotState().toString());
     }
 
     public Command setRobotStateCommand(RobotState rs) {

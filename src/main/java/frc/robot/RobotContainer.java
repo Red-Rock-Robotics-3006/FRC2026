@@ -36,7 +36,7 @@ public class RobotContainer {
         ledModeChooser.addOption("TURRET_TRACKING", led.setRobotStateCommand(RobotState.TURRET_TRACKING));
         ledModeChooser.addOption("POLICE", led.setRobotStateCommand(RobotState.POLICE));
 
-        SmartDashboard.putData("LED Mode Chooser", ledModeChooser);
+        // SmartDashboard.putData("LED Mode Chooser", ledModeChooser);
     }
     private void configureBindings() {
         // joystick.rightBumper().onTrue(Commands.runOnce(() -> led.setRobotState(LED.RobotState.MANUAL_SHOT)));
