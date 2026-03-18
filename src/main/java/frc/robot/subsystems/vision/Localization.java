@@ -67,8 +67,8 @@ public class Localization extends SubsystemBase{
     private Localization() {
         super("localization");
 
-        //right (loom retractor side)
-        cameras.add(new RedRockCamera("Photon-Rubik-Everything") //thriftycam on right side
+        //thriftycam on right side (loom retractor)
+        cameras.add(new RedRockCamera("Photon-Rubik-Everything")
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(-11.376042), Units.inchesToMeters(2.325621), Units.inchesToMeters(7.979991)),
@@ -79,8 +79,8 @@ public class Localization extends SubsystemBase{
             )
         );
 
-        //left
-        cameras.add(new RedRockCamera("Photon-Rubik-Nothing") //thriftycam on left side
+        //thriftycam on left side (breaker)
+        cameras.add(new RedRockCamera("Photon-Rubik-Nothing") 
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
@@ -91,8 +91,8 @@ public class Localization extends SubsystemBase{
             )
         );
 
-        //turret
-        cameras.add(new RedRockCamera("Photon-Rubik-Booger") //limelight 4 on turret
+        //limelight 3g on turret
+        cameras.add(new RedRockCamera("Photon-Rubik-Booger") 
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
