@@ -32,7 +32,7 @@ public class Superstructure extends SubsystemBase {
     public final Intake intake = Intake.getInstance();
     private final Index index = Index.getInstance();
     private final Shooter shooter = Shooter.getInstance();
-    // private final Turret turret = Turret.getInstance();
+    private final Turret turret = Turret.getInstance();
     private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     public final Localization localization = Localization.getInstance();
 
@@ -103,6 +103,9 @@ public class Superstructure extends SubsystemBase {
     @Override
     public void periodic() {
         SwerveDriveState state = drivetrain.getState();
+
+        Localization.setCameraDynamicRotation(this.turret.getRotation());
+
         boolean isBlue = drivetrain.isBlue();
 
         dtPose = state.Pose;

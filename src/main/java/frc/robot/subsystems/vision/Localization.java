@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Localization extends SubsystemBase{
     private static Localization instance = null;
 
+    public static final int kTurretLLIndex = 2;
+
     public static final Pose2d blueHub = new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84), Rotation2d.fromDegrees(0));
     public static final Pose2d redHub = new Pose2d(Units.inchesToMeters(469.11), Units.inchesToMeters(158.84), Rotation2d.fromDegrees(0));
 
@@ -54,26 +56,42 @@ public class Localization extends SubsystemBase{
         return estimates;
     }
 
+    public static void setCameraDynamicRotation(Rotation2d rotation, int cameraIndex) {
+        cameras.get(cameraIndex).withDynamicRotationTransform(rotation);
+    }
+
+    public static void setCameraDynamicRotation(Rotation2d rotation) {
+        setCameraDynamicRotation(rotation, kTurretLLIndex);
+    }
+
     private Localization() {
         super("localization");
 
+        //right (loom retractor side)
         cameras.add(new RedRockCamera("Photon-Rubik-Everything") //thriftycam on right side
             .withRobotToCameraTransform(
                 new Transform3d(
-                    new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
-                    new Rotation3d(new Quaternion(0, 0, 0, 0))
-                )
+                    new Translation3d(Units.inchesToMeters(-11.376042), Units.inchesToMeters(2.325621), Units.inchesToMeters(7.979991)),
+                    new Rotation3d()
+                        .rotateBy(new Rotation3d(0, Math.toRadians(-33.2), 0))
+                        .rotateBy(new Rotation3d(Rotation2d.fromDegrees(-155)))
+                    )
             )
         );
+
+        //left
         cameras.add(new RedRockCamera("Photon-Rubik-Nothing") //thriftycam on left side
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
-                    new Rotation3d(new Quaternion(0, 0, 0, 0))
+                    new Rotation3d()
+                        .rotateBy(new Rotation3d(0, Math.toRadians(-33.2), 0))
+                        .rotateBy(new Rotation3d(Rotation2d.fromDegrees(150)))
                 )
             )
         );
 
+        //turret
         cameras.add(new RedRockCamera("Photon-Rubik-Booger") //limelight 4 on turret
             .withRobotToCameraTransform(
                 new Transform3d(

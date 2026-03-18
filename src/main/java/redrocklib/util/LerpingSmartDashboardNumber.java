@@ -25,6 +25,11 @@ public class LerpingSmartDashboardNumber {
             * (input - inputLowerBound.getNumber()) + outputLowerBound.getNumber();
     }
 
+    public double getValueInverse(double output) {
+        return ((inputUpperBound.getNumber() - inputLowerBound.getNumber()) / (outputUpperBound.getNumber() - outputLowerBound.getNumber()))
+            * (output - outputLowerBound.getNumber()) + inputLowerBound.getNumber();
+    }
+
     public double convertOutputByRate(double val) {
         return ((inputUpperBound.getNumber() - inputLowerBound.getNumber()) / (outputUpperBound.getNumber() - outputLowerBound.getNumber())) * val;
     }
