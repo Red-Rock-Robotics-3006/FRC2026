@@ -32,7 +32,7 @@ public class Superstructure extends SubsystemBase {
     public final Intake intake = Intake.getInstance();
     private final Index index = Index.getInstance();
     private final Shooter shooter = Shooter.getInstance();
-    private final Turret turret = Turret.getInstance();
+    public final Turret turret = Turret.getInstance(); //private ts for comp
     private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     public final Localization localization = Localization.getInstance();
 

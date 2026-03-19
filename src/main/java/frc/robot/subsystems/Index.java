@@ -5,6 +5,7 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -29,7 +30,7 @@ public class Index extends SubsystemBase {
     private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 1).withTuningEnabled(true); //SHOULD BE RPM FOR MM VELOCITY VOLTAGE
     private SmartDashboardNumber indexReverseSpeed = new SmartDashboardNumber("index/index reverse speed", -3000).withTuningEnabled(true);
 
-    private SmartDashboardNumber kickerSpeed = new SmartDashboardNumber("index/kicker speed", 1).withTuningEnabled(true);
+    private SmartDashboardNumber kickerSpeed = new SmartDashboardNumber("index/kicker speed", 0.6).withTuningEnabled(true);
 
     private final double dyeRotorGearRatio = 25 * 44 / 24;
     private SmartDashboardNumber indexSafePosition = new SmartDashboardNumber("index/index safe position", 0).withTuningEnabled(true);
@@ -67,7 +68,7 @@ public class Index extends SubsystemBase {
 
         this.kickerMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withInverted(InvertedValue.Clockwise_Positive)
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
@@ -97,8 +98,10 @@ public class Index extends SubsystemBase {
     }
 
     public void startIndex() {
-        this.setIndexSpeed(indexSpeed.getNumber());
+        // this.setIndexSpeed(indexSpeed.getNumber());
         this.setKickerSpeed(kickerSpeed.getNumber());
+        this.dyeRotorMotor.motor.setControl(new DutyCycleOut(indexSpeed.getNumber()));
+
     }
 
     public void reverseIndex() {
@@ -123,6 +126,7 @@ public class Index extends SubsystemBase {
     }
 
     public void khangaiIsAChud() { //TODO: run dutycycleout and tune mm for position for this command, then tune mm for velocity
+        this.dyeRotorMotor.motor.setControl(new CoastOut());
         this.dyeRotorMotor.motor.setPosition(this.dyeRotorMotor.motor.getPosition().getValueAsDouble() % dyeRotorGearRatio);
         this.dyeRotorMotor.motor.setControl(new PositionVoltage(indexSafePosition.getNumber()).withSlot(0).withEnableFOC(true).withOverrideBrakeDurNeutral(true));
     }

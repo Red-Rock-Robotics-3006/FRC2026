@@ -1,9 +1,12 @@
 package frc.robot.subsystems.shooter;
 
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -34,10 +37,15 @@ public class Turret extends SubsystemBase{
     private CANcoder ccoderA = new CANcoder(45, "*");
     private CANcoder ccoderB = new CANcoder(47, "*");
 
+    private SmartDashboardNumber turretLoomMinAngle = new SmartDashboardNumber("turret/min loom angle", -90);
+
+    private SmartDashboardNumber turretTuningA = new SmartDashboardNumber("Turret/tuning/motor pos a", 10);
+    private SmartDashboardNumber turretTuningB = new SmartDashboardNumber("Turret/tuning/motor pos b", 20);
+
     private LerpingSmartDashboardNumber turretRestrictions
         = new LerpingSmartDashboardNumber(
             -180, 0, 
-            270, 20, 
+            270, 47.6450195313, 
             "turret/angle-degrees", "turret/motor-rotations", 
             kEnableTurretTuning && true);
 
@@ -49,14 +57,29 @@ public class Turret extends SubsystemBase{
             .withPeakForwardDutyCycle(1)
             .withPeakReverseDutyCycle(-1)
             .withNeutralMode(NeutralModeValue.Brake)
+            .withInverted(InvertedValue.Clockwise_Positive)
         ).withSlot0Configs(
             new Slot0Configs()
         );
 
-        this.resetTurret();
+        ccoderA.getConfigurator().apply(
+            new MagnetSensorConfigs()
+            .withMagnetOffset(-0.52099609375)
+            .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+            .withAbsoluteSensorDiscontinuityPoint(1.0)
+        );
+
+        ccoderB.getConfigurator().apply(
+            new MagnetSensorConfigs()
+            .withMagnetOffset(-0.06884765625)
+            .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+            .withAbsoluteSensorDiscontinuityPoint(1.0)
+        );
+
+        this.calibrateTurret();
     }
 
-    public void resetTurret() {
+    public void calibrateTurret() {
         this.turretMotor.resetMotor();
         this.turretMotor.motor.setPosition(
             turretRestrictions.getValue(
@@ -66,9 +89,9 @@ public class Turret extends SubsystemBase{
     }
 
     private double crtDegrees() {
-        double e1 = ccoderA.getPosition().getValueAsDouble();
+        double e1 = ccoderA.getAbsolutePosition().getValueAsDouble();
         if (e1 < 0) e1 = 1 - e1;
-        double e2 = ccoderB.getPosition().getValueAsDouble();
+        double e2 = ccoderB.getAbsolutePosition().getValueAsDouble();
         if (e2 < 0) e2 = 1 - e2;
 
         double tooth1 = e1 * kCcoderAToothCount;
@@ -95,7 +118,7 @@ public class Turret extends SubsystemBase{
         double dist = ((targetDeg - currentAngle + 180) % 360 + 360) % 360 - 180;
         targetDeg = currentAngle + dist;
 
-        if (targetDeg < turretRestrictions.getMinInput()) targetDeg += 360;
+        if (targetDeg < turretRestrictions.getValue(turretLoomMinAngle.getNumber())) targetDeg += 360;
         else if (targetDeg > turretRestrictions.getMaxInput()) targetDeg -= 360;
 
         this.setTurretPosition(
@@ -112,7 +135,7 @@ public class Turret extends SubsystemBase{
         this.turretMotor.setMotionMagicPosition(
             MathUtil.clamp(
                 position, 
-                turretRestrictions.getMinOutput(), 
+                turretRestrictions.getValue(turretLoomMinAngle.getNumber()), 
                 turretRestrictions.getMaxOutput())
         );
         this.targetTurretPositionMotorRotations = position;
@@ -135,12 +158,23 @@ public class Turret extends SubsystemBase{
         );
     }
 
+    public void setTuningPosA() {
+        this.setTurretPosition(turretTuningA.getNumber());
+    }
+
+    public void setTuningPosB() {
+        this.setTurretPosition(turretTuningB.getNumber());
+    }
+
     @Override
     public void periodic() {
         turretMotor.update();
 
         SmartDashboard.putNumber("Turret/motor degrees", this.getTruePositionDegrees());
         SmartDashboard.putNumber("Turret/CRT degrees", this.crtDegrees());
+
+        SmartDashboard.putNumber("Turret/ccoder A", this.ccoderA.getAbsolutePosition().getValueAsDouble());
+        SmartDashboard.putNumber("Turret/ccoder B", this.ccoderB.getAbsolutePosition().getValueAsDouble());
     }
 
     public static class TurretCalcs {

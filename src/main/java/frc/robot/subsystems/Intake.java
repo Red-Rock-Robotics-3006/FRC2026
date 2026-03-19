@@ -30,8 +30,8 @@ public class Intake extends SubsystemBase{
     private SmartDashboardNumber minExtensionRotation = new SmartDashboardNumber("intake/extension/min rotation", 0);
 
     private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0.2);
-    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 4.5);
-    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 4);
+    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 11.2);
+    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 6.5);
     private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 2);
     private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.1);
 
@@ -42,15 +42,15 @@ public class Intake extends SubsystemBase{
 
         Slot0Configs slot0COnfigs = new Slot0Configs()
             .withKA(0)
-            .withKS(0.42)
+            .withKS(0.52)
             .withKV(0)
-            .withKP(7)
+            .withKP(9.5)
             .withKI(0)
             .withKD(0);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-            .withMotionMagicAcceleration(150)
-            .withMotionMagicCruiseVelocity(50)
+            .withMotionMagicAcceleration(700)
+            .withMotionMagicCruiseVelocity(250)
             .withMotionMagicJerk(10000000);
 
         CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs()
@@ -60,8 +60,8 @@ public class Intake extends SubsystemBase{
             .withStatorCurrentLimitEnable(true);
 
         boolean enableTuning = true;
-        double resetSpeed = -0.1;
-        double spikeThreshold = 30;
+        double resetSpeed = -0.2;
+        double spikeThreshold = 50;
                 
         this.driveMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()
@@ -105,8 +105,8 @@ public class Intake extends SubsystemBase{
         .withCurrentLimitConfigs(currentLimitsConfigs)
         .withTuningEnabled(enableTuning);
 
-        this.extensionLeftMotor.motor.setPosition(maxExtensionRotation.getNumber());
-        this.extensionRightMotor.motor.setPosition(maxExtensionRotation.getNumber());
+        this.extensionLeftMotor.motor.setPosition(maxExtensionRotation.getNumber() - intakePositionTolerance.getNumber());
+        this.extensionRightMotor.motor.setPosition(maxExtensionRotation.getNumber() - intakePositionTolerance.getNumber());
     }
 
     public void setExtensionPosition(double rotations) {
@@ -176,7 +176,7 @@ public class Intake extends SubsystemBase{
     public Command deployIntakeCommand() {
         return Commands.sequence( 
             Commands.runOnce(() -> this.deployIntake(), this),
-            Commands.waitUntil(() -> this.atTargetPosition() || this.extensionLeftMotor.aboveSpikeThreshold() || this.extensionRightMotor.aboveSpikeThreshold()),
+            Commands.waitUntil(() -> this.atTargetPosition() || (this.extensionLeftMotor.aboveSpikeThreshold() && this.extensionRightMotor.aboveSpikeThreshold())),
             this.resetIntakeExtensionCommand()
         );
     }

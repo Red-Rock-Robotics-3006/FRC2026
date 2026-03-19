@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+
 import frc.robot.subsystems.Climber;
-// import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.RobotState;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
@@ -118,15 +118,24 @@ public class RobotContainer {
         // joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
         //     .onTrue(led.togglePoliceCommand());
 
-        joystick.a()
-            .onTrue(superstructure.intake.stowIntakeCommand());
+        // joystick.a()
+        //     .onTrue(Commands.runOnce(() -> superstructure.intake.pushRetractIntake()));
 
         joystick.b()
             .onTrue(superstructure.intake.resetIntakeExtensionCommand());
 
-        joystick.y()
-            .onTrue(superstructure.intake.reverseIntakeCommand())
-            .onFalse(superstructure.intake.stopIntakeCommand());
+        // joystick.y()
+        //     .onTrue(superstructure.intake.reverseIntakeCommand())
+        //     .onFalse(superstructure.intake.stopIntakeCommand());
+
+        // joystick.a()
+        //     .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosA(), superstructure.turret));
+        
+        // joystick.y()
+        //     .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosB(), superstructure.turret));
+
+        // joystick.b()
+        //     .onTrue(Commands.runOnce(() -> superstructure.turret.calibrateTurret(), superstructure.turret));
 
         // joystick.
     }
