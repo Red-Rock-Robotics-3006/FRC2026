@@ -26,7 +26,7 @@ public class Intake extends SubsystemBase{
     private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.83333);
     private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.5);
 
-    private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 4.71);
+    private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 11.424);
     private SmartDashboardNumber minExtensionRotation = new SmartDashboardNumber("intake/extension/min rotation", 0);
 
     private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0.2);
@@ -156,7 +156,7 @@ public class Intake extends SubsystemBase{
 
     public Command startIntakeCommand() {
         return Commands.sequence( 
-            Commands.runOnce(() -> this.deployIntake(), this),
+            // Commands.runOnce(() -> this.deployIntake(), this),
             Commands.runOnce(() -> this.startIntake(), this)
         );
     }

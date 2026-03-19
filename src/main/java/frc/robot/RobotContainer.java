@@ -63,7 +63,9 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.resetHeadingCommand());
 
         joystick.leftTrigger(kTriggerThreshold)
-            .onTrue(superstructure.intake.startIntakeCommand())
+            .onTrue(Commands.sequence(
+                superstructure.intake.deployIntakeCommand(),
+                superstructure.intake.startIntakeCommand()))
             .onFalse(superstructure.intake.stopIntakeCommand());
 
         // joystick.rightTrigger(kTriggerThreshold)
@@ -125,6 +127,8 @@ public class RobotContainer {
         joystick.y()
             .onTrue(superstructure.intake.reverseIntakeCommand())
             .onFalse(superstructure.intake.stopIntakeCommand());
+
+        // joystick.
     }
 
     // private void configureSysIDBindings() {
