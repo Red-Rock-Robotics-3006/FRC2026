@@ -75,15 +75,6 @@ public class RedRockCamera {
         return this;
     }
 
-    public RedRockCamera withDynamicRotationTransform(Rotation2d rotation) {
-        robotToCamera = new Transform3d(
-            robotToCameraTranslation, 
-            robotToCameraRotation
-                .rotateBy(new Rotation3d(rotation)));
-        poseEstimator.setRobotToCameraTransform(robotToCamera);
-        return this;
-    }
-
     public Optional<EstimatedRobotPose> getEstimate() {
         return visionEst;
     }

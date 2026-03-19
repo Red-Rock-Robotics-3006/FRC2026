@@ -10,11 +10,13 @@ import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.shooter.autoaim.SOTMCalcs;
 
 public class Localization extends SubsystemBase{
     private static Localization instance = null;
@@ -37,6 +39,14 @@ public class Localization extends SubsystemBase{
 
     private static ArrayList<RedRockCamera> cameras = new ArrayList<>();
 
+    public static final Transform3d kTurretToLimelightTransform = 
+                new Transform3d(
+                    new Translation3d(Units.inchesToMeters(7.053), 
+                                    Units.inchesToMeters(0), 
+                                    Units.inchesToMeters(19.212751)),
+                    new Rotation3d(0, Math.toRadians(-28), 0)
+                );
+
     public static ArrayList<RRPoseEstimate> getPoseEstimates() {
         ArrayList<RRPoseEstimate> estimates = new ArrayList<>();
 
@@ -56,12 +66,28 @@ public class Localization extends SubsystemBase{
         return estimates;
     }
 
-    public static void setCameraDynamicRotation(Rotation2d rotation, int cameraIndex) {
-        cameras.get(cameraIndex).withDynamicRotationTransform(rotation);
+    public static void setCameraDynamicRotation(Translation2d shooterOffset, Rotation2d turretRotation, Rotation2d drivetrainRotation, int cameraIndex) {
+        double[] turretToRobot = SOTMCalcs.rotate(shooterOffset.getX(), shooterOffset.getY(), drivetrainRotation);
+        double[] llToTurret = SOTMCalcs.rotate(kTurretToLimelightTransform.getX(), kTurretToLimelightTransform.getY(), drivetrainRotation.plus(turretRotation));
+
+        cameras.get(cameraIndex)
+            .withRobotToCameraTransform(
+                new Transform3d(
+                    new Translation3d(
+                        turretToRobot[0] + llToTurret[0],
+                        turretToRobot[1] + llToTurret[1],
+                        kTurretToLimelightTransform.getZ()
+                    ),
+                    kTurretToLimelightTransform.getRotation()
+                        .rotateBy(new Rotation3d(
+                            drivetrainRotation.plus(turretRotation)
+                        ))
+                )
+            );
     }
 
-    public static void setCameraDynamicRotation(Rotation2d rotation) {
-        setCameraDynamicRotation(rotation, kTurretLLIndex);
+    public static void setCameraDynamicRotation(Translation2d shooterOffset, Rotation2d turretRotation, Rotation2d drivetrainRotation) {
+        setCameraDynamicRotation(shooterOffset, turretRotation, drivetrainRotation, kTurretLLIndex);
     }
 
     private Localization() {
@@ -71,7 +97,9 @@ public class Localization extends SubsystemBase{
         cameras.add(new RedRockCamera("Photon-Rubik-Everything") //thriftycam on right side
             .withRobotToCameraTransform(
                 new Transform3d(
-                    new Translation3d(Units.inchesToMeters(-11.376042), Units.inchesToMeters(2.325621), Units.inchesToMeters(7.979991)),
+                    new Translation3d(Units.inchesToMeters(-11.376042), 
+                                    Units.inchesToMeters(2.325621), 
+                                    Units.inchesToMeters(7.979991)),
                     new Rotation3d()
                         .rotateBy(new Rotation3d(0, Math.toRadians(-33.2), 0))
                         .rotateBy(new Rotation3d(Rotation2d.fromDegrees(-155)))
@@ -83,7 +111,9 @@ public class Localization extends SubsystemBase{
         cameras.add(new RedRockCamera("Photon-Rubik-Nothing") //thriftycam on left side
             .withRobotToCameraTransform(
                 new Transform3d(
-                    new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
+                    new Translation3d(Units.inchesToMeters(-11.417663), 
+                                    Units.inchesToMeters(-4.293691), 
+                                    Units.inchesToMeters(12.979991)),
                     new Rotation3d()
                         .rotateBy(new Rotation3d(0, Math.toRadians(-33.2), 0))
                         .rotateBy(new Rotation3d(Rotation2d.fromDegrees(150)))
@@ -95,8 +125,10 @@ public class Localization extends SubsystemBase{
         cameras.add(new RedRockCamera("Photon-Rubik-Booger") //limelight 4 on turret
             .withRobotToCameraTransform(
                 new Transform3d(
-                    new Translation3d(Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
-                    new Rotation3d(new Quaternion(0, 0, 0, 0))
+                    new Translation3d(Units.inchesToMeters(7.053), 
+                                    Units.inchesToMeters(0), 
+                                    Units.inchesToMeters(19.212751)),
+                    new Rotation3d(0, Math.toRadians(-28), 0)
                 )
             )
         );

@@ -104,7 +104,7 @@ public class Superstructure extends SubsystemBase {
     public void periodic() {
         SwerveDriveState state = drivetrain.getState();
 
-        Localization.setCameraDynamicRotation(this.turret.getRotation());
+        Localization.setCameraDynamicRotation(shooterOffset.getTranslation(), turret.getRotation(), state.Pose.getRotation());
 
         boolean isBlue = drivetrain.isBlue();
 
