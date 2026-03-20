@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -37,10 +38,12 @@ public class Turret extends SubsystemBase{
     private CANcoder ccoderA = new CANcoder(45, "*");
     private CANcoder ccoderB = new CANcoder(47, "*");
 
-    private SmartDashboardNumber turretLoomMinAngle = new SmartDashboardNumber("turret/min loom angle", -90);
+    private SmartDashboardNumber turretLoomMinAngle = new SmartDashboardNumber("turret/min loom angle", -180);
 
-    private SmartDashboardNumber turretTuningA = new SmartDashboardNumber("Turret/tuning/motor pos a", 10);
-    private SmartDashboardNumber turretTuningB = new SmartDashboardNumber("Turret/tuning/motor pos b", 20);
+    private SmartDashboardNumber turretTuningA = new SmartDashboardNumber("turret/tuning/motor pos a", 10);
+    private SmartDashboardNumber turretTuningB = new SmartDashboardNumber("turret/tuning/motor pos b", 20);
+
+    private SmartDashboardNumber turretTuningAngle = new SmartDashboardNumber("turret/tuning/rotation2d deg", 0);
 
     private LerpingSmartDashboardNumber turretRestrictions
         = new LerpingSmartDashboardNumber(
@@ -60,18 +63,29 @@ public class Turret extends SubsystemBase{
             .withInverted(InvertedValue.Clockwise_Positive)
         ).withSlot0Configs(
             new Slot0Configs()
+            // .withKP(6)
+            // .withKS(0.26)
+            .withKP(3)
+            .withKS(0.25)
+        ).withMotionMagicConfigs(
+            new MotionMagicConfigs()
+            // .withMotionMagicAcceleration(400)
+            // .withMotionMagicCruiseVelocity(200)
+            .withMotionMagicAcceleration(100)
+            .withMotionMagicCruiseVelocity(100)
+            .withMotionMagicJerk(99999)
         );
 
         ccoderA.getConfigurator().apply(
             new MagnetSensorConfigs()
-            .withMagnetOffset(-0.52099609375)
+            .withMagnetOffset(-0.508544921875)
             .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
             .withAbsoluteSensorDiscontinuityPoint(1.0)
         );
 
         ccoderB.getConfigurator().apply(
             new MagnetSensorConfigs()
-            .withMagnetOffset(-0.06884765625)
+            .withMagnetOffset(-0.056640625)
             .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
             .withAbsoluteSensorDiscontinuityPoint(1.0)
         );
@@ -118,12 +132,16 @@ public class Turret extends SubsystemBase{
         double dist = ((targetDeg - currentAngle + 180) % 360 + 360) % 360 - 180;
         targetDeg = currentAngle + dist;
 
-        if (targetDeg < turretRestrictions.getValue(turretLoomMinAngle.getNumber())) targetDeg += 360;
+        if (targetDeg < turretLoomMinAngle.getNumber()) targetDeg += 360;
         else if (targetDeg > turretRestrictions.getMaxInput()) targetDeg -= 360;
 
         this.setTurretPosition(
             turretRestrictions.getValue(targetDeg)
         );
+
+        // SmartDashboard.putNumber("Turret/rot debug/target", targetDeg);
+        // SmartDashboard.putNumber(getName(), dist);
+        // SmartDashboard.putNumber("Turret/rot debug/dist", dist);
     }
 
     /**
@@ -166,15 +184,20 @@ public class Turret extends SubsystemBase{
         this.setTurretPosition(turretTuningB.getNumber());
     }
 
+    public void setTuningRotation() {
+        this.setTurretAngle(Rotation2d.fromDegrees(turretTuningAngle.getNumber()));
+    }
+
     @Override
     public void periodic() {
         turretMotor.update();
 
-        SmartDashboard.putNumber("Turret/motor degrees", this.getTruePositionDegrees());
-        SmartDashboard.putNumber("Turret/CRT degrees", this.crtDegrees());
+        SmartDashboard.putNumber("turret/motor degrees", this.getTruePositionDegrees());
+        SmartDashboard.putNumber("turret/CRT degrees", this.crtDegrees());
 
-        SmartDashboard.putNumber("Turret/ccoder A", this.ccoderA.getAbsolutePosition().getValueAsDouble());
-        SmartDashboard.putNumber("Turret/ccoder B", this.ccoderB.getAbsolutePosition().getValueAsDouble());
+        SmartDashboard.putNumber("turret/ccoder A", this.ccoderA.getAbsolutePosition().getValueAsDouble());
+        SmartDashboard.putNumber("turret/ccoder B", this.ccoderB.getAbsolutePosition().getValueAsDouble());
+        SmartDashboard.putNumber("turret/target motor rotations", this.targetTurretPositionMotorRotations);
     }
 
     public static class TurretCalcs {

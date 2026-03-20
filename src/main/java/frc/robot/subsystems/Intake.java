@@ -24,15 +24,16 @@ public class Intake extends SubsystemBase{
     private RedRockTalon extensionRightMotor = new RedRockTalon(23, "intake-extension-right-motor", "*");
 
     private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.83333);
+    private SmartDashboardNumber intakePulsateSpeed = new SmartDashboardNumber("intake/drive/pulsate speed", 0.4);
     private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.5);
 
     private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 11.424);
     private SmartDashboardNumber minExtensionRotation = new SmartDashboardNumber("intake/extension/min rotation", 0);
 
     private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0.2);
-    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 11.2);
-    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 6.5);
-    private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 2);
+    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 10.5);
+    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 5.5);
+    private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 1);
     private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.1);
 
     private double targetPosition = 0;
@@ -60,8 +61,8 @@ public class Intake extends SubsystemBase{
             .withStatorCurrentLimitEnable(true);
 
         boolean enableTuning = true;
-        double resetSpeed = -0.2;
-        double spikeThreshold = 50;
+        double resetSpeed = -0.13;
+        double spikeThreshold = 30;
                 
         this.driveMotor.withMotorOutputConfigs(
             new MotorOutputConfigs()
@@ -105,8 +106,8 @@ public class Intake extends SubsystemBase{
         .withCurrentLimitConfigs(currentLimitsConfigs)
         .withTuningEnabled(enableTuning);
 
-        this.extensionLeftMotor.motor.setPosition(maxExtensionRotation.getNumber() - intakePositionTolerance.getNumber());
-        this.extensionRightMotor.motor.setPosition(maxExtensionRotation.getNumber() - intakePositionTolerance.getNumber());
+        this.extensionLeftMotor.motor.setPosition(maxExtensionRotation.getNumber() - 0.5);
+        this.extensionRightMotor.motor.setPosition(maxExtensionRotation.getNumber() - 0.5);
     }
 
     public void setExtensionPosition(double rotations) {
@@ -123,7 +124,7 @@ public class Intake extends SubsystemBase{
     }
 
     public void setDriveSpeed(double speed) {
-        this.driveMotor.motor.setControl(new DutyCycleOut(speed));
+        this.driveMotor.motor.setControl(new DutyCycleOut(speed).withEnableFOC(false));
     }
 
     public void deployIntake() {
@@ -144,6 +145,10 @@ public class Intake extends SubsystemBase{
 
     public void startIntake() {
         this.setDriveSpeed(intakeSpeed.getNumber());
+    }
+
+    public void startPulsateIntake() {
+        this.setDriveSpeed(intakePulsateSpeed.getNumber());
     }
 
     public void reverseIntake() {
@@ -174,18 +179,25 @@ public class Intake extends SubsystemBase{
     }
 
     public Command deployIntakeCommand() {
-        return Commands.sequence( 
+        return Commands.sequence(
+            Commands.runOnce(() -> this.stopIntake()),
             Commands.runOnce(() -> this.deployIntake(), this),
-            Commands.waitUntil(() -> this.atTargetPosition() || (this.extensionLeftMotor.aboveSpikeThreshold() && this.extensionRightMotor.aboveSpikeThreshold())),
+            Commands.waitUntil(() -> this.atTargetPosition()),// || (this.extensionLeftMotor.aboveSpikeThreshold() && this.extensionRightMotor.aboveSpikeThreshold())),
             this.resetIntakeExtensionCommand()
         );
     }
 
+    public Command pushRetractIntakeCommand() {
+        return Commands.runOnce(() -> this.pushRetractIntake(), this);
+    }
+
     public Command pulsateIntakeCommand() {
         return Commands.sequence(
+            Commands.runOnce(() -> this.startPulsateIntake()),
             Commands.runOnce(() -> this.pushRetractIntake(), this),
             Commands.waitUntil(() -> this.atTargetPosition()),
             Commands.waitSeconds(0.15),
+            Commands.runOnce(() -> this.stopIntake()),
             Commands.runOnce(() -> this.pushDeployIntake(), this),
             Commands.waitUntil(() -> this.atTargetPosition())
         ).repeatedly();

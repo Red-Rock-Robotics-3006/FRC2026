@@ -410,7 +410,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             return;
         }
         for (RRPoseEstimate estimate : Localization.getPoseEstimates()) {
-            if (estimate.pose.getTranslation().getDistance(this.getPose().getTranslation()) > poseMaxDistance.getNumber()) continue;
+            if (estimate.pose.getTranslation().getDistance(this.getPose().getTranslation()) > poseMaxDistance.getNumber() && !DriverStation.isDisabled()) continue;
             this.addVisionMeasurement(estimate.pose, estimate.timeStamp, estimate.stdvs);
         }
     }
@@ -497,7 +497,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private Rotation2d fieldCentricSeedOffset = new Rotation2d();
 
-    private boolean visionEnabled = false;
+    private boolean visionEnabled = true;
 
     public void enablePoseTargeting(Pose2d targetPose) {
         this.targetPose = targetPose;
@@ -576,15 +576,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 break;
         }
     }
-    public void resetHeading() {
-        this.resetPose(
-            new Pose2d(
-                this.getState().Pose.getX(),
-                this.getState().Pose.getY(),
-                Rotation2d.kZero
-            )
-        );
-        this.targetAngle = Rotation2d.kZero;
+    public void seedHeading() {
+        this.fieldCentricSeedOffset = this.getState().Pose.getRotation();
+        this.targetAngle = this.fieldCentricSeedOffset;
     }
 
     public double getRotationRate() {
@@ -592,7 +586,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public Command resetHeadingCommand() {
-        return this.runOnce(this::resetHeading);
+        return this.runOnce(this::seedHeading);
     }
 
     public CommandSwerveDrivetrain withController(CommandXboxController controller) {

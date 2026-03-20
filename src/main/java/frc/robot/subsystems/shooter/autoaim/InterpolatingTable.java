@@ -12,27 +12,44 @@ import java.util.TreeMap;
 public class InterpolatingTable {
 
     private InterpolatingTable() {}
-                
-    public static TreeMap<Double, ShotParameter> table =
+
+    public static TreeMap<Double, ShotParameter> table = 
         new TreeMap<>(
             Map.ofEntries(
                 entry(
-                    Double.valueOf(0),
-                    new ShotParameter(10, 3000)
+                    Double.valueOf(1.4049852287675), 
+                    new ShotParameter(15, 2300)
                 ),
                 entry(
-                    Double.valueOf(1),
-                    new ShotParameter(20, 3500)
+                    Double.valueOf(2.05110564189444), 
+                    new ShotParameter(21, 2400)
                 ),
                 entry(
-                    Double.valueOf(2),
-                    new ShotParameter(30, 4500)
+                    Double.valueOf(2.79029301875713), 
+                    new ShotParameter(23, 2550)
                 ),
                 entry(
-                    Double.valueOf(4),
-                    new ShotParameter(45, 5000)
+                    Double.valueOf(3.42614161315327), 
+                    new ShotParameter(25, 2650)
+                ),
+                entry(
+                    Double.valueOf(4.20671927734278), 
+                    new ShotParameter(27, 2750)
+                ),
+                entry(
+                    Double.valueOf(4.89260698375057), 
+                    new ShotParameter(29, 2850)
+                ),
+                entry(
+                    Double.valueOf(5.42628168818297), 
+                    new ShotParameter(31, 2950)
+                ),
+                entry(
+                    Double.valueOf(6.1811784254011), 
+                    new ShotParameter(33, 3100)
                 )
-                ));
+            )
+        );
 
     public static ShotParameter get(double distanceToTarget) {
         Entry<Double, ShotParameter> ceil = table.ceilingEntry(distanceToTarget);

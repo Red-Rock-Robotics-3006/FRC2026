@@ -6,7 +6,6 @@ import org.photonvision.EstimatedRobotPose;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -67,6 +66,7 @@ public class Localization extends SubsystemBase{
     }
 
     public static void setCameraDynamicRotation(Translation2d shooterOffset, Rotation2d turretRotation, Rotation2d drivetrainRotation, int cameraIndex) {
+        if (cameraIndex >= cameras.size()) return;
         double[] turretToRobot = SOTMCalcs.rotate(shooterOffset.getX(), shooterOffset.getY(), drivetrainRotation);
         double[] llToTurret = SOTMCalcs.rotate(kTurretToLimelightTransform.getX(), kTurretToLimelightTransform.getY(), drivetrainRotation.plus(turretRotation));
 
@@ -97,12 +97,10 @@ public class Localization extends SubsystemBase{
         cameras.add(new RedRockCamera("Photon-Rubik-Everything")
             .withRobotToCameraTransform(
                 new Transform3d(
-                    new Translation3d(Units.inchesToMeters(-11.376042), 
-                                    Units.inchesToMeters(2.325621), 
-                                    Units.inchesToMeters(7.979991)),
+                    new Translation3d(Units.inchesToMeters(-11.376042), Units.inchesToMeters(-2.325621), Units.inchesToMeters(7.979991)),
                     new Rotation3d()
-                        .rotateBy(new Rotation3d(0, Math.toRadians(-33.2), 0))
-                        .rotateBy(new Rotation3d(Rotation2d.fromDegrees(-155)))
+                        .rotateBy(new Rotation3d(0, Math.toRadians(-33.2), 0)) //pitch
+                        .rotateBy(new Rotation3d(Rotation2d.fromDegrees(-155))) //yaw
                     )
             )
         );
@@ -111,27 +109,23 @@ public class Localization extends SubsystemBase{
         cameras.add(new RedRockCamera("Photon-Rubik-Nothing") 
             .withRobotToCameraTransform(
                 new Transform3d(
-                    new Translation3d(Units.inchesToMeters(-11.417663), 
-                                    Units.inchesToMeters(-4.293691), 
-                                    Units.inchesToMeters(12.979991)),
+                    new Translation3d(Units.inchesToMeters(-11.417663), Units.inchesToMeters(4.293691), Units.inchesToMeters(12.979991)),
                     new Rotation3d()
-                        .rotateBy(new Rotation3d(0, Math.toRadians(-33.2), 0))
-                        .rotateBy(new Rotation3d(Rotation2d.fromDegrees(150)))
+                        .rotateBy(new Rotation3d(0, Math.toRadians(-33.2), 0)) //pitch
+                        .rotateBy(new Rotation3d(Rotation2d.fromDegrees(150))) //yaw
                 )
             )
         );
 
         //limelight 3g on turret
-        cameras.add(new RedRockCamera("Photon-Rubik-Booger") 
-            .withRobotToCameraTransform(
-                new Transform3d(
-                    new Translation3d(Units.inchesToMeters(7.053), 
-                                    Units.inchesToMeters(0), 
-                                    Units.inchesToMeters(19.212751)),
-                    new Rotation3d(0, Math.toRadians(-28), 0)
-                )
-            )
-        );
+        // cameras.add(new RedRockCamera("Photon-Rubik-Booger") //TODO: gng this isnt on a rubik lmao
+        //     .withRobotToCameraTransform(
+        //         new Transform3d(
+        //             new Translation3d(Units.inchesToMeters(7.053), Units.inchesToMeters(0), Units.inchesToMeters(19.212751)),
+        //             new Rotation3d(0, Math.toRadians(-28), 0)
+        //         )
+        //     )
+        // );
     }
 
     /**

@@ -7,8 +7,8 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -28,11 +28,11 @@ public class Index extends SubsystemBase {
     private Slot1Configs slot1Configs = new Slot1Configs();
 
     private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 1).withTuningEnabled(true); //SHOULD BE RPM FOR MM VELOCITY VOLTAGE
-    private SmartDashboardNumber indexReverseSpeed = new SmartDashboardNumber("index/index reverse speed", -3000).withTuningEnabled(true);
+    private SmartDashboardNumber indexReverseSpeed = new SmartDashboardNumber("index/index reverse speed", -0.3).withTuningEnabled(true);
 
     // private SmartDashboardNumber kickerSpeed = new SmartDashboardNumber("index/kicker speed", 0.6).withTuningEnabled(true);
 
-    private final double dyeRotorGearRatio = 25 * 44 / 24;
+    private final double dyeRotorGearRatio = 45.82608144444; // 25 * 44 / 24;
     private SmartDashboardNumber indexSafePosition = new SmartDashboardNumber("index/index safe position", 0).withTuningEnabled(true);
     private SmartDashboardNumber indexSafePositionTolerance = new SmartDashboardNumber("index/index safe position tolerance", 5).withTuningEnabled(true);
 
@@ -50,14 +50,14 @@ public class Index extends SubsystemBase {
             .withKA(0)
             .withKS(0)
             .withKV(0)
-            .withKP(0)
+            .withKP(5)
             .withKI(0)
             .withKD(0)
         ).withMotionMagicConfigs(
             new MotionMagicConfigs()
-            .withMotionMagicAcceleration(0)
-            .withMotionMagicCruiseVelocity(0)
-            .withMotionMagicJerk(0)
+            .withMotionMagicAcceleration(450)
+            .withMotionMagicCruiseVelocity(99999)
+            .withMotionMagicJerk(250)
         ).withCurrentLimitConfigs(
             new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(45)
@@ -93,14 +93,14 @@ public class Index extends SubsystemBase {
         this.dyeRotorMotor.resetMotor();
     }
 
-    private void setIndexSpeed(double rpm) {
-        this.dyeRotorMotor.setMotionMagicVelocity(rpm);
+    private void setIndexSpeed(double speed) {
+        this.dyeRotorMotor.motor.setControl(new DutyCycleOut(speed).withEnableFOC(false));
     }
 
     public void startIndex() {
         // this.setIndexSpeed(indexSpeed.getNumber());
         // this.setKickerSpeed(kickerSpeed.getNumber());
-        this.dyeRotorMotor.motor.setControl(new DutyCycleOut(indexSpeed.getNumber()));
+        this.setIndexSpeed(indexSpeed.getNumber());
 
     }
 
@@ -125,10 +125,36 @@ public class Index extends SubsystemBase {
     //     this.setKickerSpeed(0);
     // }
 
-    public void khangaiIsAChud() { //TODO: run dutycycleout and tune mm for position for this command, then tune mm for velocity
+    public void khangaiIsAChud() {
         this.dyeRotorMotor.motor.setControl(new CoastOut());
         this.dyeRotorMotor.motor.setPosition(this.dyeRotorMotor.motor.getPosition().getValueAsDouble() % dyeRotorGearRatio);
-        this.dyeRotorMotor.motor.setControl(new PositionVoltage(indexSafePosition.getNumber()).withSlot(0).withEnableFOC(true).withOverrideBrakeDurNeutral(true));
+        this.dyeRotorMotor.motor.setControl(new MotionMagicVoltage(indexSafePosition.getNumber()).withSlot(0).withEnableFOC(true).withOverrideBrakeDurNeutral(true));
+    }
+
+    public void indexChudTuningPosition() {
+        this.dyeRotorMotor.motor.setPosition(this.dyeRotorMotor.motor.getPosition().getValueAsDouble() % dyeRotorGearRatio);
+    }
+
+    public void indexChudTuning1() {
+        this.dyeRotorMotor.motor.setPosition(this.dyeRotorMotor.motor.getPosition().getValueAsDouble() % dyeRotorGearRatio);
+        this.dyeRotorMotor.motor.setControl(new MotionMagicVoltage(indexSafePosition.getNumber()).withSlot(0).withEnableFOC(true).withOverrideBrakeDurNeutral(true));
+    }
+
+    public void indexChudTuning2() {
+        this.dyeRotorMotor.motor.setPosition(this.dyeRotorMotor.motor.getPosition().getValueAsDouble() % dyeRotorGearRatio);
+        this.dyeRotorMotor.motor.setControl(new MotionMagicVoltage(indexSafePosition.getNumber()+20).withSlot(0).withEnableFOC(true).withOverrideBrakeDurNeutral(true));
+    }
+
+    public Command indexChudTuningPositionCommand() {
+        return Commands.runOnce(() -> this.indexChudTuningPosition());
+    }
+
+    public Command indexChudTuning1Command() {
+        return Commands.runOnce(() -> this.indexChudTuning1());
+    }
+
+    public Command indexChudTuning2Command() {
+        return Commands.runOnce(() -> this.indexChudTuning2());
     }
 
     public boolean inSafePosition() {

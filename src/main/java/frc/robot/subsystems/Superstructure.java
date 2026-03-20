@@ -30,10 +30,10 @@ public class Superstructure extends SubsystemBase {
     public static final boolean kTuning = true;
 
     public final Intake intake = Intake.getInstance();
-    private final Index index = Index.getInstance();
-    private final Shooter shooter = Shooter.getInstance();
+    public final Index index = Index.getInstance();
+    public final Shooter shooter = Shooter.getInstance();
     public final Turret turret = Turret.getInstance(); //private ts for comp
-    private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
+    public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     public final Localization localization = Localization.getInstance();
 
     private SmartDashboardNumber blueAllianceZoneX = new SmartDashboardNumber("superstructure/blue alliance zone x", 4.38, kTuning);
@@ -168,21 +168,21 @@ public class Superstructure extends SubsystemBase {
             case MANUAL_SHOT:
                 if (readyToShoot()) index.startIndex();
                 break;
-            case LERP_TUNING: //UNCOMMENT ONCE TURRET IS DONE MECHANICALLY AND IS TUNED
-                // turret.setTurretAngle(turretTargetAngle);
+            case LERP_TUNING:
+                turret.setTurretAngle(turretTargetAngle);
                 if (readyToShoot()) index.startIndex();
                 break;
             case SHOOTING_WHILE_MOVING:
                 break;
             case SHOOTING:
-                if (!readyToShoot()) setState(RobotState.FULL_TRACKING);
+                if (!turret.atTurretAngle()) setState(RobotState.FULL_TRACKING);
             case FULL_TRACKING:
                 if (!inAllianceZone() && !inLobEnabledZone()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
                 else {shooter.setShotParameter(dynamicShotParameter);}
 
                 if (readyToShoot()) setState(RobotState.SHOOTING);
             case TURRET_TRACKING:
-                // turret.setTurretAngle(turretTargetAngle); //UNCOMMENT ONCE TURRET IS DONE MECHANICALLY AND IS TUNED
+                turret.setTurretAngle(turretTargetAngle);
                 break;
             case IDLE:
                 break;
@@ -234,6 +234,7 @@ public class Superstructure extends SubsystemBase {
             case IDLE:
                 index.stopIndex();
                 shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);
+                intake.stopIntake();
                 break;
             case SHOOTING:
                 index.startIndex();
@@ -277,13 +278,13 @@ public class Superstructure extends SubsystemBase {
         return shooter.resetHoodCommand();
     }
 
-    public Command intakeSafeStowCommand() { //TODO: test this
+    public Command intakeSafeStowCommand() {
         return Commands.sequence(
-            // intake.stopIntakeCommand(),
-            // index.khangaiIsAChudCommand(),
-            // Commands.waitUntil(() -> index.inSafePosition()),
-            // intake.stowIntakeCommand(),
-            // Commands.waitUntil(() -> intake.atTargetPosition())
+            intake.stopIntakeCommand(),
+            index.khangaiIsAChudCommand(),
+            Commands.waitUntil(() -> index.inSafePosition()),
+            intake.stowIntakeCommand(),
+            Commands.waitUntil(() -> intake.atTargetPosition())
         );
     }
 

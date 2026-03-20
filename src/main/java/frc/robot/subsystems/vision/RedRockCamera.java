@@ -16,7 +16,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -25,7 +24,7 @@ import redrocklib.logging.SmartDashboardNumber;
 
 public class RedRockCamera {
     public static final boolean kEnableCameraTuning = true;
-    public static final SmartDashboardNumber kMaxDistToTag = new SmartDashboardNumber("localization-max dist", 3, true && kEnableCameraTuning);
+    public static final SmartDashboardNumber kMaxDistToTag = new SmartDashboardNumber("localization-max dist", 5, true && kEnableCameraTuning);
     
     public static final RRStdv kDefaultStdvs = new RRStdv(0.8, 0.8, 2);
     public static final AprilTagFieldLayout defaultFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
@@ -35,7 +34,9 @@ public class RedRockCamera {
     private Transform3d robotToCamera = new Transform3d(new Translation3d(), new Rotation3d());
     private SmartDashboardNumber stdvX, stdvY, stdvTheta;
 
+    @SuppressWarnings("unused")
     private Translation3d robotToCameraTranslation = new Translation3d();
+    @SuppressWarnings("unused")
     private Rotation3d robotToCameraRotation = new Rotation3d();
 
     private Optional<EstimatedRobotPose> visionEst = Optional.empty();
@@ -109,16 +110,18 @@ public class RedRockCamera {
                 double lowestAmbiguityScore = 10;
                 PhotonTrackedTarget lowestAmbiguityTarget = null;
 
-                for (PhotonTrackedTarget target : visionEst.get().targetsUsed) {
-                    double targetPoseAmbiguity = target.getPoseAmbiguity();
-                    // Make sure the target is a Fiducial target.
-                    if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestAmbiguityScore) {
-                        lowestAmbiguityScore = targetPoseAmbiguity;
-                        lowestAmbiguityTarget = target;
+                if (!visionEst.isEmpty()) {
+                    for (PhotonTrackedTarget target : visionEst.get().targetsUsed) {
+                        double targetPoseAmbiguity = target.getPoseAmbiguity();
+                        // Make sure the target is a Fiducial target.
+                        if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestAmbiguityScore) {
+                            lowestAmbiguityScore = targetPoseAmbiguity;
+                            lowestAmbiguityTarget = target;
+                        }
                     }
                 }
-
                 distToTag = (lowestAmbiguityTarget == null) ? distToTag : lowestAmbiguityTarget.getBestCameraToTarget().getTranslation().getNorm();
+
             } else {
                 double sum = 0;
                 var targetsUsed = visionEst.get().targetsUsed;
