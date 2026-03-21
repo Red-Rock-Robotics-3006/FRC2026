@@ -65,7 +65,7 @@ public class Turret extends SubsystemBase{
             new Slot0Configs()
             // .withKP(6)
             // .withKS(0.26)
-            .withKP(3)
+            .withKP(4.9)
             .withKS(0.25)
         ).withMotionMagicConfigs(
             new MotionMagicConfigs()

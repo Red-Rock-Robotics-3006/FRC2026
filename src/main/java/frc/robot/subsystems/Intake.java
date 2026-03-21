@@ -23,18 +23,18 @@ public class Intake extends SubsystemBase{
     private RedRockTalon extensionLeftMotor = new RedRockTalon(22, "intake-extension-left-motor", "*");
     private RedRockTalon extensionRightMotor = new RedRockTalon(23, "intake-extension-right-motor", "*");
 
-    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.83333);
+    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.67);
     private SmartDashboardNumber intakePulsateSpeed = new SmartDashboardNumber("intake/drive/pulsate speed", 0.4);
-    private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.5);
+    private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.4);
 
     private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 11.424);
     private SmartDashboardNumber minExtensionRotation = new SmartDashboardNumber("intake/extension/min rotation", 0);
 
-    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0.2);
-    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 10.5);
-    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 5.5);
-    private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 1);
-    private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.1);
+    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0.2, false);
+    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 10.5, false);
+    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 5.5, false);
+    private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 1, false);
+    private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.1, false);
 
     private double targetPosition = 0;
     
@@ -182,8 +182,8 @@ public class Intake extends SubsystemBase{
         return Commands.sequence(
             Commands.runOnce(() -> this.stopIntake()),
             Commands.runOnce(() -> this.deployIntake(), this),
-            Commands.waitUntil(() -> this.atTargetPosition()),// || (this.extensionLeftMotor.aboveSpikeThreshold() && this.extensionRightMotor.aboveSpikeThreshold())),
-            this.resetIntakeExtensionCommand()
+            Commands.waitUntil(() -> this.atTargetPosition())// || (this.extensionLeftMotor.aboveSpikeThreshold() && this.extensionRightMotor.aboveSpikeThreshold())),
+            // this.resetIntakeExtensionCommand()
         );
     }
 

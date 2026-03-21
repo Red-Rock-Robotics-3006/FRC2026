@@ -2,16 +2,13 @@ package frc.robot.subsystems.shooter.autoaim;
 
 import static java.util.Map.entry;
 
-// import edu.wpi.first.math.util.Units;
-// import edu.wpi.first.units.Unit;
-
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-public class InterpolatingTable {
+public class HubInterpolatingTable {
 
-    private InterpolatingTable() {}
+    private HubInterpolatingTable() {}
 
     public static TreeMap<Double, ShotParameter> table = 
         new TreeMap<>(

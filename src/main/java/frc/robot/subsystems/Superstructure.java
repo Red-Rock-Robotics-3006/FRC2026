@@ -27,7 +27,7 @@ public class Superstructure extends SubsystemBase {
 
     public static final boolean kPractice = false;
     public static final boolean kHubOrLob = true; //true for hub, false for lob
-    public static final boolean kTuning = true;
+    public static final boolean kTuning = false;
 
     public final Intake intake = Intake.getInstance();
     public final Index index = Index.getInstance();
@@ -124,7 +124,7 @@ public class Superstructure extends SubsystemBase {
                     (inLobUpperZone() ? Localization.redLobTargets[0] : Localization.redLobTargets[1]));
 
         ShotParameter staticShotParameter =  (this.inAllianceZone()) ? 
-            InterpolatingTable.get(shooterPose.minus(staticTargetPose).getTranslation().getNorm()) :
+            HubInterpolatingTable.get(shooterPose.minus(staticTargetPose).getTranslation().getNorm()) :
             LobInterpolatingTable.get(shooterPose.minus(staticTargetPose).getTranslation().getNorm()); 
             //calculates exit velocity using static pose
         
@@ -153,7 +153,7 @@ public class Superstructure extends SubsystemBase {
 
         // ACTUAL SHOT PARAMETER FOR ADJUSTED SOTM POSE
         ShotParameter dynamicShotParameter =  (this.inAllianceZone()) ? 
-            InterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm()) :
+            HubInterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm()) :
             LobInterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm());
             
         // ACTUAL TURRET ANGLE FOR ADJUSTED SOTM POSE
@@ -196,6 +196,9 @@ public class Superstructure extends SubsystemBase {
         SmartDashboard.putString("ROBOT STATE", this.robotState.toString());
         SmartDashboard.putBoolean("superstructure/ready to shoot", this.readyToShoot());
         SmartDashboard.putBoolean("superstructure/in alliance zone", inAllianceZone());
+            
+        SmartDashboard.putNumberArray("superstructure/target pose", dynamicTargetPose.toMatrix().getData());
+        SmartDashboard.putNumber("superstructure/distance to target", distanceToTarget);
 
         // SMARTDASHBOARD LOGGING | TUNING
 
@@ -206,9 +209,6 @@ public class Superstructure extends SubsystemBase {
             poses.add(dynamicTargetPose);
             poses.add(staticTargetPose);
             fieldObject2d.setPoses(poses);
-            
-            SmartDashboard.putNumberArray("superstructure/target pose", dynamicTargetPose.toMatrix().getData());
-            SmartDashboard.putNumber("superstructure/distance to hub", distanceToTarget);
             
             SmartDashboard.putNumber("auto aim/sotm offset/x", sotmOffset.getX());
             SmartDashboard.putNumber("auto aim/sotm offset/y", sotmOffset.getY());

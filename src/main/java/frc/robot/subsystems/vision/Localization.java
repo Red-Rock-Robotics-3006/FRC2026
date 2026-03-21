@@ -27,14 +27,12 @@ public class Localization extends SubsystemBase{
 
     // first pose is UPPER lob pose, second pose is LOWER lob pose
     public static final Pose2d[] redLobTargets = {
-        new Pose2d(Units.inchesToMeters(0), Units.inchesToMeters(0), Rotation2d.fromDegrees(0)),
-        new Pose2d(Units.inchesToMeters(0), Units.inchesToMeters(0), Rotation2d.fromDegrees(0))};
-        
+        new Pose2d(15.56, 6.84, Rotation2d.fromDegrees(0)),
+        new Pose2d(15.56, 1.25, Rotation2d.fromDegrees(0))};
+    
     public static final Pose2d[] blueLobTargets = {
-        // new Pose2d(Units.inchesToMeters(0), Units.inchesToMeters(0), Rotation2d.fromDegrees(0)),
-        // new Pose2d(Units.inchesToMeters(0), Units.inchesToMeters(0), Rotation2d.fromDegrees(0))};
-        new Pose2d(3, 6.4, Rotation2d.fromDegrees(0)),
-        new Pose2d(3, 1.7, Rotation2d.fromDegrees(0))};
+        new Pose2d(1, 6.84, Rotation2d.fromDegrees(0)),
+        new Pose2d(1, 1.25, Rotation2d.fromDegrees(0))};
 
     private static ArrayList<RedRockCamera> cameras = new ArrayList<>();
 

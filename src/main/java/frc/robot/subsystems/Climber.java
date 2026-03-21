@@ -34,12 +34,16 @@ public class Climber extends SubsystemBase{
         ).withTuningEnabled(false);
     }
 
+    public void setClimberSpeed(double speed) {
+        this.climbMotor.motor.setControl(new DutyCycleOut(speed).withEnableFOC(false));
+    }
+
     public void raiseClimber() {
-        this.climbMotor.motor.setControl(new DutyCycleOut(raiseSpeed.getNumber()));
+        this.setClimberSpeed(raiseSpeed.getNumber());
     }
     
     public void lowerClimber() {
-        this.climbMotor.motor.setControl(new DutyCycleOut(lowerSpeed.getNumber()));
+        this.setClimberSpeed(lowerSpeed.getNumber());
     }
     
     public void stopClimber() {

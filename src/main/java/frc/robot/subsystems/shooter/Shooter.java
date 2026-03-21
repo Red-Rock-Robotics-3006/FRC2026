@@ -25,7 +25,7 @@ import redrocklib.wrappers.RedRockTalon;
 public class Shooter extends SubsystemBase{
     private static Shooter instance = null;
 
-    private static final boolean kEnableShooterTuning = true;
+    private static final boolean kEnableShooterTuning = false;
 
     private double targetRPM = 0;
     private double targetHoodPositionMotorRotations = 0;

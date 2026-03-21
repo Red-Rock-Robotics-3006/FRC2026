@@ -12,43 +12,36 @@ import java.util.TreeMap;
 public class LobInterpolatingTable {
 
     private LobInterpolatingTable() {}
-                
-    public static TreeMap<Double, ShotParameter> table =
+
+    public static TreeMap<Double, ShotParameter> table = 
         new TreeMap<>(
             Map.ofEntries(
                 entry(
-                    Double.valueOf(0),
-                    new ShotParameter(10, 3000)
+                    Double.valueOf(5.13220036503524), 
+                    new ShotParameter(45, 2200)
                 ),
                 entry(
-                    Double.valueOf(1),
-                    new ShotParameter(20, 3500)
+                    Double.valueOf(6.36148775420231), 
+                    new ShotParameter(45, 2600)
                 ),
                 entry(
-                    Double.valueOf(2),
-                    new ShotParameter(30, 4500)
+                    Double.valueOf(7.9501400162639), 
+                    new ShotParameter(45, 2850)
                 ),
                 entry(
-                    Double.valueOf(4),
-                    new ShotParameter(45, 5000)
+                    Double.valueOf(9.45595389790476), 
+                    new ShotParameter(45, 3150)
                 ),
                 entry(
-                    Double.valueOf(5),
-                    new ShotParameter(45, 5200)
+                    Double.valueOf(12.3204298138742), 
+                    new ShotParameter(50, 3750)
                 ),
                 entry(
-                    Double.valueOf(6),
-                    new ShotParameter(45, 5400)
-                ),
-                entry(
-                    Double.valueOf(7),
-                    new ShotParameter(45, 5800)
-                ),
-                entry(
-                    Double.valueOf(10),
-                    new ShotParameter(45, 5990)
+                    Double.valueOf(16), 
+                    new ShotParameter(50, 4600)
                 )
-                ));
+            )
+        );
 
     public static ShotParameter get(double distanceToTarget) {
         Entry<Double, ShotParameter> ceil = table.ceilingEntry(distanceToTarget);

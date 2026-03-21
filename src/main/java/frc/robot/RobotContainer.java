@@ -78,7 +78,9 @@ public class RobotContainer {
             
         joystick.leftBumper() 
             .onTrue(superstructure.intake.pulsateIntakeCommand())
-            .onFalse(superstructure.intake.stopIntakeCommand());
+            .onFalse(Commands.sequence(
+                superstructure.intake.stopIntakeCommand(),
+                superstructure.intake.deployIntakeCommand()));
 
         joystick.rightBumper() //manual hub shot
             .onTrue(superstructure.setManualShotParameterCommand())
@@ -110,9 +112,9 @@ public class RobotContainer {
     }
 
     private void configureTestBindings() {
-        // joystick.x() //manual lerp tuning shot
-        //     .onTrue(superstructure.setLerpTuneParameterCommand())
-        //     .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+        joystick.x() //manual lerp tuning shot
+            .onTrue(superstructure.setLerpTuneParameterCommand())
+            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
         // joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
         //     .onTrue(led.togglePoliceCommand());
@@ -122,6 +124,14 @@ public class RobotContainer {
 
         joystick.povRight()
             .onTrue(superstructure.intake.resetIntakeExtensionCommand());
+
+        joystick.y()
+            .onTrue(superstructure.index.reverseIndexCommand())
+            .onFalse(superstructure.index.stopIndexCommand());
+
+        joystick.start()
+            .onTrue(Commands.runOnce(() -> superstructure.drivetrain.enableIgnoreCamera(), superstructure.drivetrain))
+            .onFalse(Commands.runOnce(() -> superstructure.drivetrain.disableIgnoreCamera(), superstructure.drivetrain));
 
         // joystick.b()
         //     .onTrue(superstructure.index.indexChudTuningPositionCommand());

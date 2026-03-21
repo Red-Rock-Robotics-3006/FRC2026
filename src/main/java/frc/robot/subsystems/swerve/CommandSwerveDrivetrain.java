@@ -54,6 +54,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private Alliance alliance = Alliance.Blue;
 
+    private boolean ignoreCameraPoseDistance = false;
+
     private CommandXboxController controller;
 
     private SmartDashboardNumber poseMaxDistance = new SmartDashboardNumber("dt/dt localization/dist restriction", 3);
@@ -64,9 +66,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private SmartDashboardNumber drivingDeadBand = new SmartDashboardNumber("dt/dt thresholds/deadband", 0.005);
     private SmartDashboardNumber pidRotationThreshold = new SmartDashboardNumber("dt/dt thresholds/rotation threshold", 1); // threshold to enable heading pid again.
 
-    private SmartDashboardNumber headingP = new SmartDashboardNumber("dt/dt heading pid coeffs/kP", 4);
-    private SmartDashboardNumber headingI = new SmartDashboardNumber("dt/dt heading pid coeffs/kI", 0);
-    private SmartDashboardNumber headingD = new SmartDashboardNumber("dt/dt heading pid coeffs/kD", 0);
+    private SmartDashboardNumber headingP = new SmartDashboardNumber("dt/dt heading pid coeffs/kP", 4, false);
+    private SmartDashboardNumber headingI = new SmartDashboardNumber("dt/dt heading pid coeffs/kI", 0, false);
+    private SmartDashboardNumber headingD = new SmartDashboardNumber("dt/dt heading pid coeffs/kD", 0, false);
 
     private SmartDashboardNumber poseP = new SmartDashboardNumber("dt/dt pose coeffs/kP", 0);
     private SmartDashboardNumber poseI = new SmartDashboardNumber("dt/dt pose coeffs/kI", 0);
@@ -401,6 +403,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         SmartDashboard.putString("dt/drive state", this.state.toString());
         SmartDashboard.putNumber("dt/field centric offset", this.fieldCentricSeedOffset.getDegrees());
         SmartDashboard.putString("alliance", this.alliance.toString());
+        SmartDashboard.putBoolean("dt/ignore camera pose distance", ignoreCameraPoseDistance);
 
         if (this.visionEnabled) updateVisionMeasurements();
     }
@@ -410,7 +413,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             return;
         }
         for (RRPoseEstimate estimate : Localization.getPoseEstimates()) {
-            if (estimate.pose.getTranslation().getDistance(this.getPose().getTranslation()) > poseMaxDistance.getNumber() && !DriverStation.isDisabled()) continue;
+            if (estimate.pose.getTranslation().getDistance(this.getPose().getTranslation()) > poseMaxDistance.getNumber() && !DriverStation.isDisabled() && !ignoreCameraPoseDistance) continue;
             this.addVisionMeasurement(estimate.pose, estimate.timeStamp, estimate.stdvs);
         }
     }
@@ -515,6 +518,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Pose2d getPose() {
         return this.getState().Pose;
+    }
+
+    public void enableIgnoreCamera() {
+        this.ignoreCameraPoseDistance = true;
+    }
+
+    public void disableIgnoreCamera() {
+        this.ignoreCameraPoseDistance = false;
     }
 
     private void configureHeadingPID() {
