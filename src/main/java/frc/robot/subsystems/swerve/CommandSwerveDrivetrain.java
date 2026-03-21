@@ -58,8 +58,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private CommandXboxController controller;
 
-    private SmartDashboardNumber poseMaxDistance = new SmartDashboardNumber("dt/dt localization/dist restriction", 3);
-    private SmartDashboardNumber poseMaxRotation = new SmartDashboardNumber("dt/dt localization/rotation restriction", 3);
+    private SmartDashboardNumber poseMaxDistance = new SmartDashboardNumber("dt/dt localization/dist restriction", 6);
+    private SmartDashboardNumber poseMaxRotation = new SmartDashboardNumber("dt/dt localization/rotation restriction", 10);
 
     private SmartDashboardNumber maxDriveSpeed = new SmartDashboardNumber("dt/dt drive speeds/max drive mps", 4);
     private SmartDashboardNumber maxTurnSpeed = new SmartDashboardNumber("dt/dt drive speeds/turn rotps", 1);
@@ -413,7 +413,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             return;
         }
         for (RRPoseEstimate estimate : Localization.getPoseEstimates()) {
-            if (estimate.pose.getTranslation().getDistance(this.getPose().getTranslation()) > poseMaxDistance.getNumber() && !DriverStation.isDisabled() && !ignoreCameraPoseDistance) continue;
+            if (estimate.pose.equals(new Pose2d())) continue;
+            if (estimate.pose.getTranslation().getDistance(this.getPose().getTranslation()) > poseMaxDistance.getNumber() 
+                && !DriverStation.isDisabled() 
+                && !ignoreCameraPoseDistance) 
+                continue;
             this.addVisionMeasurement(estimate.pose, estimate.timeStamp, estimate.stdvs);
         }
     }
