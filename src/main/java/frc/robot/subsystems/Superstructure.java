@@ -27,7 +27,7 @@ public class Superstructure extends SubsystemBase {
 
     public static final boolean kPractice = false;
     public static final boolean kHubOrLob = true; //true for hub, false for lob
-    public static final boolean kTuning = false;
+    public static final boolean kTuning = true;
 
     public final Intake intake = Intake.getInstance();
     public final Index index = Index.getInstance();
@@ -142,12 +142,19 @@ public class Superstructure extends SubsystemBase {
             omega * r * tangentialAngle.getSin()
         };
 
-        Transform2d sotmOffset = new Transform2d(SOTMCalcs.getOffset(
+        Transform2d sotmOffset = new Transform2d(SOTMCalcs.getNewtonMethodOffset(
             fieldCentricRobotVelocity[0] + shooterPoseVelocity[0],
             fieldCentricRobotVelocity[1] + shooterPoseVelocity[1],
-            exitVelocity,
-            distanceToTarget),
+            staticTargetPose,
+            dtPose),
             new Rotation2d());
+        
+        // Transform2d sotmOffset = new Transform2d(SOTMCalcs.getOffset(
+        //     fieldCentricRobotVelocity[0] + shooterPoseVelocity[0],
+        //     fieldCentricRobotVelocity[1] + shooterPoseVelocity[1],
+        //     exitVelocity,
+        //     distanceToTarget),
+        //     new Rotation2d());
 
         this.dynamicTargetPose = staticTargetPose.transformBy(sotmOffset);
 
