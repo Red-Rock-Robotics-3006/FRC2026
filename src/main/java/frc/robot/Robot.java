@@ -9,6 +9,8 @@ import com.ctre.phoenix6.HootAutoReplay;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
+import frc.robot.subsystems.swerve.CommandSwerveDrivetrain.DriveState;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -31,7 +33,9 @@ public class Robot extends TimedRobot {
     }
 
     @Override
-    public void disabledInit() {}
+    public void disabledInit() {
+        CommandSwerveDrivetrain.getInstance().setDriveState(DriveState.DRIVE_FACING_ANGLE);
+    }
 
     @Override
     public void disabledPeriodic() {}

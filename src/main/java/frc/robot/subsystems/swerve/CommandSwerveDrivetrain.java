@@ -39,6 +39,7 @@ import frc.robot.subsystems.swerve.generated.TunerConstants;
 import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.vision.Localization;
 import frc.robot.subsystems.vision.Localization.RRPoseEstimate;
+import redrocklib.logging.SmartDashboardBoolean;
 import redrocklib.logging.SmartDashboardNumber;
 // import redrocklib.wrappers.RedRockCamera;
 
@@ -405,7 +406,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         SmartDashboard.putString("alliance", this.alliance.toString());
         SmartDashboard.putBoolean("dt/ignore camera pose distance", ignoreCameraPoseDistance);
 
-        if (this.visionEnabled) updateVisionMeasurements();
+        if (this.visionEnabled.getValue()) updateVisionMeasurements();
     }
 
     private void updateVisionMeasurements() {
@@ -504,7 +505,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private Rotation2d fieldCentricSeedOffset = new Rotation2d();
 
-    private boolean visionEnabled = true;
+    private SmartDashboardBoolean visionEnabled = new SmartDashboardBoolean("vision enabled", false);
 
     public void enablePoseTargeting(Pose2d targetPose) {
         this.targetPose = targetPose;

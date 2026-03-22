@@ -123,6 +123,14 @@ public class Autos {
         );
     }
 
+    public Command M_Depot_Outpost_Paths() {
+        return drivetrain.followTrajectory("M_Depot_Outpost");
+    }
+
+    public Command TESTPATH() {
+        return drivetrain.followTrajectory("Test_path");
+    }
+
     // public Command R_MS_C() {
     //     return Commands.sequence(
     //         superstructure.intake.startIntakeCommand(),

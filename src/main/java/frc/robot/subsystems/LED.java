@@ -111,7 +111,7 @@ public class LED extends SubsystemBase{
         rainbowHue %= 180;
     }
 
-    private final int LARSON_SIZE = 6;
+    private final int LARSON_SIZE = 10;
 
     private static class LarsonState {
         int position = 0;

@@ -56,6 +56,8 @@ public class RobotContainer {
         autoChooser.addOption("PATHS - Right Two Midtakes Leave", autos.R_MS_MS_L_Paths());
         autoChooser.addOption("PATHS - Right Midtake Outpost", autos.R_MS_OS_Paths());
         autoChooser.addOption("PATHS - Right Two Midtakes Outpost", autos.R_MS_MS_OS_Paths());
+        autoChooser.addOption("PATHS - Middle", autos.M_Depot_Outpost_Paths());
+        autoChooser.addOption("PATHS - Testpath", autos.TESTPATH());
     }
 
     private void configureCompBindings() {
@@ -87,6 +89,13 @@ public class RobotContainer {
             .onFalse(Commands.parallel(
                 superstructure.setStateCommand(RobotState.TURRET_TRACKING),
                 superstructure.intake.deployIntakeCommand()));
+
+        joystick.x()
+            .onTrue(superstructure.resetSuperStructure());
+
+        joystick.y()
+            .onTrue(superstructure.index.reverseIndexCommand())
+            .onFalse(superstructure.index.stopIndexCommand());
             
         joystick.a()
             .onTrue(superstructure.intake.reverseIntakeCommand())
@@ -97,61 +106,30 @@ public class RobotContainer {
 
         joystick.povUp() //left paddle
             .onTrue(Commands.sequence(
-                superstructure.setStateCommand(RobotState.IDLE),
-                // superstructure.intakeSafeStowCommand(),
                 superstructure.intake.pushRetractIntakeCommand(),
                 climber.raiseClimberCommand()))
             .onFalse(climber.stopClimberCommand());
 
         joystick.povDown() //right paddle
             .onTrue(Commands.sequence(
-                // superstructure.intakeSafeStowCommand(),
                 superstructure.intake.pushRetractIntakeCommand(),
                 climber.lowerClimberCommand()))
             .onFalse(climber.stopClimberCommand());
+            
+        joystick.povRight()
+            .onTrue(superstructure.intake.resetIntakeExtensionCommand());
     }
 
     private void configureTestBindings() {
-        joystick.x() //manual lerp tuning shot
-            .onTrue(superstructure.setLerpTuneParameterCommand())
-            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+        // joystick.x() //manual lerp tuning shot
+        //     .onTrue(superstructure.setLerpTuneParameterCommand())
+        //     .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
         // joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
         //     .onTrue(led.togglePoliceCommand());
 
         // joystick.a()
         //     .onTrue(Commands.runOnce(() -> superstructure.intake.pushRetractIntake()));
-
-        joystick.povRight()
-            .onTrue(superstructure.intake.resetIntakeExtensionCommand());
-
-        joystick.y()
-            .onTrue(superstructure.index.reverseIndexCommand())
-            .onFalse(superstructure.index.stopIndexCommand());
-
-        joystick.start()
-            .onTrue(Commands.runOnce(() -> superstructure.drivetrain.enableIgnoreCamera(), superstructure.drivetrain))
-            .onFalse(Commands.runOnce(() -> superstructure.drivetrain.disableIgnoreCamera(), superstructure.drivetrain));
-
-        // joystick.b()
-        //     .onTrue(superstructure.index.indexChudTuningPositionCommand());
-
-        // joystick.y()
-        //     .onTrue(superstructure.index.indexChudTuning1Command());
-
-        // joystick.a()
-        //     .onTrue(superstructure.index.indexChudTuning2Command());
-
-        // joystick.a()
-        //     .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosA(), superstructure.turret));
-        
-        // joystick.y()
-        //     .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningRotation(), superstructure.turret));
-
-        joystick.povLeft()
-            .onTrue(Commands.runOnce(() -> superstructure.turret.calibrateTurret(), superstructure.turret));
-
-        // joystick.
     }
 
     // private void configureSysIDBindings() {

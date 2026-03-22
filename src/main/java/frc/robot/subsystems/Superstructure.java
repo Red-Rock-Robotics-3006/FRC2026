@@ -281,8 +281,12 @@ public class Superstructure extends SubsystemBase {
         );
     }
 
-    public Command resetShooterHoodCommand() { //for tuning, delete or reimplement this for comp
-        return shooter.resetHoodCommand();
+    public Command resetSuperStructure() {
+        return Commands.parallel(
+            Commands.runOnce(() -> drivetrain.enableIgnoreCamera(), drivetrain),
+            Commands.runOnce(() -> turret.calibrateTurret(), turret)//,
+            // shooter.resetHoodCommand()
+        );
     }
 
     public Command intakeSafeStowCommand() {
