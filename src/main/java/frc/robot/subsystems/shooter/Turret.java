@@ -1,16 +1,20 @@
 package frc.robot.subsystems.shooter;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -49,6 +53,7 @@ public class Turret extends SubsystemBase{
         = new LerpingSmartDashboardNumber(
             -180, 0, 
             270, 47.6450195313, 
+            // 270, 110.0/16.0,
             "turret/angle-degrees", "turret/motor-rotations", 
             kEnableTurretTuning && true);
 
@@ -90,11 +95,23 @@ public class Turret extends SubsystemBase{
             .withAbsoluteSensorDiscontinuityPoint(1.0)
         );
 
+        this.turretMotor.motor.getConfigurator().apply(
+            new FeedbackConfigs()
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
+        );
+
+        // this.turretMotor.motor.getConfigurator().apply(
+        //     new FeedbackConfigs()
+        //     .withFeedbackSensorSource(FeedbackSensorSourceValue.FusedCANcoder)
+        //     .withFeedbackRemoteSensorID(ccoderB.getDeviceID())
+        // );
+
         this.calibrateTurret();
     }
 
     public void calibrateTurret() {
-        this.turretMotor.resetMotor();
+        // this.turretMotor.resetMotor();
+        this.turretMotor.motor.setControl(new CoastOut());
         this.turretMotor.motor.setPosition(
             turretRestrictions.getValue(
                 this.crtDegrees()
@@ -191,6 +208,8 @@ public class Turret extends SubsystemBase{
     @Override
     public void periodic() {
         turretMotor.update();
+
+        if (DriverStation.isDisabled()) this.calibrateTurret();
 
         SmartDashboard.putNumber("turret/motor degrees", this.getTruePositionDegrees());
         SmartDashboard.putNumber("turret/CRT degrees", this.crtDegrees());

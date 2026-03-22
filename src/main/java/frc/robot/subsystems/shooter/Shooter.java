@@ -25,7 +25,7 @@ import redrocklib.wrappers.RedRockTalon;
 public class Shooter extends SubsystemBase{
     private static Shooter instance = null;
 
-    private static final boolean kEnableShooterTuning = false;
+    private static final boolean kEnableShooterTuning = true;
 
     private double targetRPM = 0;
     private double targetHoodPositionMotorRotations = 0;
@@ -59,7 +59,7 @@ public class Shooter extends SubsystemBase{
             .withKA(0)
             .withKS(0.25)
             .withKV(0.127)
-            .withKP(0.25)
+            .withKP(0.45)
             .withKI(0)
             .withKD(0)
         ).withFollowerMotor(new TalonFX(42, "*"), MotorAlignmentValue.Opposed);

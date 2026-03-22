@@ -19,7 +19,7 @@ public class SOTMCalcs {
         return new Translation2d(-velocityX * flightTime * kFudgeFactor.getNumber(), -velocityY * flightTime * kFudgeFactor.getNumber());
     }
 
-    public static final SmartDashboardNumber kFudgeFactor = new SmartDashboardNumber("sotm/fudge", 5.67);
+    public static final SmartDashboardNumber kFudgeFactor = new SmartDashboardNumber("sotm/fudge", 3.67);
     
     public static Translation2d getOffset(double velocityX, double velocityY) {
         return new Translation2d(-kFudgeFactor.getNumber() * velocityX, -kFudgeFactor.getNumber() * velocityY);

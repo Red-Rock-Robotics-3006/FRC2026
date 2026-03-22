@@ -56,6 +56,8 @@ public class RobotContainer {
         autoChooser.addOption("PATHS - Right Two Midtakes Leave", autos.R_MS_MS_L_Paths());
         autoChooser.addOption("PATHS - Right Midtake Outpost", autos.R_MS_OS_Paths());
         autoChooser.addOption("PATHS - Right Two Midtakes Outpost", autos.R_MS_MS_OS_Paths());
+        autoChooser.addOption("PATHS - Middle", autos.M_Depot_Outpost_Paths());
+        autoChooser.addOption("PATHS - Testpath", autos.TESTPATH());
     }
 
     private void configureCompBindings() {
