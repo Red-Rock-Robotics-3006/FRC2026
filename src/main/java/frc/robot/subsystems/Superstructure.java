@@ -36,9 +36,6 @@ public class Superstructure extends SubsystemBase {
     public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     public final Localization localization = Localization.getInstance();
 
-    private SmartDashboardNumber blueAllianceZoneX = new SmartDashboardNumber("superstructure/blue alliance zone x", 4.38, kTuning);
-    private SmartDashboardNumber redAllianceZoneX = new SmartDashboardNumber("superstructure/red alliance zone x", 12.16, kTuning);
-
     private SmartDashboardNumber lobDisableZoneUpperY = new SmartDashboardNumber("superstructure/lob disable zone upper y", 4.5, kTuning);
     private SmartDashboardNumber lobDisableZoneLowerY = new SmartDashboardNumber("superstructure/lob disable zone lower y", 3.44, kTuning);
     private final double midfieldY = Units.inchesToMeters(158.845);
@@ -73,7 +70,7 @@ public class Superstructure extends SubsystemBase {
 
     private boolean inAllianceZone() {
         if (kPractice) return kHubOrLob;
-        return drivetrain.isBlue() ? shooterPose.getX() < blueAllianceZoneX.getNumber() : shooterPose.getX() > redAllianceZoneX.getNumber();
+        return drivetrain.isBlue() ? shooterPose.getX() < blueTrenchX : shooterPose.getX() > redTrenchX;
     }
 
     private boolean inLobEnabledZone() {
@@ -206,6 +203,7 @@ public class Superstructure extends SubsystemBase {
             
         SmartDashboard.putNumberArray("superstructure/target pose", dynamicTargetPose.toMatrix().getData());
         SmartDashboard.putNumber("superstructure/distance to target", distanceToTarget);
+        SmartDashboard.putBoolean("superstructure/near trench", nearTrench());
 
         // SMARTDASHBOARD LOGGING | TUNING
 

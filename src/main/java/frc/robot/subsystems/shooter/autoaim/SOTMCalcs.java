@@ -43,7 +43,7 @@ public class SOTMCalcs {
         Pose2d virtualOffsetPose = targetPose;
         int i = 0;
         do {
-            flightTime = FlightTimeLerpTable.get(virtualOffsetPose.minus(currentPose).getTranslation().getNorm());
+            flightTime = FlightTimeInterpolatingTable.get(virtualOffsetPose.minus(currentPose).getTranslation().getNorm());
             offset = new Translation2d(-vx * flightTime, -vy * flightTime);
             virtualOffsetPose = targetPose.plus(new Transform2d(offset, new Rotation2d()));
             i++;

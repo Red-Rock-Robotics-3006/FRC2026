@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-public class FlightTimeLerpTable {
-    private FlightTimeLerpTable() {}
+public class FlightTimeInterpolatingTable {
+    private FlightTimeInterpolatingTable() {}
 
     // entry(
     //     distance,

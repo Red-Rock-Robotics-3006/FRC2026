@@ -27,39 +27,11 @@ public class Autos {
     private final Superstructure superstructure = Superstructure.getInstance();
     // private final Climber climber = Climber.getInstance();
 
-    public Command R_MS_L() {
-        return Commands.sequence(
-            superstructure.intake.startIntakeCommand(),
-
-            drivetrain.followTrajectory("R_FarMidtake"),
-            superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(7),
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-
-            superstructure.intake.stopIntakeCommand(),
-            drivetrain.followTrajectory("R_Leave")
-        );
-    }
+    // PATHS AUTOS
 
     public Command R_MS_L_Paths() {
         return Commands.sequence(
             drivetrain.followTrajectory("R_FarMidtake"),
-            drivetrain.followTrajectory("R_Leave")
-        );
-    }
-
-    public Command R_MS_MS_L() {
-        return Commands.sequence(
-            superstructure.intake.startIntakeCommand(),
-
-            drivetrain.followTrajectory("R_FarMidtake"),
-            superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(7),
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-
-            drivetrain.followTrajectory("R_CloseMidtake"),
-            superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(5),
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-
-            superstructure.intake.stopIntakeCommand(),
             drivetrain.followTrajectory("R_Leave")
         );
     }
@@ -72,46 +44,10 @@ public class Autos {
         );
     }
 
-    public Command R_MS_OS() {
-        return Commands.sequence(
-            superstructure.intake.startIntakeCommand(),
-
-            drivetrain.followTrajectory("R_FarMidtake"),
-            superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(7),
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-
-            drivetrain.followTrajectory("R_Outposttake"),
-            superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(5),
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-
-            superstructure.intake.stopIntakeCommand()
-        );
-    }
-
     public Command R_MS_OS_Paths() {
         return Commands.sequence(
             drivetrain.followTrajectory("R_FarMidtake"),
             drivetrain.followTrajectory("R_Outposttake")
-        );
-    }
-
-    public Command R_MS_MS_OS() {
-        return Commands.sequence(
-            superstructure.intake.startIntakeCommand(),
-
-            drivetrain.followTrajectory("R_FarMidtake"),
-            superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(7),
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-
-            drivetrain.followTrajectory("R_CloseMidtake"),
-            superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(5),
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-
-            drivetrain.followTrajectory("R_Outposttake"),
-            superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(5),
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-
-            superstructure.intake.stopIntakeCommand()
         );
     }
 
@@ -131,16 +67,68 @@ public class Autos {
         return drivetrain.followTrajectory("Test_path");
     }
 
-    // public Command R_MS_C() {
-    //     return Commands.sequence(
-    //         superstructure.intake.startIntakeCommand(),
-    //         superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(2),
-    //         superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-    //         drivetrain.followTrajectory("R_MS_C", 0),
-    //         drivetrain.followTrajectory("R_MS_C", 1),
-    //         drivetrain.followTrajectory("R_MS_C", 2),
-    //         superstructure.setStateCommand(RobotState.FULL_TRACKING).withTimeout(4),
-    //         superstructure.intake.stopIntakeCommand(),
+    // FULL AUTOS
+
+    public Command R_MS_L() {
+        return Commands.sequence(
+            superstructure.intake.startIntakeCommand(),
+
+            drivetrain.followTrajectory("R_FarMidtake"),
+            this.shootAuto(6),
+
+            superstructure.intake.stopIntakeCommand(),
+            drivetrain.followTrajectory("R_Leave")
+        );
+    }
+
+    public Command R_MS_MS_L() {
+        return Commands.sequence(
+            superstructure.intake.startIntakeCommand(),
+
+            drivetrain.followTrajectory("R_FarMidtake"),
+            this.shootAuto(6),
+
+            drivetrain.followTrajectory("R_CloseMidtake"),
+            this.shootAuto(4),
+
+            superstructure.intake.stopIntakeCommand(),
+            drivetrain.followTrajectory("R_Leave")
+        );
+    }
+
+    public Command R_MS_OS() {
+        return Commands.sequence(
+            superstructure.intake.startIntakeCommand(),
+
+            drivetrain.followTrajectory("R_FarMidtake"),
+            this.shootAuto(6),
+
+            drivetrain.followTrajectory("R_Outposttake"),
+            this.shootAuto(4),
+
+            superstructure.intake.stopIntakeCommand()
+        );
+    }
+
+    public Command R_MS_MS_OS() {
+        return Commands.sequence(
+            superstructure.intake.startIntakeCommand(),
+
+            drivetrain.followTrajectory("R_FarMidtake"),
+            this.shootAuto(6),
+
+            drivetrain.followTrajectory("R_CloseMidtake"),
+            this.shootAuto(4),
+
+            drivetrain.followTrajectory("R_Outposttake"),
+            this.shootAuto(7),
+
+            superstructure.intake.stopIntakeCommand()
+        );
+    }
+
+    // climb sequence if we ever need it ig
+    //     
     //         Commands.parallel(
     //             Commands.sequence(
     //                 drivetrain.followTrajectory("R_MS_C", 3),
@@ -152,6 +140,14 @@ public class Autos {
     //         climber.stopClimberCommand()
     //     );
     // }
+
+    private Command shootAuto(double seconds) {
+        return Commands.sequence(
+            superstructure.setStateCommand(RobotState.FULL_TRACKING),
+            Commands.waitSeconds(seconds),
+            superstructure.setStateCommand(RobotState.TURRET_TRACKING)
+        );
+    }
 
     public static Autos getInstance() {
         if (instance == null) instance = new Autos();

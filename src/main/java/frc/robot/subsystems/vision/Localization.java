@@ -116,7 +116,7 @@ public class Localization extends SubsystemBase{
         );
 
         //limelight 3g on turret
-        // cameras.add(new RedRockCamera("Photon-Rubik-Booger") //TODO: gng this isnt on a rubik lmao
+        // cameras.add(new RedRockCamera("Photon-Booger")
         //     .withRobotToCameraTransform(
         //         new Transform3d(
         //             new Translation3d(Units.inchesToMeters(7.053), Units.inchesToMeters(0), Units.inchesToMeters(19.212751)),
