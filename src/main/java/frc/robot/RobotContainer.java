@@ -73,9 +73,15 @@ public class RobotContainer {
             .onFalse(superstructure.intake.stopIntakeCommand());
 
         joystick.rightTrigger(kTriggerThreshold)
-            .onTrue(superstructure.setStateCommand(RobotState.FULL_TRACKING))
+            .onTrue(
+                Commands.parallel(
+                    superstructure.setStateCommand(RobotState.FULL_TRACKING),
+                    Commands.runOnce(() -> drivetrain.enableSpeedLimiter(), drivetrain)
+                    )
+            )
             .onFalse(Commands.parallel(
                 superstructure.setStateCommand(RobotState.TURRET_TRACKING),
+                Commands.runOnce(() -> drivetrain.disableSpeedLimiter(), drivetrain),
                 superstructure.intake.deployIntakeCommand()));
             
         joystick.leftBumper() 
@@ -91,7 +97,8 @@ public class RobotContainer {
                 superstructure.intake.deployIntakeCommand()));
 
         joystick.x()
-            .onTrue(superstructure.resetSuperStructure());
+            .onTrue(superstructure.resetSuperStructure())
+            .onFalse(Commands.runOnce(() -> drivetrain.disableIgnoreCameraDistance(), drivetrain));
 
         joystick.y()
             .onTrue(superstructure.index.reverseIndexCommand())

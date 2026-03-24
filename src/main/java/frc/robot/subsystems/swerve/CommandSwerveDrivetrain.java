@@ -20,6 +20,7 @@ import edu.wpi.first.math.MathUtil;
 // import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -58,6 +59,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private boolean ignoreCameraPoseDistance = false;
 
     private CommandXboxController controller;
+
+    private boolean driveLimiterEnabled = false;
+
+    private SlewRateLimiter driveSlewRateLimiterX = new SlewRateLimiter(1);
+    private SlewRateLimiter driveSlewRateLimiterY = new SlewRateLimiter(1);
+    private SlewRateLimiter rotateSlewRateLimiter = new SlewRateLimiter(1);
+
+    private SmartDashboardNumber limitedMaxDriveSpeed = new SmartDashboardNumber("dt/dt sotm drive speeds", 2);
+    private SmartDashboardNumber limitedMaxRotateSpeed = new SmartDashboardNumber("dt/dt sotm rotate speeds", 0.5);
 
     private SmartDashboardNumber poseMaxDistance = new SmartDashboardNumber("dt/dt localization/dist restriction", 6);
     private SmartDashboardNumber poseMaxRotation = new SmartDashboardNumber("dt/dt localization/rotation restriction", 10);
@@ -525,12 +535,28 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return this.getState().Pose;
     }
 
-    public void enableIgnoreCamera() {
+    public void enableIgnoreCameraDistance() {
         this.ignoreCameraPoseDistance = true;
     }
 
-    public void disableIgnoreCamera() {
+    public void disableIgnoreCameraDistance() {
         this.ignoreCameraPoseDistance = false;
+    }
+
+    public void enableVision() {
+        this.visionEnabled.putBoolean(true);
+    }
+
+    public void disableVision() {
+        this.visionEnabled.putBoolean(false);
+    }
+
+    public void enableSpeedLimiter() {
+        this.driveLimiterEnabled = true;
+    }
+
+    public void disableSpeedLimiter() {
+        this.driveLimiterEnabled = false;
     }
 
     private void configureHeadingPID() {
@@ -539,8 +565,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public SwerveRequest getRequest() {
+        double rawX = -controller.getLeftY();
+        double rawY = -controller.getLeftX();
+        double rawRotation = -controller.getRightX();
+
+        double slewX = driveSlewRateLimiterX.calculate(rawX);
+        double slewY = driveSlewRateLimiterY.calculate(rawY);
+
+        double slewRequestedX = slewX * limitedMaxDriveSpeed.getNumber();
+        double slewRequestedY = slewY * limitedMaxDriveSpeed.getNumber();
+        double slewRequestedRot = rawRotation * limitedMaxRotateSpeed.getNumber();
+
         double requestedXSpeed = -controller.getLeftY() * maxDriveSpeed.getNumber();
         double requestedYSpeed = -controller.getLeftX() * maxDriveSpeed.getNumber();
+
+
 
         double[] rotatedRequestedSpeed = SOTMCalcs.rotate(requestedXSpeed, requestedYSpeed, fieldCentricSeedOffset);
 
@@ -549,7 +588,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         double requestedRotationSpeed = -controller.getRightX() * RotationsPerSecond.of(maxTurnSpeed.getNumber()).in(RadiansPerSecond);
 
-        double pidToPoseMax = pidToPoseMaxVelo.getNumber();
+        double pidToPoseMax = pidToPoseMaxVelo.getNumber(); 
+
+        if (driveLimiterEnabled) {
+            requestedXSpeed = slewRequestedX;
+            requestedYSpeed = slewRequestedY;
+            requestedRotationSpeed = slewRequestedRot;
+        }
 
         Pose2d dtPose = this.getPose();
         switch (state) {
