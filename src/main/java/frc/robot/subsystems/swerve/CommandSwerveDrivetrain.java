@@ -571,10 +571,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         double slewX = driveSlewRateLimiterX.calculate(rawX);
         double slewY = driveSlewRateLimiterY.calculate(rawY);
+        double slewRot = rotateSlewRateLimiter.calculate(rawRotation);
 
         double slewRequestedX = slewX * limitedMaxDriveSpeed.getNumber();
         double slewRequestedY = slewY * limitedMaxDriveSpeed.getNumber();
-        double slewRequestedRot = rawRotation * limitedMaxRotateSpeed.getNumber();
+        double slewRequestedRot = slewRot * limitedMaxRotateSpeed.getNumber();
 
         double requestedXSpeed = -controller.getLeftY() * maxDriveSpeed.getNumber();
         double requestedYSpeed = -controller.getLeftX() * maxDriveSpeed.getNumber();
