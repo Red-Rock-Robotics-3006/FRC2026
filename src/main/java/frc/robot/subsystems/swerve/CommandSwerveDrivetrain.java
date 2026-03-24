@@ -575,27 +575,29 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         double slewRequestedX = slewX * limitedMaxDriveSpeed.getNumber();
         double slewRequestedY = slewY * limitedMaxDriveSpeed.getNumber();
-        double slewRequestedRot = slewRot * limitedMaxRotateSpeed.getNumber();
+        double slewRequestedRot = slewRot * RotationsPerSecond.of(limitedMaxRotateSpeed.getNumber()).in(RadiansPerSecond);
 
         double requestedXSpeed = -controller.getLeftY() * maxDriveSpeed.getNumber();
         double requestedYSpeed = -controller.getLeftX() * maxDriveSpeed.getNumber();
+        double requestedRotationSpeed = -controller.getRightX() * RotationsPerSecond.of(maxTurnSpeed.getNumber()).in(RadiansPerSecond);
 
+        double pidToPoseMax = pidToPoseMaxVelo.getNumber(); 
 
+        if (driveLimiterEnabled) {
+            requestedXSpeed = Math.abs(rawX) < drivingDeadBand.getNumber() ? 0 : slewRequestedX;
+            requestedYSpeed = Math.abs(rawY) < drivingDeadBand.getNumber() ? 0 : slewRequestedY;
+            requestedRotationSpeed = Math.abs(rawRotation) < drivingDeadBand.getNumber() ? 0 : slewRequestedRot;
+        }
+        
+        SmartDashboard.putNumber("dt/raw x", rawX);
+        SmartDashboard.putNumber("dt/requested x", requestedXSpeed);
 
         double[] rotatedRequestedSpeed = SOTMCalcs.rotate(requestedXSpeed, requestedYSpeed, fieldCentricSeedOffset);
 
         requestedXSpeed = rotatedRequestedSpeed[0];
         requestedYSpeed = rotatedRequestedSpeed[1];
 
-        double requestedRotationSpeed = -controller.getRightX() * RotationsPerSecond.of(maxTurnSpeed.getNumber()).in(RadiansPerSecond);
 
-        double pidToPoseMax = pidToPoseMaxVelo.getNumber(); 
-
-        if (driveLimiterEnabled) {
-            requestedXSpeed = slewRequestedX;
-            requestedYSpeed = slewRequestedY;
-            requestedRotationSpeed = slewRequestedRot;
-        }
 
         Pose2d dtPose = this.getPose();
         switch (state) {
