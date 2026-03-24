@@ -281,7 +281,7 @@ public class Superstructure extends SubsystemBase {
 
     public Command resetSuperStructure() {
         return Commands.parallel(
-            Commands.runOnce(() -> drivetrain.enableIgnoreCamera(), drivetrain),
+            Commands.runOnce(() -> drivetrain.enableIgnoreCameraDistance(), drivetrain),
             Commands.runOnce(() -> turret.calibrateTurret(), turret)//,
             // shooter.resetHoodCommand()
         );
