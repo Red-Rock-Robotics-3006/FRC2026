@@ -13,11 +13,11 @@ public class LED extends SubsystemBase{
 
     private static LED instance = null;
 
-    private AddressableLED control = new AddressableLED(2);
-    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(40); //79 for two strips // 118 for three strips
+    private AddressableLED control = new AddressableLED(0);
+    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(79); // 118 for three strips
 
     // public AddressableLEDBufferView left = buffer.createView(79, 117);
-    // public AddressableLEDBufferView left = buffer.createView(40, 78);
+    public AddressableLEDBufferView left = buffer.createView(40, 78);
     public AddressableLEDBufferView right = buffer.createView(1, 39);
 
     private Superstructure superstructure = Superstructure.getInstance();
@@ -118,12 +118,12 @@ public class LED extends SubsystemBase{
         int direction = 2;
     }
 
-    // private final LarsonState leftLarsonState  = new LarsonState();
+    private final LarsonState leftLarsonState  = new LarsonState();
     private final LarsonState rightLarsonState = new LarsonState();
     // private final LarsonState backLarsonState  = new LarsonState();
 
     public void larson(Color c) {
-        // larson(left,  leftLarsonState,  c);
+        larson(left,  leftLarsonState,  c);
         larson(right, rightLarsonState, c);
         // larson(back,  backLarsonState,  c);
         this.buffer.setLED(0, OFF);
@@ -166,7 +166,7 @@ public class LED extends SubsystemBase{
     private boolean policeEnabled = false;
 
     private void police() {
-        // police(left);
+        police(left);
         police(right);
         // police(back);
         this.buffer.setLED(0, OFF);
