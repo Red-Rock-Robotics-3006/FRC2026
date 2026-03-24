@@ -79,7 +79,7 @@ public class RobotContainer {
                     Commands.runOnce(() -> drivetrain.enableSpeedLimiter(), drivetrain)
                     )
             )
-            .onFalse(Commands.parallel(
+            .onFalse(Commands.sequence(
                 superstructure.setStateCommand(RobotState.TURRET_TRACKING),
                 Commands.runOnce(() -> drivetrain.disableSpeedLimiter(), drivetrain),
                 superstructure.intake.deployIntakeCommand()));
