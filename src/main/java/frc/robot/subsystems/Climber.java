@@ -25,13 +25,14 @@ public class Climber extends SubsystemBase{
         super("climber");
 
         this.climbMotor
+        .withTuningEnabled(false)
         .withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive)
             .withPeakForwardDutyCycle(1)
             .withPeakReverseDutyCycle(-1)
             .withNeutralMode(NeutralModeValue.Brake)
-        ).withTuningEnabled(false);
+        );
     }
 
     public void setClimberSpeed(double speed) {

@@ -60,7 +60,8 @@ public class Turret extends SubsystemBase{
     private Turret() {
         super();
 
-        turretMotor.withMotorOutputConfigs(
+        turretMotor.withTuningEnabled(kEnableTurretTuning && true)
+        .withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withPeakForwardDutyCycle(1)
             .withPeakReverseDutyCycle(-1)

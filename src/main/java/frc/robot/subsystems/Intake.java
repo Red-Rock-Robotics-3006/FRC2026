@@ -18,23 +18,24 @@ import redrocklib.wrappers.RedRockTalon;
 
 public class Intake extends SubsystemBase{
     private static Intake instance = null;
+    public static final boolean kEnableTuning = true;
 
     private RedRockTalon driveMotor = new RedRockTalon(21, "intake-drive-motor", "*");
     private RedRockTalon extensionLeftMotor = new RedRockTalon(22, "intake-extension-left-motor", "*");
     private RedRockTalon extensionRightMotor = new RedRockTalon(23, "intake-extension-right-motor", "*");
 
-    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 1);
-    private SmartDashboardNumber intakePulsateSpeed = new SmartDashboardNumber("intake/drive/pulsate speed", 0.4);
-    private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.4);
+    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 1, kEnableTuning && true);
+    private SmartDashboardNumber intakePulsateSpeed = new SmartDashboardNumber("intake/drive/pulsate speed", 0.4, kEnableTuning && true);
+    private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.4, kEnableTuning && true);
 
-    private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 11.424);
-    private SmartDashboardNumber minExtensionRotation = new SmartDashboardNumber("intake/extension/min rotation", 0);
+    private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 11.424, kEnableTuning && true);
+    private SmartDashboardNumber minExtensionRotation = new SmartDashboardNumber("intake/extension/min rotation", 0, kEnableTuning && true);
 
-    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0.2, false);
-    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 10.5, false);
-    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 4.5, true);
-    private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 1, false);
-    private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.1, false);
+    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0.2, kEnableTuning && false);
+    private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 10.5, kEnableTuning && false);
+    private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 4.5, kEnableTuning && true);
+    private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 1, kEnableTuning && false);
+    private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.1, kEnableTuning && false);
 
     private double targetPosition = 0;
     
@@ -60,11 +61,11 @@ public class Intake extends SubsystemBase{
             .withStatorCurrentLimit(60)
             .withStatorCurrentLimitEnable(true);
 
-        boolean enableTuning = true;
         double resetSpeed = -0.13;
         double spikeThreshold = 30;
                 
-        this.driveMotor.withMotorOutputConfigs(
+        this.driveMotor.withTuningEnabled(kEnableTuning && true)
+        .withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive)
             .withPeakForwardDutyCycle(1d)
@@ -76,9 +77,10 @@ public class Intake extends SubsystemBase{
             .withSupplyCurrentLimitEnable(true)
             .withStatorCurrentLimit(80)
             .withStatorCurrentLimitEnable(true)
-        ).withTuningEnabled(true);
-        
-        this.extensionLeftMotor.withMotorOutputConfigs(
+        );
+
+        this.extensionLeftMotor.withTuningEnabled(kEnableTuning && true)
+        .withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive)
             .withPeakForwardDutyCycle(1d)
@@ -89,10 +91,10 @@ public class Intake extends SubsystemBase{
         .withMotionMagicConfigs(motionMagicConfigs)
         .withSpikeThreshold(spikeThreshold)
         .withResetSpeed(resetSpeed)
-        .withCurrentLimitConfigs(currentLimitsConfigs)
-        .withTuningEnabled(enableTuning);
+        .withCurrentLimitConfigs(currentLimitsConfigs);
 
-        this.extensionRightMotor.withMotorOutputConfigs(
+        this.extensionRightMotor.withTuningEnabled(kEnableTuning && true)
+        .withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive)
             .withPeakForwardDutyCycle(1d)
@@ -103,8 +105,7 @@ public class Intake extends SubsystemBase{
         .withMotionMagicConfigs(motionMagicConfigs)
         .withSpikeThreshold(spikeThreshold)
         .withResetSpeed(resetSpeed)
-        .withCurrentLimitConfigs(currentLimitsConfigs)
-        .withTuningEnabled(enableTuning);
+        .withCurrentLimitConfigs(currentLimitsConfigs);
 
         this.extensionLeftMotor.motor.setPosition(maxExtensionRotation.getNumber() - 0.5);
         this.extensionRightMotor.motor.setPosition(maxExtensionRotation.getNumber() - 0.5);

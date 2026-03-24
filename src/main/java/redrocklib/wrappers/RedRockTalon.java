@@ -138,7 +138,7 @@ public class RedRockTalon {
     }
 
     public RedRockTalon withResetSpeed(double speed) {
-        this.resetSpeed = new SmartDashboardNumber(name + "/" + name + "-reset-speed", speed);
+        this.resetSpeed = new SmartDashboardNumber(name + "/" + name + "-reset-speed", speed, this.tuningEnabled);
         return this;
     }
 

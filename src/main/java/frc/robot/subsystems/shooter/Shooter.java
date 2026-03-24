@@ -48,7 +48,8 @@ public class Shooter extends SubsystemBase{
     
 
     private Shooter() {
-        shooterLeftMotor.withMotorOutputConfigs(
+        shooterLeftMotor.withTuningEnabled(kEnableShooterTuning && true)
+        .withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withPeakForwardDutyCycle(1)
             .withPeakReverseDutyCycle(-1)
@@ -64,7 +65,8 @@ public class Shooter extends SubsystemBase{
             .withKD(0)
         ).withFollowerMotor(new TalonFX(42, "*"), MotorAlignmentValue.Opposed);
 
-        hoodMotor.withMotorOutputConfigs(
+        hoodMotor.withTuningEnabled(kEnableShooterTuning && true)
+        .withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withPeakForwardDutyCycle(1)
             .withPeakReverseDutyCycle(-1)

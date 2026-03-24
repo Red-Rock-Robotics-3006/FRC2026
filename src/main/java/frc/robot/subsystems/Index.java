@@ -22,6 +22,8 @@ import redrocklib.wrappers.RedRockTalon;
 public class Index extends SubsystemBase {
     private static Index instance = null;
 
+    public static final boolean kEnableTuning = true;
+
     private RedRockTalon dyeRotorMotor = new RedRockTalon(31, "index-dyerotor-motor", "*");
     // private RedRockTalon kickerMotor = new RedRockTalon(32, "index-kicker-motor", "*");
 
@@ -39,7 +41,8 @@ public class Index extends SubsystemBase {
     private Index() {
         super();
 
-        this.dyeRotorMotor.withMotorOutputConfigs(
+        this.dyeRotorMotor.withTuningEnabled(kEnableTuning && true)
+        .withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive)
             .withPeakForwardDutyCycle(1d)
@@ -64,7 +67,7 @@ public class Index extends SubsystemBase {
             .withSupplyCurrentLimitEnable(true)
             .withStatorCurrentLimit(80)
             .withStatorCurrentLimitEnable(true)
-        ).withTuningEnabled(true);
+        );
 
         // this.kickerMotor.withMotorOutputConfigs(
         //     new MotorOutputConfigs()
