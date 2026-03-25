@@ -65,21 +65,18 @@ public class Localization extends SubsystemBase{
 
     public static void setCameraDynamicRotation(Translation2d shooterOffset, Rotation2d turretRotation, Rotation2d drivetrainRotation, int cameraIndex) {
         if (cameraIndex >= cameras.size()) return;
-        double[] turretToRobot = SOTMCalcs.rotate(shooterOffset.getX(), shooterOffset.getY(), drivetrainRotation);
-        double[] llToTurret = SOTMCalcs.rotate(kTurretToLimelightTransform.getX(), kTurretToLimelightTransform.getY(), drivetrainRotation.plus(turretRotation));
+        double[] turretToLLxy = SOTMCalcs.rotate(kTurretToLimelightTransform.getX(), kTurretToLimelightTransform.getY(), turretRotation);
 
         cameras.get(cameraIndex)
             .withRobotToCameraTransform(
                 new Transform3d(
                     new Translation3d(
-                        turretToRobot[0] + llToTurret[0],
-                        turretToRobot[1] + llToTurret[1],
+                        shooterOffset.getX() + turretToLLxy[0],
+                        shooterOffset.getY() + turretToLLxy[1],
                         kTurretToLimelightTransform.getZ()
                     ),
                     kTurretToLimelightTransform.getRotation()
-                        .rotateBy(new Rotation3d(
-                            drivetrainRotation.plus(turretRotation)
-                        ))
+                        .rotateBy(new Rotation3d(turretRotation))
                 )
             );
     }
