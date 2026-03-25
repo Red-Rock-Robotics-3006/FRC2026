@@ -14,11 +14,11 @@ public class LED extends SubsystemBase{
     private static LED instance = null;
 
     private AddressableLED control = new AddressableLED(0);
-    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(79); // 118 for three strips
+    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(77); // 118 for three strips
 
     // public AddressableLEDBufferView left = buffer.createView(79, 117);
-    public AddressableLEDBufferView left = buffer.createView(40, 78);
-    public AddressableLEDBufferView right = buffer.createView(1, 39);
+    public AddressableLEDBufferView left = buffer.createView(76, 39);
+    public AddressableLEDBufferView right = buffer.createView(0, 37);
 
     private Superstructure superstructure = Superstructure.getInstance();
     
@@ -33,7 +33,8 @@ public class LED extends SubsystemBase{
     
     private int loopControl = 0;
     private SmartDashboardNumber rainbowControl = new SmartDashboardNumber("led/rainbow speed", 3);
-    private SmartDashboardNumber larsonSpeed = new SmartDashboardNumber("led/larson speed", 1);
+    private SmartDashboardNumber idleLarsonSpeed = new SmartDashboardNumber("led/larson speed", 10);
+    private SmartDashboardNumber turretTrackingLarsonSpeed = new SmartDashboardNumber("led/larson speed", 1);
     private SmartDashboardNumber policeSpeed = new SmartDashboardNumber("led/police speed", 6);
 
     private LED() {
@@ -122,14 +123,15 @@ public class LED extends SubsystemBase{
     private final LarsonState rightLarsonState = new LarsonState();
     // private final LarsonState backLarsonState  = new LarsonState();
 
-    public void larson(Color c) {
-        larson(left,  leftLarsonState,  c);
-        larson(right, rightLarsonState, c);
+    public void larson(Color c, int speed) {
+        larson(left,  leftLarsonState,  c, speed);
+        larson(right, rightLarsonState, c, speed);
         // larson(back,  backLarsonState,  c);
-        this.buffer.setLED(0, OFF);
+        // this.buffer.setLED(0, OFF);
+        this.buffer.setLED(38, OFF);
     }
 
-    public void larson(AddressableLEDBufferView view, LarsonState state, Color c) {
+    public void larson(AddressableLEDBufferView view, LarsonState state, Color c, int speed) {
         for (int i = 0; i < view.getLength(); i++) {
             view.setLED(i, new Color(
                 view.getLED(i).red   * 0.5,
@@ -151,7 +153,7 @@ public class LED extends SubsystemBase{
             ));
         }
 
-        if (loopControl % larsonSpeed.getNumber() == 0) {
+        if (loopControl % speed == 0) {
             state.position += state.direction;
             if (state.position >= view.getLength() - 1) {
                 state.position   = view.getLength() - 1;
@@ -169,7 +171,8 @@ public class LED extends SubsystemBase{
         police(left);
         police(right);
         // police(back);
-        this.buffer.setLED(0, OFF);
+        // this.buffer.setLED(0, OFF);
+        this.buffer.setLED(38, OFF);
     }
 
     private void police(AddressableLEDBufferView view) {
@@ -217,13 +220,13 @@ public class LED extends SubsystemBase{
                 this.blink(GREEN, 5);
                 break;
             case FULL_TRACKING:
-                this.setLights(GREEN);
+                this.setLights(RED);
                 break;
             case TURRET_TRACKING:
-                this.larson(WHITE);
+                this.larson(WHITE, (int) turretTrackingLarsonSpeed.getNumber());
                 break;
             case IDLE:
-                this.larson(NOTE_ORANGE);
+                this.larson(NOTE_ORANGE, (int) idleLarsonSpeed.getNumber());
                 break;
         }
 

@@ -26,8 +26,8 @@ public class Turret extends SubsystemBase{
     private static boolean kEnableTurretTuning = true;
     private static Turret instance = null;
 
-    public static final int kCcoderAToothCount = 15;
-    public static final int kCcoderBToothCount = 16;
+    public static final int kCcoderAToothCount = 16;
+    public static final int kCcoderBToothCount = 15;
 
     public static final int kLCMToothCount = 240;
 
@@ -42,7 +42,7 @@ public class Turret extends SubsystemBase{
     private CANcoder ccoderA = new CANcoder(45, "*");
     private CANcoder ccoderB = new CANcoder(47, "*");
 
-    private SmartDashboardNumber turretLoomMinAngle = new SmartDashboardNumber("turret/min loom angle", -180);
+    private SmartDashboardNumber turretLoomMinAngle = new SmartDashboardNumber("turret/min loom angle", -178);
 
     private SmartDashboardNumber turretTuningA = new SmartDashboardNumber("turret/tuning/motor pos a", 10);
     private SmartDashboardNumber turretTuningB = new SmartDashboardNumber("turret/tuning/motor pos b", 20);
@@ -52,7 +52,7 @@ public class Turret extends SubsystemBase{
     private LerpingSmartDashboardNumber turretRestrictions
         = new LerpingSmartDashboardNumber(
             -180, 0, 
-            270, 47.6450195313, 
+            270, 50.55, 
             // 270, 110.0/16.0,
             "turret/angle-degrees", "turret/motor-rotations", 
             kEnableTurretTuning && true);
@@ -69,29 +69,29 @@ public class Turret extends SubsystemBase{
             .withInverted(InvertedValue.Clockwise_Positive)
         ).withSlot0Configs(
             new Slot0Configs()
-            // .withKP(6)
-            // .withKS(0.26)
-            .withKP(4.9)
-            .withKS(0.25)
+            .withKP(6)
+            .withKS(0.26)
+            // .withKP(4.9)
+            // .withKS(0.25)
         ).withMotionMagicConfigs(
             new MotionMagicConfigs()
-            // .withMotionMagicAcceleration(400)
-            // .withMotionMagicCruiseVelocity(200)
-            .withMotionMagicAcceleration(100)
-            .withMotionMagicCruiseVelocity(100)
+            .withMotionMagicAcceleration(400)
+            .withMotionMagicCruiseVelocity(200)
+            // .withMotionMagicAcceleration(100)
+            // .withMotionMagicCruiseVelocity(100)
             .withMotionMagicJerk(99999)
         );
 
         ccoderA.getConfigurator().apply(
             new MagnetSensorConfigs()
-            .withMagnetOffset(-0.508544921875)
+            .withMagnetOffset(-0.758056640625)
             .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
             .withAbsoluteSensorDiscontinuityPoint(1.0)
         );
 
         ccoderB.getConfigurator().apply(
             new MagnetSensorConfigs()
-            .withMagnetOffset(-0.056640625)
+            .withMagnetOffset(-0.445556640625)
             .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
             .withAbsoluteSensorDiscontinuityPoint(1.0)
         );
@@ -113,9 +113,11 @@ public class Turret extends SubsystemBase{
     public void calibrateTurret() {
         // this.turretMotor.resetMotor();
         this.turretMotor.motor.setControl(new CoastOut());
+        double crtDeg = this.crtDegrees();
+        if (crtDeg < turretRestrictions.getMinInput()) return;
         this.turretMotor.motor.setPosition(
             turretRestrictions.getValue(
-                this.crtDegrees()
+                crtDeg
             )
         );
     }

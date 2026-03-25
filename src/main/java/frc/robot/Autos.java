@@ -29,6 +29,10 @@ public class Autos {
 
     // PATHS AUTOS
 
+    public Command testAutoPaths() {
+        return drivetrain.followTrajectory("M_FullTest");
+    }
+
     public Command R_MS_L_Paths() {
         return Commands.sequence(
             drivetrain.followTrajectory("R_FarMidtake"),
@@ -68,6 +72,17 @@ public class Autos {
     }
 
     // FULL AUTOS
+
+    public Command testAuto() {
+        return Commands.sequence(
+            superstructure.intake.startIntakeCommand(),
+
+            drivetrain.followTrajectory("M_FullTest"),
+            this.shootAuto(6),
+
+            superstructure.intake.stopIntakeCommand()
+        );
+    }
 
     public Command R_MS_L() {
         return Commands.sequence(

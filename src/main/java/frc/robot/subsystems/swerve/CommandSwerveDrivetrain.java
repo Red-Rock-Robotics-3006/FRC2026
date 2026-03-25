@@ -515,7 +515,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private Rotation2d fieldCentricSeedOffset = new Rotation2d();
 
-    private SmartDashboardBoolean visionEnabled = new SmartDashboardBoolean("vision enabled", false);
+    private SmartDashboardBoolean visionEnabled = new SmartDashboardBoolean("vision enabled", true);
 
     public void enablePoseTargeting(Pose2d targetPose) {
         this.targetPose = targetPose;
