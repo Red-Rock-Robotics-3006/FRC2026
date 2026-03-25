@@ -113,8 +113,14 @@ public class Turret extends SubsystemBase{
     public void calibrateTurret() {
         // this.turretMotor.resetMotor();
         this.turretMotor.motor.setControl(new CoastOut());
-        double crtDeg = this.crtDegrees();
-        if (crtDeg < turretRestrictions.getMinInput()) return;
+        double crtDeg;
+        try {
+            crtDeg = this.crtDegrees();
+        } catch (Exception e) {
+            return;
+        }
+
+        if (crtDeg < turretRestrictions.getMinInput() || crtDeg > turretRestrictions.getMaxInput()) return;
         this.turretMotor.motor.setPosition(
             turretRestrictions.getValue(
                 crtDeg
@@ -240,7 +246,7 @@ public class Turret extends SubsystemBase{
                     return x;
                 }
             }
-
+            // return 1000000;
             throw new ArithmeticException("No solution found within iteration limit");
         }
 
