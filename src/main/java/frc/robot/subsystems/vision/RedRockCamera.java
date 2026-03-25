@@ -24,7 +24,8 @@ import redrocklib.logging.SmartDashboardNumber;
 
 public class RedRockCamera {
     public static final boolean kEnableCameraTuning = true;
-    public static final SmartDashboardNumber kMaxDistToTag = new SmartDashboardNumber("localization-max dist", 5, true && kEnableCameraTuning);
+    public static final SmartDashboardNumber kMaxDistToTag = new SmartDashboardNumber("localization/max dist", 5, true && kEnableCameraTuning);
+    public static final SmartDashboardNumber kMaxAmbiguityThreshold = new SmartDashboardNumber("localization/max ambiguity", 0.15, true && kEnableCameraTuning);
     
     public static final RRStdv kDefaultStdvs = new RRStdv(0.8, 0.8, 2);
     public static final AprilTagFieldLayout defaultFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
@@ -45,6 +46,7 @@ public class RedRockCamera {
     private boolean targetFound = false;
     private double distToTag = 0;
     private Field2d field2d = new Field2d();
+    private double lowestAmbiguity = 10;
 
     public RedRockCamera(String cameraName) {
         this(cameraName, defaultFieldLayout, kDefaultStdvs);
@@ -81,7 +83,7 @@ public class RedRockCamera {
     }
 
     public boolean hasValidPoseEstimate() {
-        return hasTarget() && distToTag < kMaxDistToTag.getNumber() && visionEst.isPresent();
+        return visionEst.isPresent() && hasTarget() && distToTag < kMaxDistToTag.getNumber() && lowestAmbiguity < kMaxAmbiguityThreshold.getNumber();
     }
 
     public boolean hasTarget() {
@@ -121,18 +123,24 @@ public class RedRockCamera {
                     }
                 }
                 distToTag = (lowestAmbiguityTarget == null) ? distToTag : lowestAmbiguityTarget.getBestCameraToTarget().getTranslation().getNorm();
+                this.lowestAmbiguity = lowestAmbiguityScore;
 
             } else {
                 double sum = 0;
                 var targetsUsed = visionEst.get().targetsUsed;
 
+                double lowestMultiTagAmbiguity = 10;
+
                 for (PhotonTrackedTarget target : targetsUsed) {
+                    double targetPoseAmbiguity = target.getPoseAmbiguity();
+                    if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestMultiTagAmbiguity) lowestMultiTagAmbiguity = targetPoseAmbiguity;
                     if (target.fiducialId > 0) {
                         sum += (1.0 / target.getBestCameraToTarget().getTranslation().getNorm());
                     }
                 }
 
                 distToTag = targetsUsed.size() * (1.0 / sum);
+                this.lowestAmbiguity = lowestMultiTagAmbiguity;
             }
 
 
@@ -202,6 +210,7 @@ public class RedRockCamera {
 
         SmartDashboard.putBoolean(name + "/" + name + "-has-targets", this.targetFound);
         SmartDashboard.putNumber(name + "/" + name + "-distance-to-tag", distToTag);
+        SmartDashboard.putNumber(name + "/" + name + "-lowest-ambiguity", this.lowestAmbiguity);
 
         if (targetFound) field2d.setRobotPose(getEstimate().get().estimatedPose.toPose2d());
         // SmartDashboard.putBoolean(name + "/" + name + "-has-targets", result.hasTargets());
