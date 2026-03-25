@@ -46,6 +46,8 @@ public class Superstructure extends SubsystemBase {
 
     private final ShotParameter SHOOTER_IDLE_PARAMETER = new ShotParameter(14, 0);
 
+    private SmartDashboardNumber dtROtationTurretOffsetCoeff = new SmartDashboardNumber("sotm/rotation fudge factor", 0.11);
+
     private Field2d field2d = new Field2d();
     private FieldObject2d fieldObject2d = field2d.getObject("poses");
 
@@ -168,6 +170,12 @@ public class Superstructure extends SubsystemBase {
                     dynamicTargetPose.getX() - shooterPose.getX())
             ).minus(dtRotation);
 
+        Rotation2d dtTurretCompensation = 
+            Rotation2d.fromDegrees(
+                -dtROtationTurretOffsetCoeff.getNumber() * 
+                Math.toDegrees(state.Speeds.omegaRadiansPerSecond)
+            );
+
         switch (robotState) {
             case MANUAL_SHOT:
                 if (readyToShoot()) index.startIndex();
@@ -186,7 +194,7 @@ public class Superstructure extends SubsystemBase {
 
                 if (readyToShoot()) setState(RobotState.SHOOTING);
             case TURRET_TRACKING:
-                turret.setTurretAngle(turretTargetAngle);
+                turret.setTurretAngle(turretTargetAngle.plus(dtTurretCompensation));
                 break;
             case IDLE:
                 break;

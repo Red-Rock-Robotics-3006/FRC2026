@@ -104,12 +104,12 @@ public class RobotContainer {
             .onTrue(superstructure.index.reverseIndexCommand())
             .onFalse(superstructure.index.stopIndexCommand());
             
-        joystick.a()
-            .onTrue(superstructure.intake.reverseIntakeCommand())
-            .onFalse(superstructure.intake.stopIntakeCommand());
+        // joystick.a()
+        //     .onTrue(superstructure.intake.reverseIntakeCommand())
+        //     .onFalse(superstructure.intake.stopIntakeCommand());
 
-        joystick.b()
-            .onTrue(superstructure.setStateCommand(RobotState.IDLE));
+        // joystick.b()
+        //     .onTrue(superstructure.setStateCommand(RobotState.IDLE));
 
         joystick.povUp() //left paddle
             .onTrue(Commands.sequence(
@@ -137,6 +137,12 @@ public class RobotContainer {
 
         // joystick.a()
         //     .onTrue(Commands.runOnce(() -> superstructure.intake.pushRetractIntake()));
+
+        joystick.a()
+            .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosA()));
+
+        joystick.b()
+            .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosB()));
     }
 
     // private void configureSysIDBindings() {
