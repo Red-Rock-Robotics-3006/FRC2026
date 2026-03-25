@@ -29,7 +29,7 @@ public class Autos {
 
     // PATHS AUTOS
 
-    public Command testAutoPaths() {
+    public Command fullTestPaths() {
         return drivetrain.followTrajectory("M_FullTest");
     }
 
@@ -73,7 +73,7 @@ public class Autos {
 
     // FULL AUTOS
 
-    public Command testAuto() {
+    public Command fullTestAuto() {
         return Commands.sequence(
             superstructure.intake.startIntakeCommand(),
 

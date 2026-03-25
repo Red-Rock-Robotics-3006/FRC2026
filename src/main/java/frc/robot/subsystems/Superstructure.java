@@ -55,6 +55,7 @@ public class Superstructure extends SubsystemBase {
         TURRET_TRACKING, //turret tracking
         FULL_TRACKING, //flywheels spin up, hood tracking, turret tracking
         SHOOTING, //index spinning, flywheels spinning, hood tracking, turret tracking
+        SHOOTING_JAMMED, //index jammed, flywheels spinning, hood tracking, turret tracking
         SHOOTING_WHILE_MOVING, //mostly for redundancy, flywheels spinning, hood tracking, turret tracking, dt speed > 0
 
         MANUAL_SHOT, //any manual shot, flywheels spinning, turret at set angle, hood at set angle
@@ -185,9 +186,11 @@ public class Superstructure extends SubsystemBase {
                 if (readyToShoot()) index.startIndex();
                 break;
             case SHOOTING_WHILE_MOVING:
-                break;
+            case SHOOTING_JAMMED:
+                if (!index.isJamming()) setState(RobotState.SHOOTING);
             case SHOOTING:
                 if (!turret.atTurretAngle()) setState(RobotState.FULL_TRACKING);
+                if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
             case FULL_TRACKING:
                 if (!inAllianceZone() && !inLobEnabledZone()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
                 else {shooter.setShotParameter(dynamicShotParameter);}

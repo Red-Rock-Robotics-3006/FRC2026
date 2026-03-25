@@ -47,6 +47,7 @@ public class RobotContainer {
         autoChooser.addOption("Right Two Midtakes Leave", autos.R_MS_MS_L());
         autoChooser.addOption("Right Midtake Outpost", autos.R_MS_OS());
         autoChooser.addOption("Right Two Midtakes Outpost", autos.R_MS_MS_OS());
+        autoChooser.addOption("Full Test", autos.fullTestAuto());
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
@@ -57,7 +58,7 @@ public class RobotContainer {
         autoChooser.addOption("PATHS - Right Midtake Outpost", autos.R_MS_OS_Paths());
         autoChooser.addOption("PATHS - Right Two Midtakes Outpost", autos.R_MS_MS_OS_Paths());
         autoChooser.addOption("PATHS - Middle", autos.M_Depot_Outpost_Paths());
-        autoChooser.addOption("PATHS - Testpath", autos.TESTPATH());
+        autoChooser.addOption("PATHS - Full Test Paths", autos.fullTestPaths());
     }
 
     private void configureCompBindings() {
@@ -104,12 +105,12 @@ public class RobotContainer {
             .onTrue(superstructure.index.reverseIndexCommand())
             .onFalse(superstructure.index.stopIndexCommand());
             
-        // joystick.a()
-        //     .onTrue(superstructure.intake.reverseIntakeCommand())
-        //     .onFalse(superstructure.intake.stopIntakeCommand());
+        joystick.a()
+            .onTrue(superstructure.intake.reverseIntakeCommand())
+            .onFalse(superstructure.intake.stopIntakeCommand());
 
-        // joystick.b()
-        //     .onTrue(superstructure.setStateCommand(RobotState.IDLE));
+        joystick.b()
+            .onTrue(superstructure.setStateCommand(RobotState.IDLE));
 
         joystick.povUp() //left paddle
             .onTrue(Commands.sequence(
@@ -132,17 +133,17 @@ public class RobotContainer {
         //     .onTrue(superstructure.setLerpTuneParameterCommand())
         //     .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
-        // joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
-        //     .onTrue(led.togglePoliceCommand());
+        joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
+            .onTrue(led.togglePoliceCommand());
 
         // joystick.a()
         //     .onTrue(Commands.runOnce(() -> superstructure.intake.pushRetractIntake()));
 
-        joystick.a()
-            .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosA()));
+        // joystick.a()
+        //     .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosA()));
 
-        joystick.b()
-            .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosB()));
+        // joystick.b()
+        //     .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosB()));
     }
 
     // private void configureSysIDBindings() {

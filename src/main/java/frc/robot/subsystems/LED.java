@@ -33,8 +33,6 @@ public class LED extends SubsystemBase{
     
     private int loopControl = 0;
     private SmartDashboardNumber rainbowControl = new SmartDashboardNumber("led/rainbow speed", 3);
-    private SmartDashboardNumber idleLarsonSpeed = new SmartDashboardNumber("led/larson speed", 10);
-    private SmartDashboardNumber turretTrackingLarsonSpeed = new SmartDashboardNumber("led/larson speed", 1);
     private SmartDashboardNumber policeSpeed = new SmartDashboardNumber("led/police speed", 6);
 
     private LED() {
@@ -123,7 +121,7 @@ public class LED extends SubsystemBase{
     private final LarsonState rightLarsonState = new LarsonState();
     // private final LarsonState backLarsonState  = new LarsonState();
 
-    public void larson(Color c, int speed) {
+    public void larson(Color c, double speed) {
         larson(left,  leftLarsonState,  c, speed);
         larson(right, rightLarsonState, c, speed);
         // larson(back,  backLarsonState,  c);
@@ -131,7 +129,7 @@ public class LED extends SubsystemBase{
         this.buffer.setLED(38, OFF);
     }
 
-    public void larson(AddressableLEDBufferView view, LarsonState state, Color c, int speed) {
+    public void larson(AddressableLEDBufferView view, LarsonState state, Color c, double speed) {
         for (int i = 0; i < view.getLength(); i++) {
             view.setLED(i, new Color(
                 view.getLED(i).red   * 0.5,
@@ -216,6 +214,9 @@ public class LED extends SubsystemBase{
                 break;
             case SHOOTING_WHILE_MOVING:
                 break;
+            case SHOOTING_JAMMED:
+                this.blink(NOTE_ORANGE, 5);
+                break;
             case SHOOTING:
                 this.blink(GREEN, 5);
                 break;
@@ -223,10 +224,11 @@ public class LED extends SubsystemBase{
                 this.setLights(RED);
                 break;
             case TURRET_TRACKING:
-                this.larson(WHITE, (int) turretTrackingLarsonSpeed.getNumber());
+                this.larson(WHITE, 1);
                 break;
             case IDLE:
-                this.larson(NOTE_ORANGE, (int) idleLarsonSpeed.getNumber());
+                // this.larson(WHITE, 5);
+                this.rainbow();
                 break;
         }
 
