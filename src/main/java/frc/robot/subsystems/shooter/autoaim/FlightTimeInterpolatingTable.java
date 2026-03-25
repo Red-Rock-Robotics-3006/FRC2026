@@ -18,35 +18,35 @@ public class FlightTimeInterpolatingTable {
                     Map.ofEntries(
                         entry(
                             Double.valueOf(1.4049852287675), 
-                            Double.valueOf(0.2)
+                            Double.valueOf(0.85)
                         ),
-                        entry(
-                            Double.valueOf(2.05110564189444), 
-                            Double.valueOf(0.25)
-                        ),
-                        entry(
-                            Double.valueOf(2.79029301875713), 
-                            Double.valueOf(0.3)
-                        ),
-                        entry(
-                            Double.valueOf(3.42614161315327), 
-                            Double.valueOf(0.35)
-                        ),
-                        entry(
-                            Double.valueOf(4.20671927734278), 
-                            Double.valueOf(0.4)
-                        ),
-                        entry(
-                            Double.valueOf(4.89260698375057), 
-                            Double.valueOf(0.45)
-                        ),
+                        // entry(
+                        //     Double.valueOf(2.05110564189444), 
+                        //     Double.valueOf(0.25)
+                        // ),
+                        // entry(
+                        //     Double.valueOf(2.79029301875713), 
+                        //     Double.valueOf(0.3)
+                        // ),
+                        // entry(
+                        //     Double.valueOf(3.42614161315327), 
+                        //     Double.valueOf(0.35)
+                        // ),
+                        // entry(
+                        //     Double.valueOf(4.20671927734278), 
+                        //     Double.valueOf(0.4)
+                        // ),
+                        // entry(
+                        //     Double.valueOf(4.89260698375057), 
+                        //     Double.valueOf(0.45)
+                        // ),
                         entry(
                             Double.valueOf(5.42628168818297), 
-                            Double.valueOf(0.5)
+                            Double.valueOf(1.4)
                         ),
                         entry(
                             Double.valueOf(6.1811784254011), 
-                            Double.valueOf(0.55)
+                            Double.valueOf(1.7)
                         )
                     ));
 

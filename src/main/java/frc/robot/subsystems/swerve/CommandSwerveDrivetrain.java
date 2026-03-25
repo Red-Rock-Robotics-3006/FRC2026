@@ -62,9 +62,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private boolean driveLimiterEnabled = false;
 
-    private SlewRateLimiter driveSlewRateLimiterX = new SlewRateLimiter(1);
-    private SlewRateLimiter driveSlewRateLimiterY = new SlewRateLimiter(1);
-    private SlewRateLimiter rotateSlewRateLimiter = new SlewRateLimiter(1);
+    private SlewRateLimiter driveSlewRateLimiterX = new SlewRateLimiter(3);
+    private SlewRateLimiter driveSlewRateLimiterY = new SlewRateLimiter(3);
+    private SlewRateLimiter rotateSlewRateLimiter = new SlewRateLimiter(3);
 
     private SmartDashboardNumber limitedMaxDriveSpeed = new SmartDashboardNumber("dt/dt sotm drive speeds", 2);
     private SmartDashboardNumber limitedMaxRotateSpeed = new SmartDashboardNumber("dt/dt sotm rotate speeds", 0.5);
@@ -584,9 +584,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         double pidToPoseMax = pidToPoseMaxVelo.getNumber(); 
 
         if (driveLimiterEnabled) {
-            requestedXSpeed = Math.abs(rawX) < drivingDeadBand.getNumber() ? 0 : slewRequestedX;
-            requestedYSpeed = Math.abs(rawY) < drivingDeadBand.getNumber() ? 0 : slewRequestedY;
-            requestedRotationSpeed = Math.abs(rawRotation) < drivingDeadBand.getNumber() ? 0 : slewRequestedRot;
+            if (Math.abs(rawX) < drivingDeadBand.getNumber()) {
+                requestedXSpeed = 0;
+                driveSlewRateLimiterX.reset(0);
+            } else {
+                requestedXSpeed = slewRequestedX;
+            }
+            if (Math.abs(rawY) < drivingDeadBand.getNumber()) {
+                requestedYSpeed = 0;
+                driveSlewRateLimiterY.reset(0);
+            } else {
+                requestedYSpeed = slewRequestedY;
+            }
+            if (Math.abs(rawRotation) < drivingDeadBand.getNumber()) {
+                requestedRotationSpeed = 0;
+                rotateSlewRateLimiter.reset(0);
+            } else {
+                requestedRotationSpeed = slewRequestedRot;
+            }
         }
         
         SmartDashboard.putNumber("dt/raw x", rawX);

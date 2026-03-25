@@ -139,7 +139,7 @@ public class Superstructure extends SubsystemBase {
             omega * r * tangentialAngle.getSin()
         };
 
-        Transform2d sotmOffset = new Transform2d(SOTMCalcs.getNewtonMethodOffset(
+        Transform2d sotmOffset = new Transform2d(SOTMCalcs.getSecantOffset(
             fieldCentricRobotVelocity[0] + shooterPoseVelocity[0],
             fieldCentricRobotVelocity[1] + shooterPoseVelocity[1],
             staticTargetPose,
@@ -229,6 +229,9 @@ public class Superstructure extends SubsystemBase {
 
             SmartDashboard.putNumber("auto aim/lerp/rpm", staticShotParameter.getShooterRPM());
             SmartDashboard.putNumber("auto aim/lerp/deg", staticShotParameter.pivotAngleDeg);
+
+            SmartDashboard.putNumber("auto aim/dynamic lerp/rpm", dynamicShotParameter.getShooterRPM());
+            SmartDashboard.putNumber("auto aim/dynamic lerp/deg", dynamicShotParameter.pivotAngleDeg);
 
             SmartDashboard.putNumber("auto aim/exit velocity", exitVelocity);
         }
