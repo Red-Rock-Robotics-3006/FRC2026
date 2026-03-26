@@ -180,6 +180,7 @@ public class Superstructure extends SubsystemBase {
         switch (robotState) {
             case MANUAL_SHOT:
                 if (readyToShoot()) index.startIndex();
+                turret.setTurretAngle(Rotation2d.fromDegrees(90));
                 break;
             case LERP_TUNING:
                 turret.setTurretAngle(turretTargetAngle);

@@ -109,7 +109,7 @@ public class RobotContainer {
         joystick.rightBumper() //manual hub shot
             .onTrue(superstructure.setManualShotParameterCommand())
             .onFalse(Commands.parallel(
-                superstructure.setStateCommand(RobotState.TURRET_TRACKING),
+                superstructure.setStateCommand(RobotState.IDLE),
                 superstructure.intake.deployIntakeCommand()));
 
         joystick.x()
