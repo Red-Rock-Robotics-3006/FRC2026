@@ -15,8 +15,12 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
+import edu.wpi.first.math.MathUtil;
+// import edu.wpi.first.apriltag.AprilTagFieldLayout;
+// import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -31,9 +35,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.shooter.autoaim.SOTMCalcs;
 import frc.robot.subsystems.swerve.generated.TunerConstants;
 import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.subsystems.vision.Localization;
+import frc.robot.subsystems.vision.Localization.RRPoseEstimate;
+import redrocklib.logging.SmartDashboardBoolean;
 import redrocklib.logging.SmartDashboardNumber;
+// import redrocklib.wrappers.RedRockCamera;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -44,16 +53,42 @@ import redrocklib.logging.SmartDashboardNumber;
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
     private static CommandSwerveDrivetrain instance = null;
+
+    private Alliance alliance = Alliance.Blue;
+
+    private boolean ignoreCameraPoseDistance = false;
+
     private CommandXboxController controller;
+
+    private boolean driveLimiterEnabled = false;
+
+    private SlewRateLimiter driveSlewRateLimiterX = new SlewRateLimiter(3);
+    private SlewRateLimiter driveSlewRateLimiterY = new SlewRateLimiter(3);
+    private SlewRateLimiter rotateSlewRateLimiter = new SlewRateLimiter(3);
+
+    private SmartDashboardNumber limitedMaxDriveSpeed = new SmartDashboardNumber("dt/dt sotm/drive speeds", 2);
+    private SmartDashboardNumber limitedMaxRotateSpeed = new SmartDashboardNumber("dt/dt sotm/rotate speeds", 0.5);
+
+    private SmartDashboardNumber poseMaxDistance = new SmartDashboardNumber("dt/dt localization/dist restriction", 6);
+    private SmartDashboardNumber poseMaxRotation = new SmartDashboardNumber("dt/dt localization/rotation restriction", 10);
 
     private SmartDashboardNumber maxDriveSpeed = new SmartDashboardNumber("dt/dt drive speeds/max drive mps", 4);
     private SmartDashboardNumber maxTurnSpeed = new SmartDashboardNumber("dt/dt drive speeds/turn rotps", 1);
-    private SmartDashboardNumber drivingDeadBand = new SmartDashboardNumber("dt/dt thresholds/deadband", 0.025);
+    private SmartDashboardNumber drivingDeadBand = new SmartDashboardNumber("dt/dt thresholds/deadband", 0.005);
     private SmartDashboardNumber pidRotationThreshold = new SmartDashboardNumber("dt/dt thresholds/rotation threshold", 1); // threshold to enable heading pid again.
 
-    private SmartDashboardNumber headingP = new SmartDashboardNumber("dt/dt heading pid coeffs/kP", 4);
-    private SmartDashboardNumber headingI = new SmartDashboardNumber("dt/dt heading pid coeffs/kI", 0);
-    private SmartDashboardNumber headingD = new SmartDashboardNumber("dt/dt heading pid coeffs/kD", 0);
+    private SmartDashboardNumber headingP = new SmartDashboardNumber("dt/dt heading pid coeffs/kP", 4, false);
+    private SmartDashboardNumber headingI = new SmartDashboardNumber("dt/dt heading pid coeffs/kI", 0, false);
+    private SmartDashboardNumber headingD = new SmartDashboardNumber("dt/dt heading pid coeffs/kD", 0, false);
+
+    private SmartDashboardNumber poseP = new SmartDashboardNumber("dt/dt pose coeffs/kP", 0);
+    private SmartDashboardNumber poseI = new SmartDashboardNumber("dt/dt pose coeffs/kI", 0);
+    private SmartDashboardNumber poseD = new SmartDashboardNumber("dt/dt pose coeffs/kD", 0);
+
+    private SmartDashboardNumber pidToPoseMaxVelo = new SmartDashboardNumber("dt/dt pose coeffs/max velo", 3);
+
+    private PIDController poseXController;
+    private PIDController poseYController;
 
     private SmartDashboardNumber headingTolerance = new SmartDashboardNumber("dt/dt heading pid coeffs/tolerance", 0.015);
     
@@ -68,15 +103,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private Telemetry telemetry = new Telemetry(maxDriveSpeed.getNumber());
 
     private Rotation2d targetAngle = new Rotation2d();
+    private Pose2d targetPose = new Pose2d();
 
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
-    private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
+    // private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
     /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
-    private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
+    // private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
@@ -87,7 +123,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final PIDController m_pathThetaController = new PIDController(7, 0, 0);
 
     private AutoFactory factory;
-    private boolean inAutoPath = false;
+
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -111,6 +147,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     );
 
     /* SysId routine for characterizing steer. This is used to find PID gains for the steer motors. */
+    @SuppressWarnings("unused")
     private final SysIdRoutine m_sysIdRoutineSteer = new SysIdRoutine(
         new SysIdRoutine.Config(
             null,        // Use default ramp rate (1 V/s)
@@ -131,6 +168,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * This is used to find PID gains for the FieldCentricFacingAngle HeadingController.
      * See the documentation of SwerveRequest.SysIdSwerveRotation for info on importing the log to SysId.
      */
+    @SuppressWarnings("unused")
     private final SysIdRoutine m_sysIdRoutineRotation = new SysIdRoutine(
         new SysIdRoutine.Config(
             /* This is in radians per second², but SysId only supports "volts per second" */
@@ -207,6 +245,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.registerTelemetry(telemetry::telemeterize);
         this.register();
         this.factory = this.createAutoFactory();
+
+        this.poseXController = new PIDController(poseP.getNumber(), poseI.getNumber(), poseD.getNumber());
+        this.poseYController = new PIDController(poseP.getNumber(), poseI.getNumber(), poseD.getNumber());
     }
 
     /**
@@ -339,29 +380,59 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
          * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
          */
 
-        if (DriverStation.isAutonomous()) return;
+        // if (DriverStation.isAutonomous()) return;
 
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-            DriverStation.getAlliance().ifPresent(allianceColor -> {
-                setOperatorPerspectiveForward(
-                    allianceColor == Alliance.Red
-                        ? kRedAlliancePerspectiveRotation
-                        : kBlueAlliancePerspectiveRotation
-                );
+            // DriverStation.getAlliance().ifPresent(allianceColor -> {
+            //     setOperatorPerspectiveForward(
+            //         allianceColor == Alliance.Red
+            //             ? kRedAlliancePerspectiveRotation
+            //             : kBlueAlliancePerspectiveRotation
+            //     );
                 m_hasAppliedOperatorPerspective = true;
-            });
+                if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red) {
+                    this.alliance = Alliance.Red;
+                    this.fieldCentricSeedOffset = Rotation2d.k180deg;
+                } else {
+                    this.alliance = Alliance.Blue;
+                    this.fieldCentricSeedOffset = Rotation2d.kZero;
+                }
         }
+
+        poseXController.setPID(poseP.getNumber(), poseI.getNumber(), poseD.getNumber());
+        poseYController.setPID(poseP.getNumber(), poseI.getNumber(), poseD.getNumber());
 
         telemetry.setMaxSpeed(maxDriveSpeed.getNumber());
 
         this.updateDeadbands();
         this.updateHeadingPIDValues();
 
-        if (!inAutoPath) {
+        if (this.state != DriveState.AUTO) {
             this.updateDriveState();
             this.setControl(this.getRequest());
+        } else if (this.state == DriveState.AUTO) {
+            this.setTargetHeading(this.getPose().getRotation());
         }
         SmartDashboard.putString("dt/drive state", this.state.toString());
+        SmartDashboard.putNumber("dt/field centric offset", this.fieldCentricSeedOffset.getDegrees());
+        SmartDashboard.putString("alliance", this.alliance.toString());
+        SmartDashboard.putBoolean("dt/ignore camera pose distance", ignoreCameraPoseDistance);
+
+        if (this.visionEnabled.getValue()) updateVisionMeasurements();
+    }
+
+    private void updateVisionMeasurements() {
+        if (this.getRotationRate() >= poseMaxRotation.getNumber()) {
+            return;
+        }
+        for (RRPoseEstimate estimate : Localization.getPoseEstimates()) {
+            if (estimate.pose.equals(new Pose2d())) continue;
+            if (estimate.pose.getTranslation().getDistance(this.getPose().getTranslation()) > poseMaxDistance.getNumber() 
+                && !DriverStation.isDisabled() 
+                && !ignoreCameraPoseDistance) 
+                continue;
+            this.addVisionMeasurement(estimate.pose, estimate.timeStamp, estimate.stdvs);
+        }
     }
 
     private void updateDeadbands() {
@@ -437,10 +508,22 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public enum DriveState {
         DRIVE,
         DRIVE_RESIDUAL,
-        DRIVE_FACING_ANGLE
+        DRIVE_FACING_ANGLE,
+        AUTO,
+        PID_TO_POSE
     }
 
     private DriveState state = DriveState.DRIVE_FACING_ANGLE;
+
+    private Rotation2d fieldCentricSeedOffset = new Rotation2d();
+
+    private SmartDashboardBoolean visionEnabled = new SmartDashboardBoolean("vision enabled", true);
+
+    public void enablePoseTargeting(Pose2d targetPose) {
+        this.targetPose = targetPose;
+        this.setTargetHeading(targetPose.getRotation());
+        this.setDriveState(DriveState.PID_TO_POSE);
+    }
 
     public void setDriveState(DriveState state) {
         this.state = state;
@@ -450,28 +533,120 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return this.state;
     }
 
+    public Pose2d getPose() {
+        return this.getState().Pose;
+    }
+
+    public void enableIgnoreCameraDistance() {
+        this.ignoreCameraPoseDistance = true;
+    }
+
+    public void disableIgnoreCameraDistance() {
+        this.ignoreCameraPoseDistance = false;
+    }
+
+    public void enableVision() {
+        this.visionEnabled.putBoolean(true);
+    }
+
+    public void disableVision() {
+        this.visionEnabled.putBoolean(false);
+    }
+
+    public void toggleVision() {
+        if (this.visionEnabled.getValue()) this.visionEnabled.putBoolean(false);
+        else this.visionEnabled.putBoolean(true);
+    }
+
+    public Command toggleVisionCommand() {
+        return Commands.runOnce(() -> this.toggleVision());
+    }
+
+    public void enableSpeedLimiter() {
+        this.driveLimiterEnabled = true;
+    }
+
+    public void disableSpeedLimiter() {
+        this.driveLimiterEnabled = false;
+    }
+
     private void configureHeadingPID() {
         driveFacingAngle.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
         this.updateHeadingPIDValues();
     }
 
     public SwerveRequest getRequest() {
+        double rawX = -controller.getLeftY();
+        double rawY = -controller.getLeftX();
+        double rawRotation = -controller.getRightX();
+
+        double slewX = driveSlewRateLimiterX.calculate(rawX);
+        double slewY = driveSlewRateLimiterY.calculate(rawY);
+        double slewRot = rotateSlewRateLimiter.calculate(rawRotation);
+
+        double slewRequestedX = slewX * limitedMaxDriveSpeed.getNumber();
+        double slewRequestedY = slewY * limitedMaxDriveSpeed.getNumber();
+        double slewRequestedRot = slewRot * RotationsPerSecond.of(limitedMaxRotateSpeed.getNumber()).in(RadiansPerSecond);
+
         double requestedXSpeed = -controller.getLeftY() * maxDriveSpeed.getNumber();
         double requestedYSpeed = -controller.getLeftX() * maxDriveSpeed.getNumber();
         double requestedRotationSpeed = -controller.getRightX() * RotationsPerSecond.of(maxTurnSpeed.getNumber()).in(RadiansPerSecond);
 
+        double pidToPoseMax = pidToPoseMaxVelo.getNumber(); 
+
+        if (driveLimiterEnabled) {
+            if (Math.abs(rawX) < drivingDeadBand.getNumber()) {
+                requestedXSpeed = 0;
+                driveSlewRateLimiterX.reset(0);
+            } else {
+                requestedXSpeed = slewRequestedX;
+            }
+            if (Math.abs(rawY) < drivingDeadBand.getNumber()) {
+                requestedYSpeed = 0;
+                driveSlewRateLimiterY.reset(0);
+            } else {
+                requestedYSpeed = slewRequestedY;
+            }
+            if (Math.abs(rawRotation) < drivingDeadBand.getNumber()) {
+                requestedRotationSpeed = 0;
+                rotateSlewRateLimiter.reset(0);
+            } else {
+                requestedRotationSpeed = slewRequestedRot;
+            }
+        }
+        
+        SmartDashboard.putNumber("dt/raw x", rawX);
+        SmartDashboard.putNumber("dt/requested x", requestedXSpeed);
+
+        double[] rotatedRequestedSpeed = SOTMCalcs.rotate(requestedXSpeed, requestedYSpeed, fieldCentricSeedOffset);
+
+        requestedXSpeed = rotatedRequestedSpeed[0];
+        requestedYSpeed = rotatedRequestedSpeed[1];
+
+
+
+        Pose2d dtPose = this.getPose();
         switch (state) {
             case DRIVE_RESIDUAL:
                 return drive.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withRotationalRate(0);
             case DRIVE_FACING_ANGLE:
                 return driveFacingAngle.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withTargetDirection(this.targetAngle);
-            default:
+            case DRIVE:
                 return drive.withVelocityX(requestedXSpeed).withVelocityY(requestedYSpeed).withRotationalRate(requestedRotationSpeed);
+            case PID_TO_POSE:
+                return driveFacingAngle
+                    .withVelocityX(MathUtil.clamp(poseXController.calculate(dtPose.getX(), targetPose.getX()), -pidToPoseMax, pidToPoseMax))
+                    .withVelocityY(MathUtil.clamp(poseYController.calculate(dtPose.getY(), targetPose.getY()), -pidToPoseMax, pidToPoseMax))
+                    .withTargetDirection(targetPose.getRotation());
+            default:
+                return new SwerveRequest.Idle();
         }
     }
 
     public void updateDriveState() {
         switch (state) {
+            case AUTO: break;
+            case PID_TO_POSE: break;
             case DRIVE_FACING_ANGLE:
                 if (Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber()) state = DriveState.DRIVE;
                 break;
@@ -479,29 +654,29 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 if (Math.abs(controller.getRightX()) <= drivingDeadBand.getNumber()) state = DriveState.DRIVE_RESIDUAL;
                 break;
             case DRIVE_RESIDUAL:
-                SwerveDriveState driveState = this.getState();
-                if (Math.abs(driveState.Speeds.omegaRadiansPerSecond) <= 
-                    DegreesPerSecond.of(pidRotationThreshold.getNumber()).in(RadiansPerSecond)) {
-                    targetAngle = driveState.Pose.getRotation();
-                    state = DriveState.DRIVE_FACING_ANGLE;
+                if (Math.abs(controller.getRightX()) >= drivingDeadBand.getNumber()) state = DriveState.DRIVE;
+                else {
+                    SwerveDriveState driveState = this.getState();
+                    if (Math.abs(driveState.Speeds.omegaRadiansPerSecond) <= 
+                        DegreesPerSecond.of(pidRotationThreshold.getNumber()).in(RadiansPerSecond)) {
+                        targetAngle = driveState.Pose.getRotation();
+                        state = DriveState.DRIVE_FACING_ANGLE;
+                    }
                 }
                 break;
         }
     }
+    public void seedHeading() {
+        this.fieldCentricSeedOffset = this.getState().Pose.getRotation();
+        this.targetAngle = this.fieldCentricSeedOffset;
+    }
 
-    public void resetHeading() {
-        this.resetPose(
-            new Pose2d(
-                this.getState().Pose.getX(),
-                this.getState().Pose.getY(),
-                Rotation2d.kZero
-            )
-        );
-        this.targetAngle = Rotation2d.kZero;
+    public double getRotationRate() {
+        return this.getState().Speeds.omegaRadiansPerSecond;
     }
 
     public Command resetHeadingCommand() {
-        return this.runOnce(this::resetHeading);
+        return this.runOnce(this::seedHeading);
     }
 
     public CommandSwerveDrivetrain withController(CommandXboxController controller) {
@@ -512,35 +687,50 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void setTargetHeading(Rotation2d target) {
         this.targetAngle = target;
     }
+
+    public void setTargetHeadingToCurrentHeading() {
+        this.targetAngle = this.getPose().getRotation();
+        // this.targetAngle = Rotation2d.fromDegrees(90);
+        System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" + this.getPose().getRotation());
+    }
+
     public Command setTargetHeadingCommand(Rotation2d target) {
         return this.runOnce(() -> this.targetAngle = target);
     }
 
-    public void setInAutoPath(boolean inAuto) {
-        this.inAutoPath = inAuto;
+    public Command setTargetHeadingToCurrentHeadingCommand() {
+        return this.runOnce(() -> this.setTargetHeadingToCurrentHeading());
     }
 
-    public Command setInAutoPathCommand(boolean inAuto) {
-        return this.runOnce(() -> this.inAutoPath = inAuto);
+    public boolean isBlue() {
+        return this.alliance == Alliance.Blue;
     }
 
     public Command followTrajectory(String pathName) {
         return Commands.sequence(
-            this.setInAutoPathCommand(true),
+            this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
             this.factory.resetOdometry(pathName),
             this.factory.trajectoryCmd(pathName),
-            this.setInAutoPathCommand(false),
-            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation())
+            this.setTargetHeadingToCurrentHeadingCommand(),
+            this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
         );
     }
 
     public Command followTrajectory(String pathName, int index) {
         return Commands.sequence(
-            this.setInAutoPathCommand(true),
+            this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
             this.factory.resetOdometry(pathName, index),
             this.factory.trajectoryCmd(pathName, index),
-            this.setInAutoPathCommand(false),
-            this.setTargetHeadingCommand(factory.cache().loadTrajectory(pathName, index).get().getFinalPose(DriverStation.getAlliance().get().equals(Alliance.Red)).get().getRotation())
+            this.setTargetHeadingToCurrentHeadingCommand(),
+            this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
+        );
+    }
+
+    public Command pidToPoseAutoCommand(Pose2d targetPose) {
+        return Commands.sequence(
+            Commands.runOnce(() -> this.enablePoseTargeting(targetPose)),
+            Commands.waitUntil(() -> poseXController.atSetpoint() && poseYController.atSetpoint()),
+            Commands.runOnce(() -> this.setDriveState(DriveState.AUTO))
         );
     }
 
