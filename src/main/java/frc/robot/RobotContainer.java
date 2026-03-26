@@ -36,31 +36,43 @@ public class RobotContainer {
         configureCompBindings();
 
         configureTestSelector();
-        configureTestBindings();
+        // configureTestBindings();
+
         // configureSysIDBindings();
     }
 
     private void configureCompSelector() {
         autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
 
-        autoChooser.addOption("Right Midtake Leave", autos.R_MS_L());
         autoChooser.addOption("Left Midtake Leave", autos.L_MS_L());
+        autoChooser.addOption("Left Small Midtake Leave", autos.L_Small_MS_L());
+        autoChooser.addOption("Left Two Midtakes Leave", autos.L_MS_MS_L());
+        autoChooser.addOption("Left Small Two Midtakes Leave", autos.L_Small_MS_MS_L());
+
+        autoChooser.addOption("Right Midtake Leave", autos.R_MS_L());
+        autoChooser.addOption("Right Small Midtake Leave", autos.R_Small_MS_L());
         autoChooser.addOption("Right Two Midtakes Leave", autos.R_MS_MS_L());
-        autoChooser.addOption("Right Midtake Outpost", autos.R_MS_OS());
-        autoChooser.addOption("Right Two Midtakes Outpost", autos.R_MS_MS_OS());
+        autoChooser.addOption("Right Small Two Midtakes Leave", autos.R_Small_MS_MS_L());
+
+        // autoChooser.addOption("Right Midtake Outpost", autos.R_MS_OS());
+        // autoChooser.addOption("Right Two Midtakes Outpost", autos.R_MS_MS_OS());
         autoChooser.addOption("Full Test", autos.fullTestAuto());
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
     private void configureTestSelector() {
-        autoChooser.addOption("PATHS - Right Midtake Leave", autos.R_MS_L_Paths());
         autoChooser.addOption("PATHS - Left Midtake Leave", autos.L_MS_L_Paths());
-        autoChooser.addOption("PATHS s- Right Two Midtakes Leave", autos.R_MS_MS_L_Paths());
-        autoChooser.addOption("PATHS - Right Midtake Outpost", autos.R_MS_OS_Paths());
-        autoChooser.addOption("PATHS - Right Two Midtakes Outpost", autos.R_MS_MS_OS_Paths());
-        autoChooser.addOption("PATHS - Middle", autos.M_Depot_Outpost_Paths());
-        autoChooser.addOption("PATHS - Full Test Paths", autos.fullTestPaths());
+        autoChooser.addOption("PATHS - Left Small Midtake Leave", autos.L_Small_MS_L_Paths());
+        autoChooser.addOption("PATHS - Left Two Midtakes Leave", autos.L_MS_MS_L_Paths());
+        autoChooser.addOption("PATHS - Left Small Two Midtakes Leave", autos.L_Small_MS_MS_L_Paths());
+
+        autoChooser.addOption("PATHS - Right Midtake Leave", autos.R_MS_L_Paths());
+        autoChooser.addOption("PATHS - Right Small Midtake Leave", autos.R_Small_MS_L_Paths());
+        autoChooser.addOption("PATHS - Right Two Midtakes Leave", autos.R_MS_MS_L_Paths());
+        autoChooser.addOption("PATHS - Right Small Two Midtakes Leave", autos.R_Small_MS_MS_L_Paths());
+
+        autoChooser.addOption("PATHS - Full Test", autos.fullTestPaths());
     }
 
     private void configureCompBindings() {
@@ -80,12 +92,9 @@ public class RobotContainer {
             .onFalse(superstructure.intake.stopIntakeCommand());
 
         joystick.rightTrigger(kTriggerThreshold)
-            .onTrue(
-                Commands.parallel(
-                    superstructure.setStateCommand(RobotState.FULL_TRACKING),
-                    Commands.runOnce(() -> drivetrain.enableSpeedLimiter(), drivetrain)
-                    )
-            )
+            .onTrue(Commands.parallel(
+                superstructure.setStateCommand(RobotState.FULL_TRACKING),
+                Commands.runOnce(() -> drivetrain.enableSpeedLimiter(), drivetrain)))
             .onFalse(Commands.sequence(
                 superstructure.setStateCommand(RobotState.TURRET_TRACKING),
                 Commands.runOnce(() -> drivetrain.disableSpeedLimiter(), drivetrain),
@@ -134,13 +143,14 @@ public class RobotContainer {
             .onTrue(superstructure.intake.resetIntakeExtensionCommand());
     }
 
+    @SuppressWarnings("unused")
     private void configureTestBindings() {
         // joystick.x() //manual lerp tuning shot
         //     .onTrue(superstructure.setLerpTuneParameterCommand())
         //     .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
-        joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
-            .onTrue(led.togglePoliceCommand());
+        // joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
+        //     .onTrue(led.togglePoliceCommand());
 
         // joystick.a()
         //     .onTrue(Commands.runOnce(() -> superstructure.intake.pushRetractIntake()));

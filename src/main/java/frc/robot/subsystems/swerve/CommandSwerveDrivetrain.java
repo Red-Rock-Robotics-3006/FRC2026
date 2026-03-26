@@ -410,6 +410,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (this.state != DriveState.AUTO) {
             this.updateDriveState();
             this.setControl(this.getRequest());
+        } else if (this.state == DriveState.AUTO) {
+            this.setTargetHeading(this.getPose().getRotation());
         }
         SmartDashboard.putString("dt/drive state", this.state.toString());
         SmartDashboard.putNumber("dt/field centric offset", this.fieldCentricSeedOffset.getDegrees());
