@@ -44,6 +44,7 @@ public class RobotContainer {
         autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
 
         autoChooser.addOption("Right Midtake Leave", autos.R_MS_L());
+        autoChooser.addOption("Left Midtake Leave", autos.L_MS_L());
         autoChooser.addOption("Right Two Midtakes Leave", autos.R_MS_MS_L());
         autoChooser.addOption("Right Midtake Outpost", autos.R_MS_OS());
         autoChooser.addOption("Right Two Midtakes Outpost", autos.R_MS_MS_OS());
@@ -54,7 +55,8 @@ public class RobotContainer {
 
     private void configureTestSelector() {
         autoChooser.addOption("PATHS - Right Midtake Leave", autos.R_MS_L_Paths());
-        autoChooser.addOption("PATHS - Right Two Midtakes Leave", autos.R_MS_MS_L_Paths());
+        autoChooser.addOption("PATHS - Left Midtake Leave", autos.L_MS_L_Paths());
+        autoChooser.addOption("PATHS s- Right Two Midtakes Leave", autos.R_MS_MS_L_Paths());
         autoChooser.addOption("PATHS - Right Midtake Outpost", autos.R_MS_OS_Paths());
         autoChooser.addOption("PATHS - Right Two Midtakes Outpost", autos.R_MS_MS_OS_Paths());
         autoChooser.addOption("PATHS - Middle", autos.M_Depot_Outpost_Paths());
@@ -65,7 +67,11 @@ public class RobotContainer {
         RobotModeTriggers.disabled().onTrue(superstructure.setStateCommand(RobotState.IDLE).ignoringDisable(true));
         RobotModeTriggers.teleop().onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
-        joystick.back().onTrue(drivetrain.resetHeadingCommand());
+        joystick.back()
+            .onTrue(drivetrain.resetHeadingCommand());
+
+        joystick.start()
+            .onTrue(drivetrain.toggleVisionCommand());
 
         joystick.leftTrigger(kTriggerThreshold)
             .onTrue(Commands.sequence(

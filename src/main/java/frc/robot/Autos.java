@@ -15,7 +15,7 @@ public class Autos {
     /*Naming convention:
         [starting position]_[intaking location][shoot or lob]_..._[climb or leave]
 
-        starting position: (L)eft, (C)enter, (R)ight
+        starting position: (L)eft, (M)iddle, (R)ight
         intaking location: (M)iddle, (D)epot, (O)utpost
         (S)hoot, (L)ob
         (C)limb, (L)eave
@@ -40,11 +40,26 @@ public class Autos {
         );
     }
 
+    public Command L_MS_L_Paths() {
+        return Commands.sequence(
+            drivetrain.followTrajectory("L_FarMidtake"),
+            drivetrain.followTrajectory("L_Leave")
+        );
+    }
+
     public Command R_MS_MS_L_Paths() {
         return Commands.sequence(
             drivetrain.followTrajectory("R_FarMidtake"),
             drivetrain.followTrajectory("R_CloseMidtake"),
             drivetrain.followTrajectory("R_Leave")
+        );
+    }
+
+    public Command L_MS_MS_L_Paths() {
+        return Commands.sequence(
+            drivetrain.followTrajectory("L_FarMidtake"),
+            drivetrain.followTrajectory("L_CloseMidtake"),
+            drivetrain.followTrajectory("L_Leave")
         );
     }
 
@@ -65,10 +80,6 @@ public class Autos {
 
     public Command M_Depot_Outpost_Paths() {
         return drivetrain.followTrajectory("M_Depot_Outpost");
-    }
-
-    public Command TESTPATH() {
-        return drivetrain.followTrajectory("Test_path");
     }
 
     // FULL AUTOS
@@ -93,6 +104,18 @@ public class Autos {
 
             superstructure.intake.stopIntakeCommand(),
             drivetrain.followTrajectory("R_Leave")
+        );
+    }
+
+    public Command L_MS_L() {
+        return Commands.sequence(
+            superstructure.intake.startIntakeCommand(),
+
+            drivetrain.followTrajectory("L_FarMidtake"),
+            this.shootAuto(6),
+
+            superstructure.intake.stopIntakeCommand(),
+            drivetrain.followTrajectory("L_Leave")
         );
     }
 

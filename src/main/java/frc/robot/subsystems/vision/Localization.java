@@ -113,14 +113,14 @@ public class Localization extends SubsystemBase{
         );
 
         //limelight 3g on turret
-        // cameras.add(new RedRockCamera("Photon-Booger")
-        //     .withRobotToCameraTransform(
-        //         new Transform3d(
-        //             new Translation3d(Units.inchesToMeters(7.053), Units.inchesToMeters(0), Units.inchesToMeters(19.212751)),
-        //             new Rotation3d(0, Math.toRadians(-28), 0)
-        //         )
-        //     )
-        // );
+        cameras.add(new RedRockCamera("Photon-Booger")
+            .withRobotToCameraTransform(
+                new Transform3d(
+                    new Translation3d(Units.inchesToMeters(7.053), Units.inchesToMeters(0), Units.inchesToMeters(19.212751)),
+                    new Rotation3d(0, Math.toRadians(-28), 0)
+                )
+            )
+        );
     }
 
     /**

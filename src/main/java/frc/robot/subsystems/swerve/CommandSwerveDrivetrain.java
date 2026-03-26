@@ -551,6 +551,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.visionEnabled.putBoolean(false);
     }
 
+    public void toggleVision() {
+        if (this.visionEnabled.getValue()) this.visionEnabled.putBoolean(false);
+        else this.visionEnabled.putBoolean(true);
+    }
+
+    public Command toggleVisionCommand() {
+        return Commands.runOnce(() -> this.toggleVision());
+    }
+
     public void enableSpeedLimiter() {
         this.driveLimiterEnabled = true;
     }

@@ -25,7 +25,7 @@ import redrocklib.logging.SmartDashboardNumber;
 public class RedRockCamera {
     public static final boolean kEnableCameraTuning = true;
     public static final SmartDashboardNumber kMaxDistToTag = new SmartDashboardNumber("localization/max dist", 5, true && kEnableCameraTuning);
-    public static final SmartDashboardNumber kMaxAmbiguityThreshold = new SmartDashboardNumber("localization/max ambiguity", 0.15, true && kEnableCameraTuning);
+    public static final SmartDashboardNumber kMaxAmbiguityThreshold = new SmartDashboardNumber("localization/max ambiguity", 0.1, true && kEnableCameraTuning);
     
     public static final RRStdv kDefaultStdvs = new RRStdv(0.8, 0.8, 2);
     public static final AprilTagFieldLayout defaultFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
@@ -129,18 +129,18 @@ public class RedRockCamera {
                 double sum = 0;
                 var targetsUsed = visionEst.get().targetsUsed;
 
-                double lowestMultiTagAmbiguity = 10;
+                double highestMultiTagAmiguity = 0;
 
                 for (PhotonTrackedTarget target : targetsUsed) {
                     double targetPoseAmbiguity = target.getPoseAmbiguity();
-                    if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestMultiTagAmbiguity) lowestMultiTagAmbiguity = targetPoseAmbiguity;
+                    if (targetPoseAmbiguity != -1 && targetPoseAmbiguity > highestMultiTagAmiguity) highestMultiTagAmiguity = targetPoseAmbiguity;
                     if (target.fiducialId > 0) {
                         sum += (1.0 / target.getBestCameraToTarget().getTranslation().getNorm());
                     }
                 }
 
                 distToTag = targetsUsed.size() * (1.0 / sum);
-                this.lowestAmbiguity = lowestMultiTagAmbiguity;
+                this.lowestAmbiguity = highestMultiTagAmiguity;
             }
 
 

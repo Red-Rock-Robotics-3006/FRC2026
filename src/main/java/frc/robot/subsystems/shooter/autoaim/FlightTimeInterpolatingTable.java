@@ -16,37 +16,51 @@ public class FlightTimeInterpolatingTable {
     public static TreeMap<Double, Double> table =
             new TreeMap<>(
                     Map.ofEntries(
+
+                    // 1.415676353
+                    // 2.007647272
+                    // 2.811736268
+                    // 3.495614464
+                    // 4.258711651
+                    // 4.844127245
+                    // 5.375485779
+                    // 6.221875559
+                    
+                    // 4.642785257361385
+                    // 7.092341618432331
+                    // 9.739697410905674
+
                         entry(
-                            Double.valueOf(1.4049852287675), 
-                            Double.valueOf(0.85)
+                            Double.valueOf(1.41567635288239), 
+                            Double.valueOf(1.2)
                         ),
-                        // entry(
-                        //     Double.valueOf(2.05110564189444), 
-                        //     Double.valueOf(0.25)
-                        // ),
-                        // entry(
-                        //     Double.valueOf(2.79029301875713), 
-                        //     Double.valueOf(0.3)
-                        // ),
-                        // entry(
-                        //     Double.valueOf(3.42614161315327), 
-                        //     Double.valueOf(0.35)
-                        // ),
-                        // entry(
-                        //     Double.valueOf(4.20671927734278), 
-                        //     Double.valueOf(0.4)
-                        // ),
-                        // entry(
-                        //     Double.valueOf(4.89260698375057), 
-                        //     Double.valueOf(0.45)
-                        // ),
                         entry(
-                            Double.valueOf(5.42628168818297), 
+                            Double.valueOf(2.00764727190795), 
+                            Double.valueOf(1.2)
+                        ),
+                        entry(
+                            Double.valueOf(2.81173626842406), 
+                            Double.valueOf(1 + 16.0/60)
+                        ),
+                        entry(
+                            Double.valueOf(3.4956144644965), 
+                            Double.valueOf(1 + 18.0/60)
+                        ),
+                        entry(
+                            Double.valueOf(4.25871165123726), 
+                            Double.valueOf(1 + 18.0/60)
+                        ),
+                        entry(
+                            Double.valueOf(4.84412724500999), 
+                            Double.valueOf(1 + 23.0/60)
+                        ),
+                        entry(
+                            Double.valueOf(5.37548577935445), 
                             Double.valueOf(1.4)
                         ),
                         entry(
-                            Double.valueOf(6.1811784254011), 
-                            Double.valueOf(1.7)
+                            Double.valueOf(6.22187555861643), 
+                            Double.valueOf(1 + 26.0/60)
                         )
                     ));
 

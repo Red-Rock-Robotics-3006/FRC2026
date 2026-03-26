@@ -12,6 +12,7 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -31,7 +32,7 @@ public class Index extends SubsystemBase {
 
     private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 1).withTuningEnabled(true); //SHOULD BE RPM FOR MM VELOCITY VOLTAGE
     private SmartDashboardNumber indexReverseSpeed = new SmartDashboardNumber("index/index reverse speed", -0.3).withTuningEnabled(true);
-    private SmartDashboardNumber dyeRotorJamSpeed = new SmartDashboardNumber("index/index jam speed rps", 10.5).withTuningEnabled(true);
+    private SmartDashboardNumber dyeRotorJamSpeed = new SmartDashboardNumber("index/index jam speed rps", 10).withTuningEnabled(true);
 
     private SmartDashboardNumber kickerSpeed = new SmartDashboardNumber("index/kicker speed", 0.6).withTuningEnabled(true);
 
@@ -70,19 +71,19 @@ public class Index extends SubsystemBase {
             .withStatorCurrentLimitEnable(true)
         ).withSpikeThreshold(50);
 
-        // this.kickerMotor.withMotorOutputConfigs(
-        //     new MotorOutputConfigs()
-        //     .withInverted(InvertedValue.Clockwise_Positive)
-        //     .withPeakForwardDutyCycle(1d)
-        //     .withPeakReverseDutyCycle(-1d)
-        //     .withNeutralMode(NeutralModeValue.Brake)
-        // ).withCurrentLimitConfigs(
-        //     new CurrentLimitsConfigs()
-        //     .withSupplyCurrentLimit(45)
-        //     .withSupplyCurrentLimitEnable(true)
-        //     .withStatorCurrentLimit(80)
-        //     .withStatorCurrentLimitEnable(true)
-        // ).withTuningEnabled(true);
+        this.kickerMotor.withMotorOutputConfigs(
+            new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withPeakForwardDutyCycle(1d)
+            .withPeakReverseDutyCycle(-1d)
+            .withNeutralMode(NeutralModeValue.Brake)
+        ).withCurrentLimitConfigs(
+            new CurrentLimitsConfigs()
+            .withSupplyCurrentLimit(45)
+            .withSupplyCurrentLimitEnable(true)
+            .withStatorCurrentLimit(80)
+            .withStatorCurrentLimitEnable(true)
+        ).withTuningEnabled(true);
 
         slot1Configs
             .withKA(0)
@@ -195,6 +196,8 @@ public class Index extends SubsystemBase {
     @Override
     public void periodic() {
         this.dyeRotorMotor.update();
+
+        SmartDashboard.putBoolean("index/index is jamming", this.isJamming());
     }
 
     public static Index getInstance() {
