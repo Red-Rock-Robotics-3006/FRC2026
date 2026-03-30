@@ -20,6 +20,7 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController mechstick = new CommandXboxController(1);
 
     private final double kTriggerThreshold = 0.1;
 
@@ -35,7 +36,7 @@ public class RobotContainer {
         configureCompSelector();
         configureCompBindings();
 
-        configureTestSelector();
+        // configureTestSelector();
         // configureTestBindings();
 
         // configureSysIDBindings();
@@ -44,31 +45,24 @@ public class RobotContainer {
     private void configureCompSelector() {
         autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
 
-        autoChooser.addOption("Left Midtake Leave", autos.L_MS_L());
-        autoChooser.addOption("Left Small Midtake Leave", autos.L_Small_MS_L());
-        autoChooser.addOption("Left Two Midtakes Leave", autos.L_MS_MS_L());
-        autoChooser.addOption("Left Small Two Midtakes Leave", autos.L_Small_MS_MS_L());
+        // autoChooser.addOption("Left Two Midtakes Leave", autos.L_MS_MS_L());
+        autoChooser.addOption("Left Two Midtakes Leave", autos.L_Small_MS_MS_L());
 
-        autoChooser.addOption("Right Midtake Leave", autos.R_MS_L());
-        autoChooser.addOption("Right Small Midtake Leave", autos.R_Small_MS_L());
-        autoChooser.addOption("Right Two Midtakes Leave", autos.R_MS_MS_L());
-        autoChooser.addOption("Right Small Two Midtakes Leave", autos.R_Small_MS_MS_L());
+        // autoChooser.addOption("Right Two Midtakes Leave", autos.R_MS_MS_L());
+        autoChooser.addOption("Right Two Midtakes Leave", autos.R_Small_MS_MS_L());
 
         // autoChooser.addOption("Right Midtake Outpost", autos.R_MS_OS());
         // autoChooser.addOption("Right Two Midtakes Outpost", autos.R_MS_MS_OS());
-        autoChooser.addOption("Full Test", autos.fullTestAuto());
+        // autoChooser.addOption("Full Test", autos.fullTestAuto());
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
+    @SuppressWarnings("unused")
     private void configureTestSelector() {
-        autoChooser.addOption("PATHS - Left Midtake Leave", autos.L_MS_L_Paths());
-        autoChooser.addOption("PATHS - Left Small Midtake Leave", autos.L_Small_MS_L_Paths());
         autoChooser.addOption("PATHS - Left Two Midtakes Leave", autos.L_MS_MS_L_Paths());
         autoChooser.addOption("PATHS - Left Small Two Midtakes Leave", autos.L_Small_MS_MS_L_Paths());
 
-        autoChooser.addOption("PATHS - Right Midtake Leave", autos.R_MS_L_Paths());
-        autoChooser.addOption("PATHS - Right Small Midtake Leave", autos.R_Small_MS_L_Paths());
         autoChooser.addOption("PATHS - Right Two Midtakes Leave", autos.R_MS_MS_L_Paths());
         autoChooser.addOption("PATHS - Right Small Two Midtakes Leave", autos.R_Small_MS_MS_L_Paths());
 
@@ -87,7 +81,7 @@ public class RobotContainer {
 
         joystick.leftTrigger(kTriggerThreshold)
             .onTrue(Commands.sequence(
-                superstructure.intake.deployIntakeCommand(),
+                superstructure.intake.deployIntakeWaitlessCommand(),
                 superstructure.intake.startIntakeCommand()))
             .onFalse(superstructure.intake.stopIntakeCommand());
 
@@ -138,9 +132,25 @@ public class RobotContainer {
                 superstructure.intake.pushRetractIntakeCommand(),
                 climber.lowerClimberCommand()))
             .onFalse(climber.stopClimberCommand());
+
+        joystick.povLeft()
+            .onTrue(superstructure.intake.pushRetractIntakeCommand());
             
         joystick.povRight()
             .onTrue(superstructure.intake.resetIntakeExtensionCommand());
+
+        mechstick.y()
+            .onTrue(superstructure.increaseAutoAimOffsetCommand());
+
+        mechstick.a()
+            .onTrue(superstructure.decreaseAutoAimOffsetCommand());
+
+        mechstick.x()
+            .onTrue(Commands.runOnce(() -> drivetrain.enableIgnoreCameraDistance(), drivetrain))
+            .onFalse(Commands.runOnce(() -> drivetrain.disableIgnoreCameraDistance(), drivetrain));
+
+        mechstick.povLeft()
+            .onTrue(superstructure.intake.deployIntakeCommand());
     }
 
     @SuppressWarnings("unused")

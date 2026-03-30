@@ -27,15 +27,14 @@ public class Intake extends SubsystemBase{
     private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 1, kEnableTuning && true);
     private SmartDashboardNumber intakePulsateSpeed = new SmartDashboardNumber("intake/drive/pulsate speed", 0.4, kEnableTuning && true);
     private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.4, kEnableTuning && true);
-
-    private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 11.424, kEnableTuning && true);
+    private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 11.5, kEnableTuning && true);
     private SmartDashboardNumber minExtensionRotation = new SmartDashboardNumber("intake/extension/min rotation", 0, kEnableTuning && true);
 
     private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0.2, kEnableTuning && false);
     private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 10.5, kEnableTuning && false);
     private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 4.5, kEnableTuning && true);
     private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 1, kEnableTuning && false);
-    private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.1, kEnableTuning && false);
+    private SmartDashboardNumber intakePositionTolerance = new SmartDashboardNumber("intake/extension/position tolerance", 0.4, kEnableTuning && false);
 
     private double targetPosition = 0;
     
@@ -107,8 +106,8 @@ public class Intake extends SubsystemBase{
         .withResetSpeed(resetSpeed)
         .withCurrentLimitConfigs(currentLimitsConfigs);
 
-        this.extensionLeftMotor.motor.setPosition(maxExtensionRotation.getNumber() - 0.5);
-        this.extensionRightMotor.motor.setPosition(maxExtensionRotation.getNumber() - 0.5);
+        this.extensionLeftMotor.motor.setPosition(maxExtensionRotation.getNumber());
+        this.extensionRightMotor.motor.setPosition(maxExtensionRotation.getNumber());
     }
 
     public void setExtensionPosition(double rotations) {
@@ -184,6 +183,15 @@ public class Intake extends SubsystemBase{
             Commands.runOnce(() -> this.stopIntake()),
             Commands.runOnce(() -> this.deployIntake(), this),
             Commands.waitUntil(() -> this.atTargetPosition())// || (this.extensionLeftMotor.aboveSpikeThreshold() && this.extensionRightMotor.aboveSpikeThreshold())),
+            // this.resetIntakeExtensionCommand()
+        );
+    }
+
+    public Command deployIntakeWaitlessCommand() {
+        return Commands.sequence(
+            // Commands.runOnce(() -> this.stopIntake()),
+            Commands.runOnce(() -> this.deployIntake(), this)
+            // Commands.waitUntil(() -> this.atTargetPosition())// || (this.extensionLeftMotor.aboveSpikeThreshold() && this.extensionRightMotor.aboveSpikeThreshold())),
             // this.resetIntakeExtensionCommand()
         );
     }

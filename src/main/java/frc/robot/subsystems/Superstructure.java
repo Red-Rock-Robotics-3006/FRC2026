@@ -42,8 +42,10 @@ public class Superstructure extends SubsystemBase {
 
     private final double blueTrenchX = Units.inchesToMeters(182.11);
     private final double redTrenchX = Units.inchesToMeters(469.11);
+    private final double midlineX = Units.inchesToMeters(325.61);
     private SmartDashboardNumber trenchZoneTolerance = new SmartDashboardNumber("superstructure/trench zone tolerance", 0.5, kTuning); //tolerance for hood near trench, probably best to be generous with this one
 
+    private SmartDashboardNumber autoAimOffsetRPM = new SmartDashboardNumber("superstructure/auto aim offset", 0);
     private final ShotParameter SHOOTER_IDLE_PARAMETER = new ShotParameter(14, 0);
 
     private SmartDashboardNumber dtROtationTurretOffsetCoeff = new SmartDashboardNumber("sotm/rotation fudge factor", 0.11);
@@ -77,7 +79,8 @@ public class Superstructure extends SubsystemBase {
     }
 
     private boolean inLobEnabledZone() {
-        return shooterPose.getY() > lobDisableZoneUpperY.getNumber() || shooterPose.getY() < lobDisableZoneLowerY.getNumber();
+        return (drivetrain.isBlue() ? shooterPose.getX() > midlineX : shooterPose.getX() < midlineX)
+            || (shooterPose.getY() > lobDisableZoneUpperY.getNumber() || shooterPose.getY() < lobDisableZoneLowerY.getNumber());
     }
 
     private boolean inLobUpperZone() {
@@ -115,6 +118,9 @@ public class Superstructure extends SubsystemBase {
             dtPose.getY() + dtRotation.getSin() * shooterOffset.getX() + dtRotation.getCos() * shooterOffset.getY(),
             new Rotation2d()
         );
+
+        drivetrain.setInLobZone(!this.inAllianceZone());
+
 
         Pose2d staticTargetPose = 
             this.inAllianceZone() ? 
@@ -162,6 +168,8 @@ public class Superstructure extends SubsystemBase {
         ShotParameter dynamicShotParameter =  (this.inAllianceZone()) ? 
             HubInterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm()) :
             LobInterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm());
+        
+        dynamicShotParameter = new ShotParameter(dynamicShotParameter.pivotAngleDeg, dynamicShotParameter.rpm + autoAimOffsetRPM.getNumber());
             
         // ACTUAL TURRET ANGLE FOR ADJUSTED SOTM POSE
         Rotation2d turretTargetAngle = 
@@ -226,6 +234,8 @@ public class Superstructure extends SubsystemBase {
             poses.add(dynamicTargetPose);
             poses.add(staticTargetPose);
             fieldObject2d.setPoses(poses);
+
+            SmartDashboard.putBoolean("superstructure/in lob enabled zone", this.inLobEnabledZone());
             
             SmartDashboard.putNumber("auto aim/sotm offset/x", sotmOffset.getX());
             SmartDashboard.putNumber("auto aim/sotm offset/y", sotmOffset.getY());
@@ -310,6 +320,22 @@ public class Superstructure extends SubsystemBase {
             intake.stowIntakeCommand(),
             Commands.waitUntil(() -> intake.atTargetPosition())
         );
+    }
+
+    public void increaseAutoAimRPMOffset() {
+        this.autoAimOffsetRPM.putNumber(this.autoAimOffsetRPM.getNumber() + 25);
+    }
+
+    public void decreaseAutoAimRPMOffset() {
+        this.autoAimOffsetRPM.putNumber(this.autoAimOffsetRPM.getNumber() - 25);
+    }
+
+    public Command increaseAutoAimOffsetCommand() {
+        return Commands.runOnce(() -> increaseAutoAimRPMOffset());
+    }
+
+    public Command decreaseAutoAimOffsetCommand() {
+        return Commands.runOnce(() -> decreaseAutoAimRPMOffset());
     }
 
     public static Superstructure getInstance() {

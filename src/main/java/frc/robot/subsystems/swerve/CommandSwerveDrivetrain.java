@@ -62,6 +62,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private boolean driveLimiterEnabled = false;
 
+    private boolean inLobZone = false;
+
     private SlewRateLimiter driveSlewRateLimiterX = new SlewRateLimiter(3);
     private SlewRateLimiter driveSlewRateLimiterY = new SlewRateLimiter(3);
     private SlewRateLimiter rotateSlewRateLimiter = new SlewRateLimiter(3);
@@ -69,11 +71,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private SmartDashboardNumber limitedMaxDriveSpeed = new SmartDashboardNumber("dt/dt sotm/drive speeds", 2);
     private SmartDashboardNumber limitedMaxRotateSpeed = new SmartDashboardNumber("dt/dt sotm/rotate speeds", 0.5);
 
+    private SmartDashboardNumber lobLimitDriveSpeed = new SmartDashboardNumber("dt/dt lob speeds/drive speed", 2.75);
+    private SmartDashboardNumber lobLimitTurnSpeed = new SmartDashboardNumber("dt/dt lob speeds/turn speed", 0.75);
+
     private SmartDashboardNumber poseMaxDistance = new SmartDashboardNumber("dt/dt localization/dist restriction", 6);
     private SmartDashboardNumber poseMaxRotation = new SmartDashboardNumber("dt/dt localization/rotation restriction", 10);
 
-    private SmartDashboardNumber maxDriveSpeed = new SmartDashboardNumber("dt/dt drive speeds/max drive mps", 4);
-    private SmartDashboardNumber maxTurnSpeed = new SmartDashboardNumber("dt/dt drive speeds/turn rotps", 1);
+    private SmartDashboardNumber maxDriveSpeed = new SmartDashboardNumber("dt/dt drive speeds/max drive mps", 6);
+    private SmartDashboardNumber maxTurnSpeed = new SmartDashboardNumber("dt/dt drive speeds/turn rotps", 1.6);
     private SmartDashboardNumber drivingDeadBand = new SmartDashboardNumber("dt/dt thresholds/deadband", 0.005);
     private SmartDashboardNumber pidRotationThreshold = new SmartDashboardNumber("dt/dt thresholds/rotation threshold", 1); // threshold to enable heading pid again.
 
@@ -418,7 +423,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         SmartDashboard.putString("alliance", this.alliance.toString());
         SmartDashboard.putBoolean("dt/ignore camera pose distance", ignoreCameraPoseDistance);
 
-        if (this.visionEnabled.getValue()) updateVisionMeasurements();
+        if (this.visionEnabled.getValue() && !DriverStation.isDisabled()) updateVisionMeasurements();
     }
 
     private void updateVisionMeasurements() {
@@ -553,6 +558,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.visionEnabled.putBoolean(false);
     }
 
+    public void setInLobZone(boolean b) {
+        this.inLobZone = b;
+    }
+
     public void toggleVision() {
         if (this.visionEnabled.getValue()) this.visionEnabled.putBoolean(false);
         else this.visionEnabled.putBoolean(true);
@@ -584,9 +593,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         double slewY = driveSlewRateLimiterY.calculate(rawY);
         double slewRot = rotateSlewRateLimiter.calculate(rawRotation);
 
-        double slewRequestedX = slewX * limitedMaxDriveSpeed.getNumber();
-        double slewRequestedY = slewY * limitedMaxDriveSpeed.getNumber();
-        double slewRequestedRot = slewRot * RotationsPerSecond.of(limitedMaxRotateSpeed.getNumber()).in(RadiansPerSecond);
+        double limitDrive = limitedMaxDriveSpeed.getNumber();
+        double limitTurn = limitedMaxRotateSpeed.getNumber();
+
+        if (inLobZone) {
+            limitDrive = lobLimitDriveSpeed.getNumber();
+            limitTurn = lobLimitTurnSpeed.getNumber();
+        }
+
+        double slewRequestedX = slewX * limitDrive;
+        double slewRequestedY = slewY * limitDrive;
+        double slewRequestedRot = slewRot * RotationsPerSecond.of(limitTurn).in(RadiansPerSecond);
 
         double requestedXSpeed = -controller.getLeftY() * maxDriveSpeed.getNumber();
         double requestedYSpeed = -controller.getLeftX() * maxDriveSpeed.getNumber();
@@ -617,6 +634,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         
         SmartDashboard.putNumber("dt/raw x", rawX);
         SmartDashboard.putNumber("dt/requested x", requestedXSpeed);
+
+        SmartDashboard.putBoolean("dt/in lob zone", inLobZone);
 
         double[] rotatedRequestedSpeed = SOTMCalcs.rotate(requestedXSpeed, requestedYSpeed, fieldCentricSeedOffset);
 
@@ -704,6 +723,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public boolean isBlue() {
         return this.alliance == Alliance.Blue;
+    }
+
+    public void resetKalaman(Pose2d pose) {
+        this.resetPose(pose);
     }
 
     public Command followTrajectory(String pathName) {
