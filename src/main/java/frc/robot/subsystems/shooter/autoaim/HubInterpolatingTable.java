@@ -9,7 +9,7 @@ import java.util.TreeMap;
 public class HubInterpolatingTable {
 
     private HubInterpolatingTable() {}
-    private static int rpmAdjust = 0;
+    private static int rpmAdjust = 100;
 
     public static TreeMap<Double, ShotParameter> table = 
         new TreeMap<>(

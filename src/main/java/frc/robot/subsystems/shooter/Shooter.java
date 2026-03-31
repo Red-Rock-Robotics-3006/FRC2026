@@ -14,9 +14,11 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.shooter.autoaim.EditableShotParameter;
+import frc.robot.subsystems.shooter.autoaim.HubInterpolatingTable;
 import frc.robot.subsystems.shooter.autoaim.ShotParameter;
 import redrocklib.logging.SmartDashboardNumber;
 import redrocklib.util.LerpingSmartDashboardNumber;
@@ -27,7 +29,7 @@ public class Shooter extends SubsystemBase{
 
     private static final boolean kEnableShooterTuning = true;
 
-    private double targetRPM = 0;
+    private double targetFlywheelSpeedRPM = 0;
     private double targetHoodPositionMotorRotations = 0;
 
     private SmartDashboardNumber rpmTolerance = new SmartDashboardNumber("shooter/tolerance/rpm", 50, kEnableShooterTuning && true);
@@ -36,7 +38,7 @@ public class Shooter extends SubsystemBase{
     private RedRockTalon shooterLeftMotor = new RedRockTalon(41, "shooter-left-motor", "*");
     private RedRockTalon hoodMotor = new RedRockTalon(43, "shooter-hood-motor", "*");
 
-    private EditableShotParameter manualShotParameter = new EditableShotParameter(30, 1000, "shooter/manual shot parameter");
+    // private EditableShotParameter manualShotParameter = new EditableShotParameter(30, 1000, "shooter/manual shot parameter");
     private EditableShotParameter lerpShotParameter = new EditableShotParameter(30, 200, "shooter/lerp shot parameter");
     
     private LerpingSmartDashboardNumber hoodRestrictions = 
@@ -126,6 +128,8 @@ public class Shooter extends SubsystemBase{
             this.shooterLeftMotor.motor.setControl(
                 new CoastOut()
             );
+            
+            this.targetFlywheelSpeedRPM = rpm;
             return;
         }
         this.shooterLeftMotor.motor.setControl(
@@ -134,7 +138,7 @@ public class Shooter extends SubsystemBase{
             .withSlot(0)
             .withOverrideBrakeDurNeutral(false)
         );
-        this.targetRPM = rpm;
+        this.targetFlywheelSpeedRPM = rpm;
     }
 
     /**
@@ -146,11 +150,11 @@ public class Shooter extends SubsystemBase{
     }
 
     public boolean atShooterSpeed() {
-        return Math.abs(shooterLeftMotor.motor.getVelocity().getValueAsDouble() * 60 - this.targetRPM) < this.rpmTolerance.getNumber();
+        return Math.abs(shooterLeftMotor.motor.getVelocity().getValueAsDouble() * 60 - this.targetFlywheelSpeedRPM) < this.rpmTolerance.getNumber();
     }
 
     public double getTargetRPM() {
-        return this.targetRPM;
+        return this.targetFlywheelSpeedRPM;
     }
 
     public boolean atHoodAngle() {
@@ -159,8 +163,8 @@ public class Shooter extends SubsystemBase{
     }
 
     public void setManualShot() {
-        this.setHoodAngle(manualShotParameter.getHoodAngle());
-        this.setShooterSpeed(manualShotParameter.getShooterRPM());
+        this.setHoodAngle(HubInterpolatingTable.get(3.1).getHoodAngle());
+        this.setShooterSpeed(HubInterpolatingTable.get(3.1).getShooterRPM());
     }
 
     public void setLerpTuneShot() {
@@ -177,6 +181,11 @@ public class Shooter extends SubsystemBase{
     public void periodic() {
         shooterLeftMotor.update();
         hoodMotor.update();
+
+        if (kEnableShooterTuning) {
+            SmartDashboard.putNumber("shooter/target/hood position", targetHoodPositionMotorRotations);
+            SmartDashboard.putNumber("shooter/target/flywheel speed", targetFlywheelSpeedRPM);
+        }
     }
 
     public static Shooter getInstance() {

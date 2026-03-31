@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 
-import frc.robot.subsystems.Climber;
+// import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.RobotState;
@@ -20,12 +20,13 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController mechstick = new CommandXboxController(1);
 
     private final double kTriggerThreshold = 0.1;
 
     public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(joystick);
     private final Superstructure superstructure = Superstructure.getInstance();
-    private final Climber climber = Climber.getInstance();
+    // private final Climber climber = Climber.getInstance();
     public final LED led = LED.getInstance();
 
     private final Autos autos = Autos.getInstance();
@@ -36,7 +37,7 @@ public class RobotContainer {
         configureCompBindings();
 
         configureTestSelector();
-        // configureTestBindings();
+        configureTestBindings();
 
         // configureSysIDBindings();
     }
@@ -44,33 +45,22 @@ public class RobotContainer {
     private void configureCompSelector() {
         autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
 
-        autoChooser.addOption("Left Midtake Leave", autos.L_MS_L());
-        autoChooser.addOption("Left Small Midtake Leave", autos.L_Small_MS_L());
-        autoChooser.addOption("Left Two Midtakes Leave", autos.L_MS_MS_L());
-        autoChooser.addOption("Left Small Two Midtakes Leave", autos.L_Small_MS_MS_L());
+        autoChooser.addOption("Left Two Sweeps", autos.L_TwoSweeps());
+        autoChooser.addOption("Left Two Sweeps Depot", autos.L_TwoSweepsDepot());
+        autoChooser.addOption("Right Two Sweeps", autos.R_TwoSweeps());
+        autoChooser.addOption("Middle Depot Outpost", autos.M_DepotOutpost());
 
-        autoChooser.addOption("Right Midtake Leave", autos.R_MS_L());
-        autoChooser.addOption("Right Small Midtake Leave", autos.R_Small_MS_L());
-        autoChooser.addOption("Right Two Midtakes Leave", autos.R_MS_MS_L());
-        autoChooser.addOption("Right Small Two Midtakes Leave", autos.R_Small_MS_MS_L());
-
-        // autoChooser.addOption("Right Midtake Outpost", autos.R_MS_OS());
-        // autoChooser.addOption("Right Two Midtakes Outpost", autos.R_MS_MS_OS());
         autoChooser.addOption("Full Test", autos.fullTestAuto());
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
+    @SuppressWarnings("unused")
     private void configureTestSelector() {
-        autoChooser.addOption("PATHS - Left Midtake Leave", autos.L_MS_L_Paths());
-        autoChooser.addOption("PATHS - Left Small Midtake Leave", autos.L_Small_MS_L_Paths());
-        autoChooser.addOption("PATHS - Left Two Midtakes Leave", autos.L_MS_MS_L_Paths());
-        autoChooser.addOption("PATHS - Left Small Two Midtakes Leave", autos.L_Small_MS_MS_L_Paths());
-
-        autoChooser.addOption("PATHS - Right Midtake Leave", autos.R_MS_L_Paths());
-        autoChooser.addOption("PATHS - Right Small Midtake Leave", autos.R_Small_MS_L_Paths());
-        autoChooser.addOption("PATHS - Right Two Midtakes Leave", autos.R_MS_MS_L_Paths());
-        autoChooser.addOption("PATHS - Right Small Two Midtakes Leave", autos.R_Small_MS_MS_L_Paths());
+        autoChooser.addOption("PATHS - Left Two Sweeps", autos.L_TwoSweeps_Paths());
+        autoChooser.addOption("PATHS - Left Two Sweeps Depot", autos.L_TwoSweepsDepot());
+        autoChooser.addOption("PATHS - Right Two Sweeps", autos.R_TwoSweeps_Paths());
+        autoChooser.addOption("PATHS - Middle Depot Outpost", autos.M_DepotOutpost_Paths());
 
         autoChooser.addOption("PATHS - Full Test", autos.fullTestPaths());
     }
@@ -109,7 +99,7 @@ public class RobotContainer {
         joystick.rightBumper() //manual hub shot
             .onTrue(superstructure.setManualShotParameterCommand())
             .onFalse(Commands.parallel(
-                superstructure.setStateCommand(RobotState.TURRET_TRACKING),
+                superstructure.setStateCommand(RobotState.IDLE),
                 superstructure.intake.deployIntakeCommand()));
 
         joystick.x()
@@ -127,20 +117,39 @@ public class RobotContainer {
         joystick.b()
             .onTrue(superstructure.setStateCommand(RobotState.IDLE));
 
-        joystick.povUp() //left paddle
-            .onTrue(Commands.sequence(
-                superstructure.intake.pushRetractIntakeCommand(),
-                climber.raiseClimberCommand()))
-            .onFalse(climber.stopClimberCommand());
+        // joystick.povUp() //left paddle
+        //     .onTrue(Commands.sequence(
+        //         superstructure.intake.pushRetractIntakeCommand(),
+        //         climber.raiseClimberCommand()))
+        //     .onFalse(climber.stopClimberCommand());
 
-        joystick.povDown() //right paddle
-            .onTrue(Commands.sequence(
-                superstructure.intake.pushRetractIntakeCommand(),
-                climber.lowerClimberCommand()))
-            .onFalse(climber.stopClimberCommand());
+        // joystick.povDown() //right paddle
+        //     .onTrue(Commands.sequence(
+        //         superstructure.intake.pushRetractIntakeCommand(),
+        //         climber.lowerClimberCommand()))
+        //     .onFalse(climber.stopClimberCommand());
+
+        joystick.povLeft()
+            .onTrue(superstructure.intake.pushRetractIntakeCommand());
             
         joystick.povRight()
             .onTrue(superstructure.intake.resetIntakeExtensionCommand());
+
+        mechstick.y()
+            .onTrue(superstructure.increaseAutoAimOffsetCommand());
+
+        mechstick.a()
+            .onTrue(superstructure.decreaseAutoAimOffsetCommand());
+
+        mechstick.x()
+            .onTrue(Commands.runOnce(() -> drivetrain.enableIgnoreCameraDistance(), drivetrain))
+            .onFalse(Commands.runOnce(() -> drivetrain.disableIgnoreCameraDistance(), drivetrain));
+
+        mechstick.b()
+            .onTrue(superstructure.toggleTrenchSafetyCommand());
+
+        mechstick.povLeft()
+            .onTrue(superstructure.intake.deployIntakeCommand());
     }
 
     @SuppressWarnings("unused")
