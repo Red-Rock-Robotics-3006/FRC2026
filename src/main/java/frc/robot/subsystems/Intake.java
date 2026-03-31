@@ -180,6 +180,7 @@ public class Intake extends SubsystemBase{
 
     public Command deployIntakeWaitCommand() {
         return Commands.sequence(
+            Commands.runOnce(() -> this.stopIntake(), this),
             Commands.runOnce(() -> this.deployIntake(), this),
             Commands.waitUntil(() -> this.atTargetPosition())
         );

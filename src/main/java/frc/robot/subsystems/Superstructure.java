@@ -277,7 +277,7 @@ public class Superstructure extends SubsystemBase {
     }
     
     public Command setStateCommand(RobotState state) {
-        return Commands.runOnce(() -> setState(state));
+        return Commands.runOnce(() -> setState(state), this);
     }
 
     public RobotState getRobotState() {

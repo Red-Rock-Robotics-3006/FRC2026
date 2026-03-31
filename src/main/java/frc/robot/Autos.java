@@ -163,7 +163,10 @@ public class Autos {
                 Commands.waitSeconds(1),
                 superstructure.intake.pulsateIntakeCommand(),
                 Commands.waitSeconds(seconds - 2),
-                superstructure.intake.deployIntakeCommand()
+                Commands.race(
+                    superstructure.intake.deployIntakeWaitCommand(),
+                    Commands.waitSeconds(1)
+                )
             )
         );
     }
