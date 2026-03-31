@@ -709,8 +709,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public void setTargetHeadingToCurrentHeading() {
         this.targetAngle = this.getPose().getRotation();
-        // this.targetAngle = Rotation2d.fromDegrees(90);
-        System.out.println("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" + this.getPose().getRotation());
     }
 
     public Command setTargetHeadingCommand(Rotation2d target) {

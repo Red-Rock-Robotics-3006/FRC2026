@@ -36,19 +36,20 @@ public class Superstructure extends SubsystemBase {
     public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
     public final Localization localization = Localization.getInstance();
 
-    private SmartDashboardNumber lobDisableZoneUpperY = new SmartDashboardNumber("superstructure/lob disable zone upper y", 4.5, kTuning);
-    private SmartDashboardNumber lobDisableZoneLowerY = new SmartDashboardNumber("superstructure/lob disable zone lower y", 3.44, kTuning);
-    private final double midfieldY = Units.inchesToMeters(158.845);
-
     private final double blueTrenchX = Units.inchesToMeters(182.11);
     private final double redTrenchX = Units.inchesToMeters(469.11);
-    private final double midlineX = Units.inchesToMeters(325.61);
+    private final double midfieldX = Units.inchesToMeters(325.61);
+    private final double midfieldY = Units.inchesToMeters(158.845);
+    
+    private SmartDashboardNumber lobDisableZoneUpperY = new SmartDashboardNumber("superstructure/lob disable zone upper y", 4.5, kTuning);
+    private SmartDashboardNumber lobDisableZoneLowerY = new SmartDashboardNumber("superstructure/lob disable zone lower y", 3.44, kTuning);
     private SmartDashboardNumber trenchZoneTolerance = new SmartDashboardNumber("superstructure/trench zone tolerance", 0.5, kTuning); //tolerance for hood near trench, probably best to be generous with this one
+    private SmartDashboardBoolean trenchSafetyEnabled = new SmartDashboardBoolean("superstructure/trench safety enabled", true);
 
     private SmartDashboardNumber autoAimOffsetRPM = new SmartDashboardNumber("superstructure/auto aim offset", 0);
     private final ShotParameter SHOOTER_IDLE_PARAMETER = new ShotParameter(14, 0);
 
-    private SmartDashboardNumber dtROtationTurretOffsetCoeff = new SmartDashboardNumber("sotm/rotation fudge factor", 0.11);
+    private SmartDashboardNumber dtRotationTurretOffsetCoeff = new SmartDashboardNumber("sotm/rotation fudge factor", 0.11);
 
     private Field2d field2d = new Field2d();
     private FieldObject2d fieldObject2d = field2d.getObject("poses");
@@ -79,7 +80,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     private boolean inLobEnabledZone() {
-        return (drivetrain.isBlue() ? shooterPose.getX() > midlineX : shooterPose.getX() < midlineX)
+        return (drivetrain.isBlue() ? shooterPose.getX() > midfieldX : shooterPose.getX() < midfieldX)
             || (shooterPose.getY() > lobDisableZoneUpperY.getNumber() || shooterPose.getY() < lobDisableZoneLowerY.getNumber());
     }
 
@@ -88,8 +89,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     private boolean nearTrench() {
-        return drivetrain.isBlue() ?
-            (shooterPose.getX() > blueTrenchX - trenchZoneTolerance.getNumber() && shooterPose.getX() < blueTrenchX + trenchZoneTolerance.getNumber()) :
+        return (shooterPose.getX() > blueTrenchX - trenchZoneTolerance.getNumber() && shooterPose.getX() < blueTrenchX + trenchZoneTolerance.getNumber()) ||
             (shooterPose.getX() > redTrenchX - trenchZoneTolerance.getNumber() && shooterPose.getX() < redTrenchX + trenchZoneTolerance.getNumber());
     }
 
@@ -154,13 +154,6 @@ public class Superstructure extends SubsystemBase {
             staticTargetPose,
             dtPose),
             new Rotation2d());
-        
-        // Transform2d sotmOffset = new Transform2d(SOTMCalcs.getOffset(
-        //     fieldCentricRobotVelocity[0] + shooterPoseVelocity[0],
-        //     fieldCentricRobotVelocity[1] + shooterPoseVelocity[1],
-        //     exitVelocity,
-        //     distanceToTarget),
-        //     new Rotation2d());
 
         this.dynamicTargetPose = staticTargetPose.transformBy(sotmOffset);
 
@@ -179,9 +172,10 @@ public class Superstructure extends SubsystemBase {
                     dynamicTargetPose.getX() - shooterPose.getX())
             ).minus(dtRotation);
 
+        // TURRET COMPENSATION FOR SWERVE ROTATION
         Rotation2d dtTurretCompensation = 
             Rotation2d.fromDegrees(
-                -dtROtationTurretOffsetCoeff.getNumber() * 
+                -dtRotationTurretOffsetCoeff.getNumber() * 
                 Math.toDegrees(state.Speeds.omegaRadiansPerSecond)
             );
 
@@ -212,7 +206,7 @@ public class Superstructure extends SubsystemBase {
                 break;
         }
 
-        if (nearTrench()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
+        if (nearTrench() && trenchSafetyEnabled.getValue()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
 
 
         // SMARTDASHBOARD LOGGING | COMPETITION
@@ -283,7 +277,7 @@ public class Superstructure extends SubsystemBase {
     }
     
     public Command setStateCommand(RobotState state) {
-        return Commands.runOnce(() -> setState(state), this);
+        return Commands.runOnce(() -> setState(state));
     }
 
     public RobotState getRobotState() {
@@ -320,6 +314,10 @@ public class Superstructure extends SubsystemBase {
             intake.stowIntakeCommand(),
             Commands.waitUntil(() -> intake.atTargetPosition())
         );
+    }
+
+    public Command toggleTrenchSafetyCommand() {
+        return Commands.runOnce(() -> trenchSafetyEnabled.putBoolean(!trenchSafetyEnabled.getValue()));
     }
 
     public void increaseAutoAimRPMOffset() {

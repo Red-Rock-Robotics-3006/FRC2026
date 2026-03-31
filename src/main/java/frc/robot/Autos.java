@@ -12,15 +12,6 @@ import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 public class Autos {
 
-    /*Naming convention:
-        [starting position]_[intaking location][shoot or lob]_..._[climb or leave]
-
-        starting position: (L)eft, (M)iddle, (R)ight
-        intaking location: (M)iddle, (D)epot, (O)utpost
-        (S)hoot, (L)ob
-        (C)limb, (L)eave
-    */
-
     private static Autos instance = null;
 
     private final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
@@ -33,219 +24,147 @@ public class Autos {
         return drivetrain.followTrajectory("M_FullTest");
     }
 
-    public Command R_MS_MS_L_Paths() {
+    public Command L_TwoSweeps_Paths() {
         return Commands.sequence(
-            drivetrain.followTrajectory("R_FarMidtake"),
-            drivetrain.followTrajectory("R_CloseMidtake"),
-            drivetrain.followTrajectory("R_Leave")
-        );
-    }
-
-    public Command R_Small_MS_MS_L_Paths() {
-        return Commands.sequence(
-            drivetrain.followTrajectory("R_SmallFarMidtake"),
-            drivetrain.followTrajectory("R_SmallCloseMidtake"),
-            drivetrain.followTrajectory("R_Leave")
-        );
-    }
-
-    public Command L_MS_MS_L_Paths() {
-        return Commands.sequence(
-            drivetrain.followTrajectory("L_FarMidtake"),
-            drivetrain.followTrajectory("L_CloseMidtake"),
+            drivetrain.followTrajectory("L_FarSweep"),
+            drivetrain.followTrajectory("L_CloseSweep"),
             drivetrain.followTrajectory("L_Leave")
         );
     }
 
-    public Command L_Small_MS_MS_L_Paths() {
+    public Command R_TwoSweeps_Paths() {
         return Commands.sequence(
-            drivetrain.followTrajectory("L_SmallFarMidtake"),
-            drivetrain.followTrajectory("L_SmallCloseMidtake"),
-            drivetrain.followTrajectory("L_Leave")
+            drivetrain.followTrajectory("R_FarSweep"),
+            drivetrain.followTrajectory("R_CloseSweep"),
+            drivetrain.followTrajectory("R_Leave")
         );
     }
 
-    public Command M_Depot_Outpost_Paths() {
-        return drivetrain.followTrajectory("M_Depot_Outpost");
+    public Command M_DepotOutpost_Paths() {
+        return drivetrain.followTrajectory("M_DepotOutpost");
     }
 
     // FULL AUTOS
 
     public Command fullTestAuto() {
         return Commands.sequence(
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-            superstructure.intake.deployIntakeCommand(),
-            superstructure.intake.startIntakeCommand(),
+            this.initAuto(),
 
             drivetrain.followTrajectory("M_FullTest"),
-            this.shootAuto(2),
+            this.shootPulsateAuto(2),
 
             Commands.parallel(
                 drivetrain.followTrajectory("M_FullTest"),
-                reverseIndexAuto()
+                this.reverseIndexAuto()
             ),
-            this.shootAuto(2),
+            this.shootPulsateAuto(2),
 
             superstructure.intake.stopIntakeCommand()
         );
     }
 
-    public Command R_MS_MS_L() {
+    public Command L_TwoSweeps() {
         return Commands.sequence(
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-            superstructure.intake.deployIntakeCommand(),
-            superstructure.intake.startIntakeCommand(),
+            this.initAuto(),
 
-            drivetrain.followTrajectory("R_FarMidtake"),
-            this.shootAuto(4),
+            drivetrain.followTrajectory("L_FarSweep"),
+            this.shootPulsateAuto(4),
 
             Commands.parallel(
-                drivetrain.followTrajectory("R_CloseMidtake"),
-                reverseIndexAuto()
+                drivetrain.followTrajectory("L_CloseSweep"),
+                this.reverseIndexAuto()
             ),
-            this.shootAuto(4),
-
-            superstructure.intake.stopIntakeCommand(),
-            drivetrain.followTrajectory("R_Leave")
-        );
-    }
-
-    public Command R_Small_MS_MS_L() {
-        return Commands.sequence(
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-            Commands.race(
-                superstructure.intake.deployIntakeCommand(),
-                Commands.waitSeconds(1.5)
-            ),
-            superstructure.intake.startIntakeCommand(),
-
-            drivetrain.followTrajectory("R_SmallFarMidtake"),
-            this.shootAuto(4),
-
-            Commands.parallel(
-                drivetrain.followTrajectory("R_SmallCloseMidtake"),
-                reverseIndexAuto()
-            ),
-            this.shootAuto(4),
-
-            superstructure.intake.stopIntakeCommand(),
-            drivetrain.followTrajectory("R_Leave")
-        );
-    }
-
-    public Command L_MS_MS_L() {
-        return Commands.sequence(
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-            superstructure.intake.deployIntakeCommand(),
-            superstructure.intake.startIntakeCommand(),
-
-            drivetrain.followTrajectory("L_FarMidtake"),
-            this.shootAuto(4),
-
-            Commands.parallel(
-                drivetrain.followTrajectory("L_CloseMidtake"),
-                reverseIndexAuto()
-            ),
-            this.shootAuto(4),
+            this.shootPulsateAuto(5),
 
             superstructure.intake.stopIntakeCommand(),
             drivetrain.followTrajectory("L_Leave")
         );
     }
 
-    public Command L_Small_MS_MS_L() {
+    public Command L_TwoSweepsDepot() {
         return Commands.sequence(
-            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-            Commands.race(
-                superstructure.intake.deployIntakeCommand(),
-                Commands.waitSeconds(1.5)
-            ),
-            superstructure.intake.startIntakeCommand(),
+            this.initAuto(),
 
-            drivetrain.followTrajectory("L_SmallFarMidtake"),
-            this.shootAuto(4),
+            drivetrain.followTrajectory("L_FarSweep"),
+            this.shootPulsateAuto(3),
 
             Commands.parallel(
-                drivetrain.followTrajectory("L_SmallCloseMidtake"),
-                reverseIndexAuto()
+                drivetrain.followTrajectory("L_CloseSweepDepot", 0),
+                this.reverseIndexAuto()
             ),
-            this.shootAuto(4),
-
-            superstructure.intake.stopIntakeCommand(),
-            drivetrain.followTrajectory("L_Leave")
+            Commands.parallel(
+                drivetrain.followTrajectory("L_CloseSweepDepot", 1),
+                this.shootAuto(10)
+            )
         );
     }
 
-    // public Command R_MS_OS() {
-    //     return Commands.sequence(
-    //         superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-    //         superstructure.intake.deployIntakeCommand(),
-    //         superstructure.intake.startIntakeCommand(),
+    public Command R_TwoSweeps() {
+        return Commands.sequence(
+            this.initAuto(),
 
-    //         drivetrain.followTrajectory("R_FarMidtake"),
-    //         this.shootAuto(4),
+            drivetrain.followTrajectory("R_FarSweep"),
+            this.shootPulsateAuto(4),
 
-    //         drivetrain.followTrajectory("R_Outposttake"),
-    //         this.shootAuto(4),
+            Commands.parallel(
+                drivetrain.followTrajectory("R_CloseSweep"),
+                this.reverseIndexAuto()
+            ),
+            this.shootPulsateAuto(5),
 
-    //         superstructure.intake.stopIntakeCommand()
-    //     );
-    // }
+            superstructure.intake.stopIntakeCommand(),
+            drivetrain.followTrajectory("R_Leave")
+        );
+    }
 
-    // public Command L_MS_OS() {
-    //     return Commands.sequence(
-    //         superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-    //         superstructure.intake.deployIntakeCommand(),
-    //         superstructure.intake.startIntakeCommand(),
+    public Command M_DepotOutpost() {
+        return Commands.parallel(
+            // Commands.sequence(
+            //     this.initAuto(),
+            //     drivetrain.followTrajectory("M_DepotOutpost")
+            // ),
+            // Commands.sequence(
+            //     Commands.waitSeconds(2),
+            //     this.shootAuto(10),
+            //     this.shootPulsateAuto(8)
+            // )
+        );
+    }
 
-    //         drivetrain.followTrajectory("L_FarMidtake"),
-    //         this.shootAuto(4),
-
-    //         drivetrain.followTrajectory("L_Outposttake"),
-    //         this.shootAuto(4),
-
-    //         superstructure.intake.stopIntakeCommand()
-    //     );
-    // }
-
-    // public Command R_MS_MS_OS() {
-    //     return Commands.sequence(
-    //         superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-    //         superstructure.intake.deployIntakeCommand(),
-    //         superstructure.intake.startIntakeCommand(),
-
-    //         drivetrain.followTrajectory("R_FarMidtake"),
-    //         this.shootAuto(4),
-
-    //         drivetrain.followTrajectory("R_CloseMidtake"),
-    //         this.shootAuto(4),
-
-    //         drivetrain.followTrajectory("R_Outposttake"),
-    //         this.shootAuto(7),
-
-    //         superstructure.intake.stopIntakeCommand()
-    //     );
-    // }
-
-    // climb sequence if we ever need it ig
-    //     
-    //         Commands.parallel(
-    //             Commands.sequence(
-    //                 drivetrain.followTrajectory("R_MS_C", 3),
-    //                 drivetrain.pidToPoseAutoCommand(new Pose2d(3006, 3006, Rotation2d.fromDegrees(3006))) //TODO: replace with actual climbing pose this'd be very bad if ran
-    //                 ),
-    //             climber.raiseClimberCommand().withTimeout(2)
-    //         ),
-    //         climber.lowerClimberCommand().withTimeout(2),
-    //         climber.stopClimberCommand()
-    //     );
-    // }
+    // AUTO UTILITY COMMANDS
+    
+    private Command initAuto() {
+        return Commands.sequence(
+            superstructure.setStateCommand(RobotState.TURRET_TRACKING),
+            Commands.race(
+                superstructure.intake.deployIntakeWaitCommand(),
+                Commands.waitSeconds(1)
+            ),
+            superstructure.intake.startIntakeCommand()
+        );
+    }
 
     private Command shootAuto(double seconds) {
         return Commands.sequence(
             superstructure.setStateCommand(RobotState.FULL_TRACKING),
             Commands.waitSeconds(seconds),
             superstructure.setStateCommand(RobotState.TURRET_TRACKING)
+        );
+    }
+
+    private Command shootPulsateAuto(double seconds) {
+        return Commands.parallel(
+            Commands.sequence(
+                superstructure.setStateCommand(RobotState.FULL_TRACKING),
+                Commands.waitSeconds(seconds),
+                superstructure.setStateCommand(RobotState.TURRET_TRACKING)
+            ),
+            Commands.sequence(
+                Commands.waitSeconds(1),
+                superstructure.intake.pulsateIntakeCommand(),
+                Commands.waitSeconds(seconds - 2),
+                superstructure.intake.deployIntakeCommand()
+            )
         );
     }
 
@@ -262,60 +181,3 @@ public class Autos {
         return instance;
     }
 }
-
-
-    // public Command R_MS_L() {
-    //     return Commands.sequence(
-    //         superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-    //         superstructure.intake.deployIntakeCommand(),
-    //         superstructure.intake.startIntakeCommand(),
-
-    //         drivetrain.followTrajectory("R_FarMidtake"),
-    //         this.shootAuto(4),
-
-    //         superstructure.intake.stopIntakeCommand(),
-    //         drivetrain.followTrajectory("R_Leave")
-    //     );
-    // }
-
-    // public Command R_Small_MS_L() {
-    //     return Commands.sequence(
-    //         superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-    //         superstructure.intake.deployIntakeCommand(),
-    //         superstructure.intake.startIntakeCommand(),
-
-    //         drivetrain.followTrajectory("R_SmallFarMidtake"),
-    //         this.shootAuto(4),
-
-    //         superstructure.intake.stopIntakeCommand(),
-    //         drivetrain.followTrajectory("R_Leave")
-    //     );
-    // }
-
-    // public Command L_MS_L() {
-    //     return Commands.sequence(
-    //         superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-    //         superstructure.intake.deployIntakeCommand(),
-    //         superstructure.intake.startIntakeCommand(),
-
-    //         drivetrain.followTrajectory("L_FarMidtake"),
-    //         this.shootAuto(4),
-
-    //         superstructure.intake.stopIntakeCommand(),
-    //         drivetrain.followTrajectory("L_Leave")
-    //     );
-    // }
-
-    // public Command L_Small_MS_L() {
-    //     return Commands.sequence(
-    //         superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-    //         superstructure.intake.deployIntakeCommand(),
-    //         superstructure.intake.startIntakeCommand(),
-
-    //         drivetrain.followTrajectory("L_SmallFarMidtake"),
-    //         this.shootAuto(4),
-
-    //         superstructure.intake.stopIntakeCommand(),
-    //         drivetrain.followTrajectory("L_Leave")
-    //     );
-    // }

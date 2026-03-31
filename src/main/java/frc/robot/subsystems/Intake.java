@@ -178,22 +178,15 @@ public class Intake extends SubsystemBase{
         return Commands.runOnce(() -> this.stowIntake(), this);
     }
 
-    public Command deployIntakeCommand() {
+    public Command deployIntakeWaitCommand() {
         return Commands.sequence(
-            Commands.runOnce(() -> this.stopIntake()),
             Commands.runOnce(() -> this.deployIntake(), this),
-            Commands.waitUntil(() -> this.atTargetPosition())// || (this.extensionLeftMotor.aboveSpikeThreshold() && this.extensionRightMotor.aboveSpikeThreshold())),
-            // this.resetIntakeExtensionCommand()
+            Commands.waitUntil(() -> this.atTargetPosition())
         );
     }
 
-    public Command deployIntakeWaitlessCommand() {
-        return Commands.sequence(
-            // Commands.runOnce(() -> this.stopIntake()),
-            Commands.runOnce(() -> this.deployIntake(), this)
-            // Commands.waitUntil(() -> this.atTargetPosition())// || (this.extensionLeftMotor.aboveSpikeThreshold() && this.extensionRightMotor.aboveSpikeThreshold())),
-            // this.resetIntakeExtensionCommand()
-        );
+    public Command deployIntakeCommand() {
+        return Commands.runOnce(() -> this.deployIntake(), this);
     }
 
     public Command pushRetractIntakeCommand() {
