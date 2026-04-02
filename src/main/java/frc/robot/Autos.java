@@ -119,15 +119,13 @@ public class Autos {
 
     public Command M_DepotOutpost() {
         return Commands.parallel(
-            // Commands.sequence(
-            //     this.initAuto(),
-            //     drivetrain.followTrajectory("M_DepotOutpost")
-            // ),
-            // Commands.sequence(
-            //     Commands.waitSeconds(2),
-            //     this.shootAuto(10),
-            //     this.shootPulsateAuto(8)
-            // )
+            drivetrain.followTrajectory("M_DepotOutpost"),
+            Commands.sequence(
+                this.initAuto(),
+                Commands.waitSeconds(0.5),
+                this.shootAuto(10),
+                this.shootPulsateAuto(8)
+            )
         );
     }
 

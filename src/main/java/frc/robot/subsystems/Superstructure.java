@@ -59,12 +59,11 @@ public class Superstructure extends SubsystemBase {
         FULL_TRACKING, //flywheels spin up, hood tracking, turret tracking
         SHOOTING, //index spinning, flywheels spinning, hood tracking, turret tracking
         SHOOTING_JAMMED, //index jammed, flywheels spinning, hood tracking, turret tracking
-        SHOOTING_WHILE_MOVING, //mostly for redundancy, flywheels spinning, hood tracking, turret tracking, dt speed > 0
 
         MANUAL_SHOT, //any manual shot, flywheels spinning, turret at set angle, hood at set angle
         LERP_TUNING, //for tuning the lerp table (prob dont need this state for comp), turret tracking, hood at set angle, flywheels at set rpm
 
-        IDLE //mechanisms all idle (on disable maybe?)
+        IDLE //mechanisms all idle
     }
 
     private RobotState robotState = RobotState.IDLE;
@@ -106,21 +105,17 @@ public class Superstructure extends SubsystemBase {
     @Override
     public void periodic() {
         SwerveDriveState state = drivetrain.getState();
-
         Localization.setCameraDynamicRotation(shooterOffset.getTranslation(), turret.getRotation(), state.Pose.getRotation());
-
         boolean isBlue = drivetrain.isBlue();
-
         dtPose = state.Pose;
+        drivetrain.setInLobZone(!this.inAllianceZone());
+
         Rotation2d dtRotation = dtPose.getRotation();
         shooterPose = new Pose2d(
             dtPose.getX() + dtRotation.getCos() * shooterOffset.getX() - dtRotation.getSin() * shooterOffset.getY(),
             dtPose.getY() + dtRotation.getSin() * shooterOffset.getX() + dtRotation.getCos() * shooterOffset.getY(),
             new Rotation2d()
         );
-
-        drivetrain.setInLobZone(!this.inAllianceZone());
-
 
         Pose2d staticTargetPose = 
             this.inAllianceZone() ? 
@@ -157,6 +152,7 @@ public class Superstructure extends SubsystemBase {
 
         this.dynamicTargetPose = staticTargetPose.transformBy(sotmOffset);
 
+
         // ACTUAL SHOT PARAMETER FOR ADJUSTED SOTM POSE
         ShotParameter dynamicShotParameter =  (this.inAllianceZone()) ? 
             HubInterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm()) :
@@ -188,7 +184,6 @@ public class Superstructure extends SubsystemBase {
                 turret.setTurretAngle(turretTargetAngle);
                 if (readyToShoot()) index.startIndex();
                 break;
-            case SHOOTING_WHILE_MOVING:
             case SHOOTING_JAMMED:
                 if (!index.isJamming()) setState(RobotState.SHOOTING);
             case SHOOTING:

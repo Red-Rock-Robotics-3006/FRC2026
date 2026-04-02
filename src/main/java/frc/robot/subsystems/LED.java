@@ -212,8 +212,6 @@ public class LED extends SubsystemBase{
             case LERP_TUNING:
                 this.blink(GREEN, 10);
                 break;
-            case SHOOTING_WHILE_MOVING:
-                break;
             case SHOOTING_JAMMED:
                 this.blink(NOTE_ORANGE, 5);
                 break;

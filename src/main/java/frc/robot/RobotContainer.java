@@ -19,12 +19,12 @@ import frc.robot.subsystems.Superstructure.RobotState;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 public class RobotContainer {
-    private final CommandXboxController joystick = new CommandXboxController(0);
-    private final CommandXboxController mechstick = new CommandXboxController(1);
+    private final CommandXboxController driverstick = new CommandXboxController(0);
+    private final CommandXboxController operatorstick = new CommandXboxController(1);
 
     private final double kTriggerThreshold = 0.1;
 
-    public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(joystick);
+    public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(driverstick);
     private final Superstructure superstructure = Superstructure.getInstance();
     // private final Climber climber = Climber.getInstance();
     public final LED led = LED.getInstance();
@@ -69,19 +69,19 @@ public class RobotContainer {
         RobotModeTriggers.disabled().onTrue(superstructure.setStateCommand(RobotState.IDLE).ignoringDisable(true));
         RobotModeTriggers.teleop().onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
-        joystick.back()
+        driverstick.back()
             .onTrue(drivetrain.resetHeadingCommand());
 
-        joystick.start()
+        driverstick.start()
             .onTrue(drivetrain.toggleVisionCommand());
 
-        joystick.leftTrigger(kTriggerThreshold)
+        driverstick.leftTrigger(kTriggerThreshold)
             .onTrue(Commands.sequence(
                 superstructure.intake.deployIntakeCommand(),
                 superstructure.intake.startIntakeCommand()))
             .onFalse(superstructure.intake.stopIntakeCommand());
 
-        joystick.rightTrigger(kTriggerThreshold)
+        driverstick.rightTrigger(kTriggerThreshold)
             .onTrue(Commands.parallel(
                 superstructure.setStateCommand(RobotState.FULL_TRACKING),
                 Commands.runOnce(() -> drivetrain.enableSpeedLimiter(), drivetrain)))
@@ -90,94 +90,94 @@ public class RobotContainer {
                 Commands.runOnce(() -> drivetrain.disableSpeedLimiter(), drivetrain),
                 superstructure.intake.deployIntakeCommand()));
             
-        joystick.leftBumper() 
+        driverstick.leftBumper() 
             .onTrue(superstructure.intake.pulsateIntakeCommand())
             .onFalse(Commands.sequence(
                 superstructure.intake.stopIntakeCommand(),
                 superstructure.intake.deployIntakeCommand()));
 
-        joystick.rightBumper() //manual hub shot
+        driverstick.rightBumper() //manual hub shot
             .onTrue(superstructure.setManualShotParameterCommand())
             .onFalse(Commands.parallel(
                 superstructure.setStateCommand(RobotState.IDLE),
                 superstructure.intake.deployIntakeCommand()));
 
-        joystick.x()
+        driverstick.x()
             .onTrue(superstructure.resetSuperStructure())
             .onFalse(Commands.runOnce(() -> drivetrain.disableIgnoreCameraDistance(), drivetrain));
 
-        joystick.y()
+        driverstick.y()
             .onTrue(superstructure.index.reverseIndexCommand())
             .onFalse(superstructure.index.stopIndexCommand());
             
-        joystick.a()
+        driverstick.a()
             .onTrue(superstructure.intake.reverseIntakeCommand())
             .onFalse(superstructure.intake.stopIntakeCommand());
 
-        joystick.b()
+        driverstick.b()
             .onTrue(superstructure.setStateCommand(RobotState.IDLE));
 
-        // joystick.povUp() //left paddle
+        // driverstick.povUp() //left paddle
         //     .onTrue(Commands.sequence(
         //         superstructure.intake.pushRetractIntakeCommand(),
         //         climber.raiseClimberCommand()))
         //     .onFalse(climber.stopClimberCommand());
 
-        // joystick.povDown() //right paddle
+        // driverstick.povDown() //right paddle
         //     .onTrue(Commands.sequence(
         //         superstructure.intake.pushRetractIntakeCommand(),
         //         climber.lowerClimberCommand()))
         //     .onFalse(climber.stopClimberCommand());
 
-        joystick.povLeft()
+        driverstick.povLeft()
             .onTrue(superstructure.intake.pushRetractIntakeCommand());
             
-        joystick.povRight()
+        driverstick.povRight()
             .onTrue(superstructure.intake.resetIntakeExtensionCommand());
 
-        mechstick.y()
+        operatorstick.y()
             .onTrue(superstructure.increaseAutoAimOffsetCommand());
 
-        mechstick.a()
+        operatorstick.a()
             .onTrue(superstructure.decreaseAutoAimOffsetCommand());
 
-        mechstick.x()
+        operatorstick.x()
             .onTrue(Commands.runOnce(() -> drivetrain.enableIgnoreCameraDistance(), drivetrain))
             .onFalse(Commands.runOnce(() -> drivetrain.disableIgnoreCameraDistance(), drivetrain));
 
-        mechstick.b()
+        operatorstick.b()
             .onTrue(superstructure.toggleTrenchSafetyCommand());
 
-        mechstick.povLeft()
+        operatorstick.povLeft()
             .onTrue(superstructure.intake.deployIntakeCommand());
     }
 
     @SuppressWarnings("unused")
     private void configureTestBindings() {
-        // joystick.x() //manual lerp tuning shot
+        // driverstick.x() //manual lerp tuning shot
         //     .onTrue(superstructure.setLerpTuneParameterCommand())
         //     .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
-        // joystick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
+        // driverstick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
         //     .onTrue(led.togglePoliceCommand());
 
-        // joystick.a()
+        // driverstick.a()
         //     .onTrue(Commands.runOnce(() -> superstructure.intake.pushRetractIntake()));
 
-        // joystick.a()
+        // driverstick.a()
         //     .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosA()));
 
-        // joystick.b()
+        // driverstick.b()
         //     .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosB()));
     }
 
     // private void configureSysIDBindings() {
     //     // Run SysId routines when holding back/start and X/Y.
     //     // Note that each routine should be run exactly once in a single log.
-    //     joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-    //     joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-    //     joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-    //     joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+    //     driverstick.back().and(driverstick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    //     driverstick.back().and(driverstick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+    //     driverstick.start().and(driverstick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+    //     driverstick.start().and(driverstick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
     // }
 
     public Command getAutonomousCommand() {
