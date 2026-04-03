@@ -108,15 +108,15 @@ public class Superstructure extends SubsystemBase {
         Localization.setCameraDynamicRotation(shooterOffset.getTranslation(), turret.getRotation(), state.Pose.getRotation());
         boolean isBlue = drivetrain.isBlue();
         dtPose = state.Pose;
-        drivetrain.setInLobZone(!this.inAllianceZone());
-
+        
         Rotation2d dtRotation = dtPose.getRotation();
         shooterPose = new Pose2d(
             dtPose.getX() + dtRotation.getCos() * shooterOffset.getX() - dtRotation.getSin() * shooterOffset.getY(),
             dtPose.getY() + dtRotation.getSin() * shooterOffset.getX() + dtRotation.getCos() * shooterOffset.getY(),
             new Rotation2d()
         );
-
+        drivetrain.setInLobZone(!this.inAllianceZone());
+            
         Pose2d staticTargetPose = 
             this.inAllianceZone() ? 
                 (isBlue ? Localization.blueHub : Localization.redHub) :
