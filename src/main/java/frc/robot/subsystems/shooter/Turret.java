@@ -49,6 +49,9 @@ public class Turret extends SubsystemBase{
 
     private SmartDashboardNumber turretTuningAngle = new SmartDashboardNumber("turret/tuning/rotation2d deg", 0);
 
+    // private SmartDashboardNumber crtTestA = new SmartDashboardNumber("turret/crt/A", 0);
+    // private SmartDashboardNumber crtTestB = new SmartDashboardNumber("turret/crt/B", 0);
+
     private LerpingSmartDashboardNumber turretRestrictions
         = new LerpingSmartDashboardNumber(
             -180, 0, 
@@ -137,9 +140,31 @@ public class Turret extends SubsystemBase{
         double tooth1 = e1 * kCcoderAToothCount;
         double remainder = tooth1 - (int)(tooth1);
         double tooth2 = e2 * kCcoderBToothCount;
-        tooth2 = (int)(tooth2) + remainder;
 
-        double absTurretToothCount = TurretCalcs.solveCRT(tooth1, tooth2);
+        double absTurretToothCount = TurretCalcs.solveCRT((int)tooth1, (int)tooth2) + remainder;
+
+        // tooth2 = (int)(tooth2) + remainder;
+        // double absTurretToothCount = TurretCalcs.solveCRT(tooth1, tooth2);
+
+        double absDegrees = (absTurretToothCount / kTurretToothCount) * 360 + turretRestrictions.getMinInput();
+
+        return absDegrees;
+    }
+
+    private double crtDegrees(double e1, double e2) {
+        // double e1 = ccoderA.getAbsolutePosition().getValueAsDouble();
+        if (e1 < 0) e1 = 1 - e1;
+        // double e2 = ccoderB.getAbsolutePosition().getValueAsDouble();
+        if (e2 < 0) e2 = 1 - e2;
+
+        double tooth1 = e1 * kCcoderAToothCount;
+        double remainder = tooth1 - (int)(tooth1);
+        double tooth2 = e2 * kCcoderBToothCount;
+
+        double absTurretToothCount = TurretCalcs.solveCRT((int)tooth1, (int)tooth2) + remainder;
+
+        // tooth2 = (int)(tooth2) + remainder;
+        // double absTurretToothCount = TurretCalcs.solveCRT(tooth1, tooth2);
 
         double absDegrees = (absTurretToothCount / kTurretToothCount) * 360 + turretRestrictions.getMinInput();
 
@@ -226,9 +251,19 @@ public class Turret extends SubsystemBase{
         SmartDashboard.putNumber("turret/ccoder A", this.ccoderA.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putNumber("turret/ccoder B", this.ccoderB.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putNumber("turret/target motor rotations", this.targetTurretPositionMotorRotations);
+
+        // SmartDashboard.putNumber("turret/crt/result", this.crtDegrees(crtTestA.getNumber() / 16.0, crtTestB.getNumber() / 15.0));
     }
 
     public static class TurretCalcs {
+        /**
+         * pure double crt is slow and bad for loop times
+         * use int crt and then add the double to the result
+         * @param e1
+         * @param e2
+         * @return
+         */
+        @Deprecated
         public static double solveCRT(double e1, double e2) {
             int m1 = kCcoderAToothCount, m2 = kCcoderBToothCount;
             @SuppressWarnings("unused")
@@ -251,7 +286,7 @@ public class Turret extends SubsystemBase{
         }
 
         public static int solveCRT(int e1, int e2) {
-            int m1 = 15, m2 = 16;
+            int m1 = kCcoderAToothCount, m2 = kCcoderBToothCount;
             int M = m1 * m2; // 240
 
             // Modular inverse of 15 mod 16 (since 15 * 15 = 225 = 14*16 + 1, inv = 15)
