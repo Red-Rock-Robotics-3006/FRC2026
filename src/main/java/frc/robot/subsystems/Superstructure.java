@@ -47,7 +47,8 @@ public class Superstructure extends SubsystemBase {
     private SmartDashboardBoolean trenchSafetyEnabled = new SmartDashboardBoolean("superstructure/trench safety enabled", true);
 
     private SmartDashboardNumber autoAimOffsetRPM = new SmartDashboardNumber("superstructure/auto aim offset", 0);
-    private final ShotParameter SHOOTER_IDLE_PARAMETER = new ShotParameter(14, 0);
+    private final ShotParameter SHOOTER_IDLE_PARAMETER = new ShotParameter(13, 0);
+    private final ShotParameter SHOOTER_REVERSE_PARAMETER = new ShotParameter(13, -700);
 
     private SmartDashboardNumber dtRotationTurretOffsetCoeff = new SmartDashboardNumber("sotm/rotation fudge factor", 0.11);
 
@@ -63,6 +64,7 @@ public class Superstructure extends SubsystemBase {
         MANUAL_SHOT, //any manual shot, flywheels spinning, turret at set angle, hood at set angle
         LERP_TUNING, //for tuning the lerp table (prob dont need this state for comp), turret tracking, hood at set angle, flywheels at set rpm
 
+        REVERSE, //index reversing, flywheels reversing
         IDLE //mechanisms all idle
     }
 
@@ -108,15 +110,16 @@ public class Superstructure extends SubsystemBase {
         Localization.setCameraDynamicRotation(shooterOffset.getTranslation(), turret.getRotation(), state.Pose.getRotation());
         boolean isBlue = drivetrain.isBlue();
         dtPose = state.Pose;
-        
+
         Rotation2d dtRotation = dtPose.getRotation();
         shooterPose = new Pose2d(
             dtPose.getX() + dtRotation.getCos() * shooterOffset.getX() - dtRotation.getSin() * shooterOffset.getY(),
             dtPose.getY() + dtRotation.getSin() * shooterOffset.getX() + dtRotation.getCos() * shooterOffset.getY(),
             new Rotation2d()
         );
+
         drivetrain.setInLobZone(!this.inAllianceZone());
-            
+
         Pose2d staticTargetPose = 
             this.inAllianceZone() ? 
                 (isBlue ? Localization.blueHub : Localization.redHub) :
@@ -177,11 +180,11 @@ public class Superstructure extends SubsystemBase {
 
         switch (robotState) {
             case MANUAL_SHOT:
-                if (readyToShoot()) index.startIndex();
                 turret.setTurretAngle(Rotation2d.fromDegrees(90));
+                if (readyToShoot()) index.startIndex();
                 break;
             case LERP_TUNING:
-                turret.setTurretAngle(turretTargetAngle);
+                turret.setTurretAngle(turretTargetAngle.plus(dtTurretCompensation));
                 if (readyToShoot()) index.startIndex();
                 break;
             case SHOOTING_JAMMED:
@@ -192,10 +195,11 @@ public class Superstructure extends SubsystemBase {
             case FULL_TRACKING:
                 if (!inAllianceZone() && !inLobEnabledZone()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
                 else {shooter.setShotParameter(dynamicShotParameter);}
-
                 if (readyToShoot()) setState(RobotState.SHOOTING);
             case TURRET_TRACKING:
                 turret.setTurretAngle(turretTargetAngle.plus(dtTurretCompensation));
+                break;
+            case REVERSE:
                 break;
             case IDLE:
                 break;
@@ -249,6 +253,8 @@ public class Superstructure extends SubsystemBase {
     }
 
     public void setState(RobotState state) {
+        if (state == RobotState.FULL_TRACKING || state == RobotState.SHOOTING) drivetrain.enableSpeedLimiter();
+        else drivetrain.disableSpeedLimiter();
         switch (state) {
             case IDLE:
                 index.stopIndex();
@@ -264,6 +270,10 @@ public class Superstructure extends SubsystemBase {
             case TURRET_TRACKING:
                 index.stopIndex();
                 shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);
+                break;
+            case REVERSE:
+                index.reverseIndex();
+                shooter.setShotParameter(SHOOTER_REVERSE_PARAMETER);
                 break;
             default:
                 break;

@@ -54,7 +54,7 @@ public class PracticeTimer {
 
         char autoWinner = (gameStr.isEmpty()) ? 'B' : gameStr.charAt(0);
 
-        boolean winAauto = 
+        boolean wonAuto = 
             autoWinner == 'R' && alliance == Alliance.Red ||
             autoWinner == 'B' && alliance == Alliance.Blue;
 
@@ -66,23 +66,23 @@ public class PracticeTimer {
         } else if (matchTime < 10) {
             this.shiftTimeLeft = 10d - this.matchTime;
             this.matchState = MatchState.TRANSITION;
-            displayString = "TRANS-" + ((winAauto) ? "WON" : "LOST");
+            displayString = "TRANSITION-" + ((wonAuto) ? "WON" : "LOST");
         } else if (matchTime < 10d + 25) {
             this.shiftTimeLeft = 10d + 25 - this.matchTime;
             this.matchState = MatchState.SHIFT_1;
-            displayString = ((winAauto) ? "LOBBING" : "SHOOTING") + " 1/4";
+            displayString = ((wonAuto) ? "LOBBING" : "SHOOTING") + " 1/4";
         } else if (matchTime < 10d + 2 * 25) {
             this.shiftTimeLeft = 10d + 2 * 25 - this.matchTime;
             this.matchState = MatchState.SHIFT_2;
-            displayString = ((!winAauto) ? "LOBBING" : "SHOOTING") + " 2/4";
+            displayString = ((!wonAuto) ? "LOBBING" : "SHOOTING") + " 2/4";
         } else if (matchTime < 10d + 3 * 25) {
             this.shiftTimeLeft = 10d + 3 * 25 - this.matchTime;
             this.matchState = MatchState.SHIFT_3;
-            displayString = ((winAauto) ? "LOBBING" : "SHOOTING") + " 3/4";
+            displayString = ((wonAuto) ? "LOBBING" : "SHOOTING") + " 3/4";
         } else if (matchTime < 10d + 4 * 25) {
             this.shiftTimeLeft = 10d + 4 * 25 - this.matchTime;
             this.matchState = MatchState.SHIFT_4;
-            displayString = ((!winAauto) ? "LOBBING" : "SHOOTING") + " 4/4";
+            displayString = ((!wonAuto) ? "LOBBING" : "SHOOTING") + " 4/4";
         } else if (matchTime < 10d + 4*25 + 30) {
             this.shiftTimeLeft = 10d + 4*25 + 30 - this.matchTime;
             this.matchState = MatchState.ENDGAME;
@@ -93,12 +93,12 @@ public class PracticeTimer {
             displayString = "MATCH_END";
         }
 
-        Logger.recordOutput("Match timer/match time", matchTime);
-        Logger.recordOutput("Match timer/shift time", this.shiftTimeLeft);
-        SmartDashboard.putString("Match timer/Shift time left", String.format("%.1f", this.shiftTimeLeft));
-        SmartDashboard.putString("Match timer/Match time left", toFormattedTime((int)(140d - this.matchTime)));
-        SmartDashboard.putString("Match timer/Current shift", displayString);
-        Logger.recordOutput("Match timer/match state", this.matchState.toString());
+        Logger.recordOutput("Match Timer/Match Time", matchTime);
+        Logger.recordOutput("Match Timer/Shift Time", this.shiftTimeLeft);
+        SmartDashboard.putString("Match Timer/SHIFT TIME LEFT", String.format("%.1f", this.shiftTimeLeft));
+        SmartDashboard.putString("Match Timer/MATCH TIME LEFT", toFormattedTime((int)(140d - this.matchTime)));
+        SmartDashboard.putString("Match Timer/CURRENT SHIFT", displayString);
+        Logger.recordOutput("Match Timer/Match State", this.matchState.toString());
     }
 
     private static String toFormattedTime(int seconds) {

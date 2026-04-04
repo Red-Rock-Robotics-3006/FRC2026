@@ -5,7 +5,9 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
@@ -21,8 +23,8 @@ public class Intake extends SubsystemBase{
     public static final boolean kEnableTuning = true;
 
     private RedRockTalon driveMotor = new RedRockTalon(21, "intake-drive-motor", "*");
-    private RedRockTalon extensionLeftMotor = new RedRockTalon(22, "intake-extension-left-motor", "*");
-    private RedRockTalon extensionRightMotor = new RedRockTalon(23, "intake-extension-right-motor", "*");
+    private RedRockTalon extensionLeftMotor = new RedRockTalon(23, "intake-extension-left-motor", "*");
+    private RedRockTalon extensionRightMotor = new RedRockTalon(24, "intake-extension-right-motor", "*");
 
     private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 1, kEnableTuning && true);
     private SmartDashboardNumber intakePulsateSpeed = new SmartDashboardNumber("intake/drive/pulsate speed", 0.4, kEnableTuning && true);
@@ -76,7 +78,7 @@ public class Intake extends SubsystemBase{
             .withSupplyCurrentLimitEnable(true)
             .withStatorCurrentLimit(80)
             .withStatorCurrentLimitEnable(true)
-        );
+        ).withFollowerMotor(new TalonFX(22, "*"), MotorAlignmentValue.Opposed);
 
         this.extensionLeftMotor.withTuningEnabled(kEnableTuning && true)
         .withMotorOutputConfigs(
@@ -187,7 +189,13 @@ public class Intake extends SubsystemBase{
     }
 
     public Command deployIntakeCommand() {
-        return Commands.runOnce(() -> this.deployIntake(), this);
+        return Commands.parallel(
+            Commands.sequence(
+                Commands.runOnce(() -> this.stopIntake(), this),
+                Commands.runOnce(() -> this.deployIntake(), this)
+            ),
+            Commands.waitSeconds(0.5)
+        );
     }
 
     public Command pushRetractIntakeCommand() {

@@ -14,18 +14,16 @@ public class LED extends SubsystemBase{
     private static LED instance = null;
 
     private AddressableLED control = new AddressableLED(0);
-    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(77); // 118 for three strips
+    private AddressableLEDBuffer buffer = new AddressableLEDBuffer(54);
 
-    // public AddressableLEDBufferView left = buffer.createView(79, 117);
-    public AddressableLEDBufferView left = buffer.createView(76, 39);
-    public AddressableLEDBufferView right = buffer.createView(0, 37);
+    public AddressableLEDBufferView left = buffer.createView(53, 27);
+    public AddressableLEDBufferView right = buffer.createView(0, 26);
 
     private Superstructure superstructure = Superstructure.getInstance();
     
     public final Color INIT_YELLOW = new Color(255, 165, 0);
     public final Color OFF = new Color(0, 0, 0);
     public final Color GREEN = new Color(0, 255, 0);
-    public final Color MAGENTA = new Color(255, 0, 255);
     public final Color NOTE_ORANGE = new Color(255, 30, 0);
     public final Color WHITE = new Color(255, 255, 255);
     public final Color BLUE = new Color(0, 0, 255);
@@ -126,7 +124,7 @@ public class LED extends SubsystemBase{
         larson(right, rightLarsonState, c, speed);
         // larson(back,  backLarsonState,  c);
         // this.buffer.setLED(0, OFF);
-        this.buffer.setLED(38, OFF);
+        // this.buffer.setLED(38, OFF);
     }
 
     public void larson(AddressableLEDBufferView view, LarsonState state, Color c, double speed) {
@@ -170,7 +168,7 @@ public class LED extends SubsystemBase{
         police(right);
         // police(back);
         // this.buffer.setLED(0, OFF);
-        this.buffer.setLED(38, OFF);
+        // this.buffer.setLED(38, OFF);
     }
 
     private void police(AddressableLEDBufferView view) {
@@ -224,8 +222,10 @@ public class LED extends SubsystemBase{
             case TURRET_TRACKING:
                 this.larson(WHITE, 1);
                 break;
+            case REVERSE:
+                this.larson(WHITE, 4);
+                break;
             case IDLE:
-                // this.larson(WHITE, 5);
                 this.rainbow();
                 break;
         }

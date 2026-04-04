@@ -150,7 +150,8 @@ public class Turret extends SubsystemBase{
 
         return absDegrees;
     }
-
+    
+    @SuppressWarnings("unused")
     private double crtDegrees(double e1, double e2) {
         // double e1 = ccoderA.getAbsolutePosition().getValueAsDouble();
         if (e1 < 0) e1 = 1 - e1;
