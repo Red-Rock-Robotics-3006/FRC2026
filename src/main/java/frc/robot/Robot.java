@@ -18,11 +18,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain.DriveState;
+import redrocklib.util.rebuilt.PracticeTimer;
 
 public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
 
     private final RobotContainer m_robotContainer;
+
+    private final PracticeTimer matchTimer;
 
     public static final boolean doReplay = false;
 
@@ -47,6 +50,7 @@ public class Robot extends LoggedRobot {
         Logger.start();
 
         m_robotContainer = new RobotContainer();
+        matchTimer = PracticeTimer.getInstance();
 
         DataLogManager.start();
 
@@ -56,11 +60,13 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
+        matchTimer.update();
     }
 
     @Override
     public void disabledInit() {
         CommandSwerveDrivetrain.getInstance().setDriveState(DriveState.DRIVE_FACING_ANGLE);
+        matchTimer.stop();
     }
 
     @Override
@@ -89,6 +95,8 @@ public class Robot extends LoggedRobot {
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
         }
+
+        matchTimer.reset();
     }
 
     @Override
