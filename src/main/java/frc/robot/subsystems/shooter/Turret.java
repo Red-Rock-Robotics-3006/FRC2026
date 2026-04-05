@@ -212,7 +212,7 @@ public class Turret extends SubsystemBase{
 
     public boolean atTurretAngle() {
         return Math.abs(turretMotor.motor.getPosition().getValueAsDouble() - this.targetTurretPositionMotorRotations)
-            < turretRestrictions.convertOutputByRate(turretTolerance.getNumber());
+            < Math.abs(turretRestrictions.convertOutputByRate(turretTolerance.getNumber()));
     }
 
     public double getTruePositionDegrees() {

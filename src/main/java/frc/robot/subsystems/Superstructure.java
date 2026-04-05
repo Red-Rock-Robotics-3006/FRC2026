@@ -93,7 +93,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     private boolean readyToShoot() {
-        return shooter.atHoodAngle() && shooter.atShooterSpeed();// && turret.atTurretAngle(); //UNCOMMENT ONCE TURRET IS DONE MECHANICALLY AND IS TUNED
+        return shooter.atHoodAngle() && shooter.atShooterSpeed() && turret.atTurretAngle(); //UNCOMMENT ONCE TURRET IS DONE MECHANICALLY AND IS TUNED
     }
 
     private Pose2d dtPose;
