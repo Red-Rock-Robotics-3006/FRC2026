@@ -39,12 +39,12 @@ public class Shooter extends SubsystemBase{
     private RedRockTalon hoodMotor = new RedRockTalon(43, "shooter-hood-motor", "*");
 
     // private EditableShotParameter manualShotParameter = new EditableShotParameter(30, 1000, "shooter/manual shot parameter");
-    private EditableShotParameter lerpShotParameter = new EditableShotParameter(30, 200, "shooter/lerp shot parameter");
-    
+    private EditableShotParameter lerpShotParameter = new EditableShotParameter(17, 2250, "shooter/lerp shot parameter");
+
     private LerpingSmartDashboardNumber hoodRestrictions = 
         new LerpingSmartDashboardNumber(
-            13, 0,
-            50, 10.1,
+            12.5, 0,
+            45, 10.1,
             "shooter/hood/angle-degrees", "shooter/hood/motor-rotations", 
             kEnableShooterTuning && true);
     

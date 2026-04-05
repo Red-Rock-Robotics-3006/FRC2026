@@ -26,7 +26,7 @@ public class Index extends SubsystemBase {
     public static final boolean kEnableTuning = true;
 
     private RedRockTalon dyeRotorMotor = new RedRockTalon(31, "index-dyerotor-motor", "*");
-    private RedRockTalon kickerMotor = new RedRockTalon(32, "index-kicker-motor", "*");
+    // private RedRockTalon kickerMotor = new RedRockTalon(32, "index-kicker-motor", "*");
 
     private Slot1Configs slot1Configs = new Slot1Configs();
 
@@ -34,7 +34,7 @@ public class Index extends SubsystemBase {
     private SmartDashboardNumber indexReverseSpeed = new SmartDashboardNumber("index/index reverse speed", -0.3).withTuningEnabled(true);
     private SmartDashboardNumber dyeRotorJamSpeed = new SmartDashboardNumber("index/index jam speed rps", 10).withTuningEnabled(true);
 
-    private SmartDashboardNumber kickerSpeed = new SmartDashboardNumber("index/kicker speed", 0.6).withTuningEnabled(true);
+    // private SmartDashboardNumber kickerSpeed = new SmartDashboardNumber("index/kicker speed", 0.6).withTuningEnabled(true);
 
     private final double dyeRotorGearRatio = 45.82608144444; // 25 * 44 / 24;
     private SmartDashboardNumber indexSafePosition = new SmartDashboardNumber("index/index safe position", 0).withTuningEnabled(true);
@@ -71,19 +71,19 @@ public class Index extends SubsystemBase {
             .withStatorCurrentLimitEnable(true)
         ).withSpikeThreshold(50);
 
-        this.kickerMotor.withMotorOutputConfigs(
-            new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
-            .withPeakForwardDutyCycle(1d)
-            .withPeakReverseDutyCycle(-1d)
-            .withNeutralMode(NeutralModeValue.Brake)
-        ).withCurrentLimitConfigs(
-            new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(45)
-            .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(80)
-            .withStatorCurrentLimitEnable(true)
-        ).withTuningEnabled(true);
+        // this.kickerMotor.withMotorOutputConfigs(
+        //     new MotorOutputConfigs()
+        //     .withInverted(InvertedValue.Clockwise_Positive)
+        //     .withPeakForwardDutyCycle(1d)
+        //     .withPeakReverseDutyCycle(-1d)
+        //     .withNeutralMode(NeutralModeValue.Brake)
+        // ).withCurrentLimitConfigs(
+        //     new CurrentLimitsConfigs()
+        //     .withSupplyCurrentLimit(45)
+        //     .withSupplyCurrentLimitEnable(true)
+        //     .withStatorCurrentLimit(80)
+        //     .withStatorCurrentLimitEnable(true)
+        // ).withTuningEnabled(true);
 
         slot1Configs
             .withKA(0)
@@ -104,7 +104,7 @@ public class Index extends SubsystemBase {
 
     public void startIndex() {
         // this.setIndexSpeed(indexSpeed.getNumber());
-        this.setKickerSpeed(kickerSpeed.getNumber());
+        // this.setKickerSpeed(kickerSpeed.getNumber());
         this.setIndexSpeed(indexSpeed.getNumber());
 
     }
@@ -115,20 +115,20 @@ public class Index extends SubsystemBase {
 
     public void stopIndex() {
         this.dyeRotorMotor.motor.setControl(new NeutralOut());
-        this.setKickerSpeed(0);
+        // this.setKickerSpeed(0);
     }
 
-    private void setKickerSpeed(double speed) {
-        this.kickerMotor.motor.setControl(new DutyCycleOut(speed));
-    }
+    // private void setKickerSpeed(double speed) {
+    //     this.kickerMotor.motor.setControl(new DutyCycleOut(speed));
+    // }
 
-    public void startKicker() {
-        this.setKickerSpeed(kickerSpeed.getNumber());
-    }
+    // public void startKicker() {
+    //     this.setKickerSpeed(kickerSpeed.getNumber());
+    // }
 
-    public void stopKicker() {
-        this.setKickerSpeed(0);
-    }
+    // public void stopKicker() {
+    //     this.setKickerSpeed(0);
+    // }
 
     public boolean isJamming() {
         return this.dyeRotorMotor.aboveSpikeThreshold() && this.dyeRotorMotor.motor.getVelocity().getValueAsDouble() < dyeRotorJamSpeed.getNumber();
@@ -177,8 +177,8 @@ public class Index extends SubsystemBase {
 
     public Command startIndexCommand() {
         return Commands.sequence(
-            Commands.runOnce(() -> this.startIndex(), this),
-            Commands.runOnce(() -> this.startKicker())
+            Commands.runOnce(() -> this.startIndex(), this)//,
+            // Commands.runOnce(() -> this.startKicker())
         );
     }
 
@@ -188,8 +188,8 @@ public class Index extends SubsystemBase {
 
     public Command stopIndexCommand() {
         return Commands.sequence(
-            Commands.runOnce(() -> this.stopIndex(), this),
-            Commands.runOnce(() -> this.stopKicker())
+            Commands.runOnce(() -> this.stopIndex(), this)//,
+            // Commands.runOnce(() -> this.stopKicker())
         );
     }
 
