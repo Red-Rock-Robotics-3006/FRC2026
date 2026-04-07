@@ -95,7 +95,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     private boolean readyToShoot() {
-        return shooter.atHoodAngle() && shooter.atShooterSpeed() && turret.atTurretAngle(); //UNCOMMENT ONCE TURRET IS DONE MECHANICALLY AND IS TUNED
+        return shooter.atHoodAngle() && shooter.atShooterSpeed() && turret.atTurretAngle();
     }
 
     private Pose2d dtPose;
@@ -177,6 +177,7 @@ public class Superstructure extends SubsystemBase {
                 -dtRotationTurretOffsetCoeff.getNumber() * 
                 Math.toDegrees(state.Speeds.omegaRadiansPerSecond)
             );
+        
 
         switch (robotState) {
             case MANUAL_SHOT:
