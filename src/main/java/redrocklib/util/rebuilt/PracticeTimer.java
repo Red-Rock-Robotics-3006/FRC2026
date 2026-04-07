@@ -98,6 +98,10 @@ public class PracticeTimer {
         SmartDashboard.putString("Match Timer/SHIFT TIME LEFT", String.format("%.1f", this.shiftTimeLeft));
         SmartDashboard.putString("Match Timer/MATCH TIME LEFT", toFormattedTime((int)(140d - this.matchTime)));
         SmartDashboard.putString("Match Timer/CURRENT SHIFT", displayString);
+        SmartDashboard.putNumber("Match Timer/Headphone Counter/shift-time-int", (int)this.shiftTimeLeft);
+        SmartDashboard.putString("Match Timer/Headphone Counter/Match state", this.matchState.toString());
+        SmartDashboard.putBoolean("Match Timer/Headphone Counter/disabled", DriverStation.isDisabled());
+        SmartDashboard.putBoolean("Match Timer/Headphone Counter/auto won", wonAuto);
         Logger.recordOutput("Match Timer/Match State", this.matchState.toString());
     }
 
