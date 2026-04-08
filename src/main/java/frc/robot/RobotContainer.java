@@ -67,7 +67,7 @@ public class RobotContainer {
 
     private void configureCompBindings() {
         RobotModeTriggers.disabled().onTrue(superstructure.setStateCommand(RobotState.IDLE).ignoringDisable(true));
-        RobotModeTriggers.teleop().onTrue(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+        RobotModeTriggers.teleop().onTrue(superstructure.setStateCommand(RobotState.IDLE));
 
         driverstick.back()
             .onTrue(drivetrain.resetHeadingCommand());
@@ -99,20 +99,20 @@ public class RobotContainer {
                 superstructure.setStateCommand(RobotState.IDLE),
                 superstructure.intake.deployIntakeCommand()));
 
-        driverstick.x()
-            .onTrue(superstructure.resetSuperStructure())
-            .onFalse(Commands.runOnce(() -> drivetrain.disableIgnoreCameraDistance(), drivetrain));
+        // driverstick.x()
+        //     .onTrue(superstructure.resetSuperStructure())
+        //     .onFalse(Commands.runOnce(() -> drivetrain.disableIgnoreCameraDistance(), drivetrain));
 
         driverstick.y()
             .onTrue(superstructure.setStateCommand(RobotState.REVERSE))
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
             
-        driverstick.a()
-            .onTrue(superstructure.intake.reverseIntakeCommand())
-            .onFalse(superstructure.intake.stopIntakeCommand());
+        // driverstick.a()
+        //     .onTrue(superstructure.intake.reverseIntakeCommand())
+        //     .onFalse(superstructure.intake.stopIntakeCommand());
 
-        driverstick.b()
-            .onTrue(superstructure.setStateCommand(RobotState.IDLE));
+        // driverstick.b()
+        //     .onTrue(superstructure.setStateCommand(RobotState.IDLE));
 
         // driverstick.povUp() //left paddle
         //     .onTrue(Commands.sequence(
@@ -151,9 +151,9 @@ public class RobotContainer {
 
     @SuppressWarnings("unused")
     private void configureTestBindings() {
-        // driverstick.x() //manual lerp tuning shot
-        //     .onTrue(superstructure.setLerpTuneParameterCommand())
-        //     .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
+        driverstick.x() //manual lerp tuning shot
+            .onTrue(superstructure.setLerpTuneParameterCommand())
+            .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
 
         // driverstick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
         //     .onTrue(led.togglePoliceCommand());
@@ -161,11 +161,14 @@ public class RobotContainer {
         // driverstick.a()
         //     .onTrue(Commands.runOnce(() -> superstructure.intake.pushRetractIntake()));
 
-        // driverstick.a()
-        //     .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosA()));
+        driverstick.a()
+            .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosA()));
 
         // driverstick.b()
         //     .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningPosB()));
+
+        driverstick.b()
+            .onTrue(Commands.runOnce(() -> superstructure.turret.setTuningRotation()));
     }
 
     // private void configureSysIDBindings() {

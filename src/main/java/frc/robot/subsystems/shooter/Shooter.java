@@ -44,7 +44,7 @@ public class Shooter extends SubsystemBase{
     private LerpingSmartDashboardNumber hoodRestrictions = 
         new LerpingSmartDashboardNumber(
             12.5, 0,
-            45, 10.1,
+            45, 6.6884765625,
             "shooter/hood/angle-degrees", "shooter/hood/motor-rotations", 
             kEnableShooterTuning && true);
     
@@ -61,8 +61,8 @@ public class Shooter extends SubsystemBase{
             new Slot0Configs()
             .withKA(0)
             .withKS(0.25)
-            .withKV(0.127)
-            .withKP(0.45)
+            .withKV(0.1275)
+            .withKP(0.5)
             .withKI(0)
             .withKD(0)
         ).withFollowerMotor(new TalonFX(42, "*"), MotorAlignmentValue.Opposed);
@@ -73,21 +73,22 @@ public class Shooter extends SubsystemBase{
             .withPeakForwardDutyCycle(1)
             .withPeakReverseDutyCycle(-1)
             .withNeutralMode(NeutralModeValue.Brake)
-            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withInverted(InvertedValue.Clockwise_Positive)
         ).withSlot0Configs(
             new Slot0Configs()
             .withKA(0)
             .withKS(0)
             .withKV(0)
-            .withKP(3)
+            .withKP(3.75)
             .withKI(0)
             .withKD(0)
+            .withKG(0.109)
             .withGravityType(GravityTypeValue.Elevator_Static)
         ).withMotionMagicConfigs(
             new MotionMagicConfigs()
-                .withMotionMagicAcceleration(1900)
-                .withMotionMagicCruiseVelocity(50)
-                .withMotionMagicJerk(9999)
+                .withMotionMagicAcceleration(0)
+                .withMotionMagicCruiseVelocity(0)
+                .withMotionMagicJerk(0)
         ).withResetSpeed(-0.2);
 
         hoodMotor.resetMotor();

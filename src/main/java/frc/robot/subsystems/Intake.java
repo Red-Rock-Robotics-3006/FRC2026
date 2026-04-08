@@ -45,16 +45,21 @@ public class Intake extends SubsystemBase{
 
         Slot0Configs slot0COnfigs = new Slot0Configs()
             .withKA(0)
-            .withKS(0.52)
+            .withKS(0)
+            // .withKS(0.52)
             .withKV(0)
-            .withKP(9.5)
+            .withKP(0)
+            // .withKP(9.5)
             .withKI(0)
             .withKD(0);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-            .withMotionMagicAcceleration(700)
-            .withMotionMagicCruiseVelocity(250)
-            .withMotionMagicJerk(10000000);
+            // .withMotionMagicAcceleration(700)
+            // .withMotionMagicCruiseVelocity(250)
+            // .withMotionMagicJerk(10000000);
+            .withMotionMagicAcceleration(0)
+            .withMotionMagicCruiseVelocity(0)
+            .withMotionMagicJerk(0);
 
         CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(45)
