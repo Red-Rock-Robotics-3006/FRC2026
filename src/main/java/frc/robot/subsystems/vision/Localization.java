@@ -88,35 +88,47 @@ public class Localization extends SubsystemBase{
     private Localization() {
         super("localization");
 
-        //thriftycam on right side (loom retractor)
-        cameras.add(new RedRockCamera("Photon-Rubik-Everything")
+        //thriftycam on right side
+        cameras.add(new RedRockCamera("Everything")
             .withRobotToCameraTransform(
                 new Transform3d(
-                    new Translation3d(Units.inchesToMeters(-11.376042), Units.inchesToMeters(-2.325621), Units.inchesToMeters(7.979991)),
+                    new Translation3d(Units.inchesToMeters(-9.150000), Units.inchesToMeters(-14.052404), Units.inchesToMeters(8.503539)),
                     new Rotation3d()
                         .rotateBy(new Rotation3d(0, Math.toRadians(-33.2), 0)) //pitch
-                        .rotateBy(new Rotation3d(Rotation2d.fromDegrees(-155))) //yaw
+                        .rotateBy(new Rotation3d(Rotation2d.fromDegrees(-90))) //yaw
                     )
             )
         );
 
-        //thriftycam on left side (breaker)
-        cameras.add(new RedRockCamera("Photon-Rubik-Nothing") 
+        //thriftycam on back
+        cameras.add(new RedRockCamera("Something")
             .withRobotToCameraTransform(
                 new Transform3d(
-                    new Translation3d(Units.inchesToMeters(-11.417663), Units.inchesToMeters(4.293691), Units.inchesToMeters(12.979991)),
+                    new Translation3d(Units.inchesToMeters(-11.612985), Units.inchesToMeters(-5.750000), Units.inchesToMeters(7.167866)),
                     new Rotation3d()
                         .rotateBy(new Rotation3d(0, Math.toRadians(-33.2), 0)) //pitch
-                        .rotateBy(new Rotation3d(Rotation2d.fromDegrees(150))) //yaw
+                        .rotateBy(new Rotation3d(Rotation2d.fromDegrees(180))) //yaw    
+                    )
+            )
+        );
+
+        //thriftycam on left side
+        cameras.add(new RedRockCamera("Nothing") 
+            .withRobotToCameraTransform(
+                new Transform3d(
+                    new Translation3d(Units.inchesToMeters(-9.150000), Units.inchesToMeters(14.052404), Units.inchesToMeters(8.503539)),
+                    new Rotation3d()
+                        .rotateBy(new Rotation3d(0, Math.toRadians(-33.2), 0)) //pitch
+                        .rotateBy(new Rotation3d(Rotation2d.fromDegrees(90))) //yaw
                 )
             )
         );
 
-        //limelight 3g on turret
-        cameras.add(new RedRockCamera("Photon-Booger")
+        //thriftycam on turret
+        cameras.add(new RedRockCamera("Good")
             .withRobotToCameraTransform(
                 new Transform3d(
-                    new Translation3d(Units.inchesToMeters(7.053), Units.inchesToMeters(0), Units.inchesToMeters(19.212751)),
+                    new Translation3d(Units.inchesToMeters(6.576997), Units.inchesToMeters(0), Units.inchesToMeters(20.513622)),
                     new Rotation3d(0, Math.toRadians(-28), 0)
                 )
             )
