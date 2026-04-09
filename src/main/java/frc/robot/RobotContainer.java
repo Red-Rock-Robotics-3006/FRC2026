@@ -22,7 +22,7 @@ public class RobotContainer {
     private final CommandXboxController driverstick = new CommandXboxController(0);
     private final CommandXboxController operatorstick = new CommandXboxController(1);
 
-    private final double kTriggerThreshold = 0.1;
+    public static final double kTriggerThreshold = 0.1;
 
     public final CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance().withController(driverstick);
     private final Superstructure superstructure = Superstructure.getInstance();
