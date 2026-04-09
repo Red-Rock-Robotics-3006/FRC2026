@@ -211,7 +211,7 @@ public class LED extends SubsystemBase{
                 this.blink(GREEN, 10);
                 break;
             case SHOOTING_JAMMED:
-                this.blink(NOTE_ORANGE, 5);
+                this.blinkHard(RED, 12);
                 break;
             case SHOOTING:
                 this.blink(GREEN, 5);
@@ -225,7 +225,7 @@ public class LED extends SubsystemBase{
             case REVERSE:
                 this.larson(WHITE, 4);
                 break;
-            case IDLE:
+            default:
                 this.rainbow();
                 break;
         }

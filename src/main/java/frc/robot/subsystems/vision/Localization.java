@@ -20,7 +20,7 @@ import frc.robot.subsystems.shooter.autoaim.SOTMCalcs;
 public class Localization extends SubsystemBase{
     private static Localization instance = null;
 
-    public static final int kTurretLLIndex = 2;
+    public static final int kTurretLLIndex = 3;
 
     public static final Pose2d blueHub = new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84), Rotation2d.fromDegrees(0));
     public static final Pose2d redHub = new Pose2d(Units.inchesToMeters(469.11), Units.inchesToMeters(158.84), Rotation2d.fromDegrees(0));

@@ -46,11 +46,12 @@ public class Superstructure extends SubsystemBase {
     private SmartDashboardNumber trenchZoneTolerance = new SmartDashboardNumber("superstructure/trench zone tolerance", 0.5, kTuning); //tolerance for hood near trench, probably best to be generous with this one
     private SmartDashboardBoolean trenchSafetyEnabled = new SmartDashboardBoolean("superstructure/trench safety enabled", true);
 
-    private SmartDashboardNumber autoAimOffsetRPM = new SmartDashboardNumber("superstructure/auto aim offset", 0);
-    private final ShotParameter SHOOTER_IDLE_PARAMETER = new ShotParameter(13, 0);
-    private final ShotParameter SHOOTER_REVERSE_PARAMETER = new ShotParameter(13, -700);
+    private SmartDashboardNumber autoAimOffsetRPM = new SmartDashboardNumber("superstructure/auto aim offset rpm", 0);
+    private SmartDashboardNumber autoAimOffsetHood = new SmartDashboardNumber("superstructure/auto aim offset hood", 0);
+    private final ShotParameter SHOOTER_IDLE_PARAMETER = new ShotParameter(12.7, 0);
+    private final ShotParameter SHOOTER_REVERSE_PARAMETER = new ShotParameter(12.7, -700);
 
-    private SmartDashboardNumber dtRotationTurretOffsetCoeff = new SmartDashboardNumber("sotm/rotation fudge factor", 0.11);
+    private SmartDashboardNumber dtRotationTurretOffsetCoeff = new SmartDashboardNumber("sotm/rotation fudge factor", 0.1);
 
     private Field2d field2d = new Field2d();
     private FieldObject2d fieldObject2d = field2d.getObject("poses");
@@ -64,11 +65,13 @@ public class Superstructure extends SubsystemBase {
         MANUAL_SHOT, //any manual shot, flywheels spinning, turret at set angle, hood at set angle
         LERP_TUNING, //for tuning the lerp table (prob dont need this state for comp), turret tracking, hood at set angle, flywheels at set rpm
 
+        NEAR_TRENCH,
         REVERSE, //index reversing, flywheels reversing
         IDLE //mechanisms all idle
     }
 
     private RobotState robotState = RobotState.IDLE;
+    private RobotState lastState = RobotState.IDLE;
 
     private Superstructure() {
         super("Superstructure");
@@ -161,8 +164,8 @@ public class Superstructure extends SubsystemBase {
             HubInterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm()) :
             LobInterpolatingTable.get(shooterPose.minus(dynamicTargetPose).getTranslation().getNorm());
         
-        dynamicShotParameter = new ShotParameter(dynamicShotParameter.pivotAngleDeg, dynamicShotParameter.rpm + autoAimOffsetRPM.getNumber());
-            
+        dynamicShotParameter = new ShotParameter(dynamicShotParameter.pivotAngleDeg + autoAimOffsetHood.getNumber(), dynamicShotParameter.rpm + autoAimOffsetRPM.getNumber());
+
         // ACTUAL TURRET ANGLE FOR ADJUSTED SOTM POSE
         Rotation2d turretTargetAngle = 
             Rotation2d.fromRadians(
@@ -188,15 +191,21 @@ public class Superstructure extends SubsystemBase {
                 turret.setTurretAngle(turretTargetAngle.plus(dtTurretCompensation));
                 if (readyToShoot()) index.startIndex();
                 break;
+            case NEAR_TRENCH:
+                if (!nearTrench() && trenchSafetyEnabled.getValue()) {
+                    if (lastState == RobotState.SHOOTING) setState(RobotState.FULL_TRACKING);
+                    setState(lastState);
+                }
+                break;
             case SHOOTING_JAMMED:
                 if (!index.isJamming()) setState(RobotState.SHOOTING);
             case SHOOTING:
                 if (!turret.atTurretAngle()) setState(RobotState.FULL_TRACKING);
-                if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
             case FULL_TRACKING:
+                if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
                 if (!inAllianceZone() && !inLobEnabledZone()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
                 else {shooter.setShotParameter(dynamicShotParameter);}
-                if (readyToShoot()) setState(RobotState.SHOOTING);
+                if (this.robotState != RobotState.SHOOTING_JAMMED && this.readyToShoot()) setState(RobotState.SHOOTING);
             case TURRET_TRACKING:
                 turret.setTurretAngle(turretTargetAngle.plus(dtTurretCompensation));
                 break;
@@ -206,12 +215,13 @@ public class Superstructure extends SubsystemBase {
                 break;
         }
 
-        if (nearTrench() && trenchSafetyEnabled.getValue()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
+        if (this.robotState != RobotState.NEAR_TRENCH && nearTrench() && trenchSafetyEnabled.getValue()) {setState(RobotState.NEAR_TRENCH);}
 
 
         // SMARTDASHBOARD LOGGING | COMPETITION
 
         SmartDashboard.putString("ROBOT STATE", this.robotState.toString());
+        SmartDashboard.putString("LAST STATE", this.lastState.toString());
         SmartDashboard.putBoolean("superstructure/ready to shoot", this.readyToShoot());
         SmartDashboard.putBoolean("superstructure/in alliance zone", inAllianceZone());
             
@@ -254,6 +264,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public void setState(RobotState state) {
+        this.lastState = this.robotState;
         if (state == RobotState.FULL_TRACKING || state == RobotState.SHOOTING) drivetrain.enableSpeedLimiter();
         else drivetrain.disableSpeedLimiter();
         switch (state) {
@@ -275,6 +286,10 @@ public class Superstructure extends SubsystemBase {
             case REVERSE:
                 index.reverseIndex();
                 shooter.setShotParameter(SHOOTER_REVERSE_PARAMETER);
+                break;
+            case NEAR_TRENCH:
+                index.stopIndex();
+                shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);
                 break;
             default:
                 break;
@@ -334,12 +349,28 @@ public class Superstructure extends SubsystemBase {
         this.autoAimOffsetRPM.putNumber(this.autoAimOffsetRPM.getNumber() - 25);
     }
 
-    public Command increaseAutoAimOffsetCommand() {
+    public void increaseAutoAimHoodOffset() {
+        this.autoAimOffsetHood.putNumber(this.autoAimOffsetHood.getNumber() + 1);
+    }
+
+    public void decreaseAutoAimHoodOffset() {
+        this.autoAimOffsetHood.putNumber(this.autoAimOffsetHood.getNumber() - 1);
+    }
+
+    public Command increaseAutoAimRPMOffsetCommand() {
         return Commands.runOnce(() -> increaseAutoAimRPMOffset());
     }
 
-    public Command decreaseAutoAimOffsetCommand() {
+    public Command decreaseAutoAimRPMOffsetCommand() {
         return Commands.runOnce(() -> decreaseAutoAimRPMOffset());
+    }
+
+    public Command increaseAutoAimHoodOffsetCommand() {
+        return Commands.runOnce(() -> increaseAutoAimHoodOffset());
+    }
+
+    public Command decreaseAutoAimHoodOffsetCommand() {
+        return Commands.runOnce(() -> decreaseAutoAimHoodOffset());
     }
 
     public static Superstructure getInstance() {

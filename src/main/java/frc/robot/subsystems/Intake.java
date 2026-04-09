@@ -5,9 +5,9 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.hardware.TalonFX;
+// import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
+// import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
@@ -23,8 +23,8 @@ public class Intake extends SubsystemBase{
     public static final boolean kEnableTuning = true;
 
     private RedRockTalon driveMotor = new RedRockTalon(21, "intake-drive-motor", "*");
-    private RedRockTalon extensionLeftMotor = new RedRockTalon(23, "intake-extension-left-motor", "*");
-    private RedRockTalon extensionRightMotor = new RedRockTalon(24, "intake-extension-right-motor", "*");
+    private RedRockTalon extensionLeftMotor = new RedRockTalon(22, "intake-extension-left-motor", "*");
+    private RedRockTalon extensionRightMotor = new RedRockTalon(23, "intake-extension-right-motor", "*");
 
     private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 1, kEnableTuning && true);
     private SmartDashboardNumber intakePulsateSpeed = new SmartDashboardNumber("intake/drive/pulsate speed", 0.4, kEnableTuning && true);
@@ -45,21 +45,21 @@ public class Intake extends SubsystemBase{
 
         Slot0Configs slot0COnfigs = new Slot0Configs()
             .withKA(0)
-            .withKS(0)
-            // .withKS(0.52)
+            // .withKS(0)
+            .withKS(0.52)
             .withKV(0)
-            .withKP(0)
-            // .withKP(9.5)
+            // .withKP(0)
+            .withKP(9.5)
             .withKI(0)
             .withKD(0);
 
         MotionMagicConfigs motionMagicConfigs = new MotionMagicConfigs()
-            // .withMotionMagicAcceleration(700)
-            // .withMotionMagicCruiseVelocity(250)
-            // .withMotionMagicJerk(10000000);
-            .withMotionMagicAcceleration(0)
-            .withMotionMagicCruiseVelocity(0)
-            .withMotionMagicJerk(0);
+            .withMotionMagicAcceleration(700)
+            .withMotionMagicCruiseVelocity(250)
+            .withMotionMagicJerk(10000000);
+            // .withMotionMagicAcceleration(0)
+            // .withMotionMagicCruiseVelocity(0)
+            // .withMotionMagicJerk(0);
 
         CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(45)
@@ -82,8 +82,8 @@ public class Intake extends SubsystemBase{
             .withSupplyCurrentLimit(45)
             .withSupplyCurrentLimitEnable(true)
             .withStatorCurrentLimit(80)
-            .withStatorCurrentLimitEnable(true)
-        ).withFollowerMotor(new TalonFX(22, "*"), MotorAlignmentValue.Opposed);
+            .withStatorCurrentLimitEnable(true));
+        // ).withFollowerMotor(new TalonFX(22, "*"), MotorAlignmentValue.Opposed);
 
         this.extensionLeftMotor.withTuningEnabled(kEnableTuning && true)
         .withMotorOutputConfigs(
@@ -199,7 +199,7 @@ public class Intake extends SubsystemBase{
                 Commands.runOnce(() -> this.stopIntake(), this),
                 Commands.runOnce(() -> this.deployIntake(), this)
             ),
-            Commands.waitSeconds(0.5)
+            Commands.waitSeconds(0.1)
         );
     }
 
@@ -217,6 +217,13 @@ public class Intake extends SubsystemBase{
             Commands.runOnce(() -> this.pushDeployIntake(), this),
             Commands.waitUntil(() -> this.atTargetPosition())
         ).repeatedly();
+    }
+
+    public Command shootRaiseHopperCommand() {
+        return Commands.sequence(
+            Commands.runOnce(() -> this.startPulsateIntake()),
+            Commands.runOnce(() -> this.pushRetractIntake(), this)
+        );
     }
 
     public Command resetIntakeExtensionCommand() {

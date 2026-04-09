@@ -56,7 +56,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private Alliance alliance = Alliance.Blue;
 
-    private boolean ignoreCameraPoseDistance = false;
+    private boolean ignoreCameraPoseDistance = true;
 
     private CommandXboxController controller;
 
@@ -432,9 +432,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         for (RRPoseEstimate estimate : Localization.getPoseEstimates()) {
             if (estimate.pose.equals(new Pose2d())) continue;
-            if (estimate.pose.getTranslation().getDistance(this.getPose().getTranslation()) > poseMaxDistance.getNumber() 
-                && !DriverStation.isDisabled() 
-                && !ignoreCameraPoseDistance) 
+            if (!ignoreCameraPoseDistance && estimate.pose.getTranslation().getDistance(this.getPose().getTranslation()) > poseMaxDistance.getNumber() 
+                && !DriverStation.isDisabled()) 
                 continue;
             this.addVisionMeasurement(estimate.pose, estimate.timeStamp, estimate.stdvs);
         }
@@ -547,7 +546,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void disableIgnoreCameraDistance() {
-        this.ignoreCameraPoseDistance = false;
+        // this.ignoreCameraPoseDistance = false;
+        this.ignoreCameraPoseDistance = true;
     }
 
     public void enableVision() {

@@ -72,7 +72,7 @@ public class Turret extends SubsystemBase{
             .withInverted(InvertedValue.Clockwise_Positive)
         ).withSlot0Configs(
             new Slot0Configs()
-            .withKP(10.5)
+            .withKP(6.1)
             .withKS(0.22)
         ).withMotionMagicConfigs(
             new MotionMagicConfigs()

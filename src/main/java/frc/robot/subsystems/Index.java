@@ -32,7 +32,7 @@ public class Index extends SubsystemBase {
 
     private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 1).withTuningEnabled(true); //SHOULD BE RPM FOR MM VELOCITY VOLTAGE
     private SmartDashboardNumber indexReverseSpeed = new SmartDashboardNumber("index/index reverse speed", -0.3).withTuningEnabled(true);
-    private SmartDashboardNumber dyeRotorJamSpeed = new SmartDashboardNumber("index/index jam speed rps", 10).withTuningEnabled(true);
+    // private SmartDashboardNumber dyeRotorJamSpeed = new SmartDashboardNumber("index/index jam speed rps", 10).withTuningEnabled(true);
 
     // private SmartDashboardNumber kickerSpeed = new SmartDashboardNumber("index/kicker speed", 0.6).withTuningEnabled(true);
 
@@ -69,7 +69,7 @@ public class Index extends SubsystemBase {
             .withSupplyCurrentLimitEnable(true)
             .withStatorCurrentLimit(80)
             .withStatorCurrentLimitEnable(true)
-        ).withSpikeThreshold(50);
+        ).withSpikeThreshold(77);
 
         // this.kickerMotor.withMotorOutputConfigs(
         //     new MotorOutputConfigs()
@@ -131,7 +131,7 @@ public class Index extends SubsystemBase {
     // }
 
     public boolean isJamming() {
-        return this.dyeRotorMotor.aboveSpikeThreshold() && this.dyeRotorMotor.motor.getVelocity().getValueAsDouble() < dyeRotorJamSpeed.getNumber();
+        return this.dyeRotorMotor.aboveSpikeThreshold(); //&& this.dyeRotorMotor.motor.getVelocity().getValueAsDouble() < dyeRotorJamSpeed.getNumber();
     }
 
     public void khangaiIsAChud() {
