@@ -35,6 +35,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.shooter.autoaim.SOTMCalcs;
 import frc.robot.subsystems.swerve.generated.TunerConstants;
 import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrain;
@@ -611,7 +612,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         double pidToPoseMax = pidToPoseMaxVelo.getNumber(); 
 
-        if (driveLimiterEnabled) {
+        if (driveLimiterEnabled || Math.abs(controller.getRightTriggerAxis()) > RobotContainer.kTriggerThreshold) {
             if (Math.abs(rawX) < drivingDeadBand.getNumber()) {
                 requestedXSpeed = 0;
                 driveSlewRateLimiterX.reset(0);
