@@ -14,6 +14,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
+// import choreo.auto.AutoTrajectory;
 import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.MathUtil;
 // import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -737,6 +738,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
         );
     }
+
+    // public Command followTrajectoryLeft(String pathName) {
+    //     return Commands.sequence(
+    //         this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
+    //         this.factory.resetOdometry(pathName),
+    //         this.factory.trajectoryCmd(pathName, AutoTrajectory::mirrorY),
+    //         this.setTargetHeadingToCurrentHeadingCommand(),
+    //         this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
+    //     );
+    // }
 
     public Command followTrajectory(String pathName, int index) {
         return Commands.sequence(
