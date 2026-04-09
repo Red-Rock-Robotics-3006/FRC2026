@@ -48,6 +48,7 @@ public class Superstructure extends SubsystemBase {
 
     private SmartDashboardNumber autoAimOffsetRPM = new SmartDashboardNumber("superstructure/auto aim offset rpm", 0);
     private SmartDashboardNumber autoAimOffsetHood = new SmartDashboardNumber("superstructure/auto aim offset hood", 0);
+
     private final ShotParameter SHOOTER_IDLE_PARAMETER = new ShotParameter(12.7, 0);
     private final ShotParameter SHOOTER_REVERSE_PARAMETER = new ShotParameter(12.7, -700);
 
@@ -62,12 +63,12 @@ public class Superstructure extends SubsystemBase {
         SHOOTING, //index spinning, flywheels spinning, hood tracking, turret tracking
         SHOOTING_JAMMED, //index jammed, flywheels spinning, hood tracking, turret tracking
 
-        MANUAL_SHOT, //any manual shot, flywheels spinning, turret at set angle, hood at set angle
-        LERP_TUNING, //for tuning the lerp table (prob dont need this state for comp), turret tracking, hood at set angle, flywheels at set rpm
+        MANUAL_SHOT, //any manual shot, turret at set angle, hood at set angle, flywheels at set rpm
+        LERP_TUNING, //for tuning lerp tables, turret tracking, hood at set angle, flywheels at set rpm
 
-        NEAR_TRENCH,
+        NEAR_TRENCH, //robot near trench, all mechanisms idle
         REVERSE, //index reversing, flywheels reversing
-        IDLE //mechanisms all idle
+        IDLE //all mechanisms idle
     }
 
     private RobotState robotState = RobotState.IDLE;

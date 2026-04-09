@@ -110,18 +110,6 @@ public class RobotContainer {
         driverstick.b()
             .onTrue(superstructure.setStateCommand(RobotState.IDLE));
 
-        // driverstick.povUp() //left paddle
-        //     .onTrue(Commands.sequence(
-        //         superstructure.intake.pushRetractIntakeCommand(),
-        //         climber.raiseClimberCommand()))
-        //     .onFalse(climber.stopClimberCommand());
-
-        // driverstick.povDown() //right paddle
-        //     .onTrue(Commands.sequence(
-        //         superstructure.intake.pushRetractIntakeCommand(),
-        //         climber.lowerClimberCommand()))
-        //     .onFalse(climber.stopClimberCommand());
-
         driverstick.povLeft()
             .onTrue(superstructure.intake.pushRetractIntakeCommand());
             
@@ -134,10 +122,6 @@ public class RobotContainer {
         operatorstick.a()
             .onTrue(superstructure.decreaseAutoAimRPMOffsetCommand());
 
-        operatorstick.x()
-            .onTrue(Commands.runOnce(() -> drivetrain.enableIgnoreCameraDistance(), drivetrain))
-            .onFalse(Commands.runOnce(() -> drivetrain.disableIgnoreCameraDistance(), drivetrain));
-
         operatorstick.b()
             .onTrue(superstructure.toggleTrenchSafetyCommand());
 
@@ -149,6 +133,21 @@ public class RobotContainer {
 
         operatorstick.povDown()
             .onTrue(superstructure.decreaseAutoAimHoodOffsetCommand());
+
+        operatorstick.leftStick()
+            .onTrue(led.togglePoliceCommand());
+
+        // driverstick.povUp() //left paddle
+        //     .onTrue(Commands.sequence(
+        //         superstructure.intake.pushRetractIntakeCommand(),
+        //         climber.raiseClimberCommand()))
+        //     .onFalse(climber.stopClimberCommand());
+
+        // driverstick.povDown() //right paddle
+        //     .onTrue(Commands.sequence(
+        //         superstructure.intake.pushRetractIntakeCommand(),
+        //         climber.lowerClimberCommand()))
+        //     .onFalse(climber.stopClimberCommand());
     }
 
     @SuppressWarnings("unused")
@@ -156,9 +155,6 @@ public class RobotContainer {
         // driverstick.x() //manual lerp tuning shot
         //     .onTrue(superstructure.setLerpTuneParameterCommand())
         //     .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
-
-        // driverstick.povLeft() //definitely delete this for comp lol (it'll look cool during practice tho)
-        //     .onTrue(led.togglePoliceCommand());
 
         // driverstick.a()
         //     .onTrue(Commands.runOnce(() -> superstructure.intake.pushRetractIntake()));

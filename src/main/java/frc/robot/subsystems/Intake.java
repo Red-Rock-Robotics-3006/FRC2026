@@ -199,7 +199,7 @@ public class Intake extends SubsystemBase{
                 Commands.runOnce(() -> this.stopIntake(), this),
                 Commands.runOnce(() -> this.deployIntake(), this)
             ),
-            Commands.waitSeconds(0.1)
+            Commands.waitSeconds(0.075)
         );
     }
 

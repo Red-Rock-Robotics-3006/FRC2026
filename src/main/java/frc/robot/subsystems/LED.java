@@ -24,7 +24,6 @@ public class LED extends SubsystemBase{
     public final Color INIT_YELLOW = new Color(255, 165, 0);
     public final Color OFF = new Color(0, 0, 0);
     public final Color GREEN = new Color(0, 255, 0);
-    public final Color NOTE_ORANGE = new Color(255, 30, 0);
     public final Color WHITE = new Color(255, 255, 255);
     public final Color BLUE = new Color(0, 0, 255);
     public final Color RED = new Color(255, 0, 0);
@@ -117,14 +116,10 @@ public class LED extends SubsystemBase{
 
     private final LarsonState leftLarsonState  = new LarsonState();
     private final LarsonState rightLarsonState = new LarsonState();
-    // private final LarsonState backLarsonState  = new LarsonState();
 
     public void larson(Color c, double speed) {
         larson(left,  leftLarsonState,  c, speed);
         larson(right, rightLarsonState, c, speed);
-        // larson(back,  backLarsonState,  c);
-        // this.buffer.setLED(0, OFF);
-        // this.buffer.setLED(38, OFF);
     }
 
     public void larson(AddressableLEDBufferView view, LarsonState state, Color c, double speed) {
@@ -166,9 +161,6 @@ public class LED extends SubsystemBase{
     private void police() {
         police(left);
         police(right);
-        // police(back);
-        // this.buffer.setLED(0, OFF);
-        // this.buffer.setLED(38, OFF);
     }
 
     private void police(AddressableLEDBufferView view) {
@@ -208,7 +200,7 @@ public class LED extends SubsystemBase{
                 this.blink(BLUE, 5);
                 break;
             case LERP_TUNING:
-                this.blink(GREEN, 10);
+                this.setLights(BLUE);
                 break;
             case SHOOTING_JAMMED:
                 this.blinkHard(RED, 12);

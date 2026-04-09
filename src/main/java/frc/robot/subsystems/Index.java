@@ -30,13 +30,13 @@ public class Index extends SubsystemBase {
 
     private Slot1Configs slot1Configs = new Slot1Configs();
 
-    private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 1).withTuningEnabled(true); //SHOULD BE RPM FOR MM VELOCITY VOLTAGE
+    private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 1).withTuningEnabled(true);
     private SmartDashboardNumber indexReverseSpeed = new SmartDashboardNumber("index/index reverse speed", -0.3).withTuningEnabled(true);
     // private SmartDashboardNumber dyeRotorJamSpeed = new SmartDashboardNumber("index/index jam speed rps", 10).withTuningEnabled(true);
 
     // private SmartDashboardNumber kickerSpeed = new SmartDashboardNumber("index/kicker speed", 0.6).withTuningEnabled(true);
 
-    private final double dyeRotorGearRatio = 45.82608144444; // 25 * 44 / 24;
+    private final double dyeRotorGearRatio = 45.82608144444; // 25 * 44 / 24; //TODO: outdated
     private SmartDashboardNumber indexSafePosition = new SmartDashboardNumber("index/index safe position", 0).withTuningEnabled(true);
     private SmartDashboardNumber indexSafePositionTolerance = new SmartDashboardNumber("index/index safe position tolerance", 5).withTuningEnabled(true);
 
