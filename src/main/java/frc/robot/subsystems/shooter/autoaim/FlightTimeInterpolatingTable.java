@@ -13,44 +13,44 @@ public class FlightTimeInterpolatingTable {
         new TreeMap<>(
             Map.ofEntries(
                 entry(
-                    Double.valueOf(1.3), //please put in real number from video
-                    Double.valueOf(58d / 60d)
+                    Double.valueOf(1.3093603964825), //please put in real number from video
+                    Double.valueOf(1 + 3d/60d)
                 ),
                 entry(
                     Double.valueOf(2.002994262), 
-                    Double.valueOf(58d / 60d)
+                    Double.valueOf(1 + 3d/60d)
                 ),
                 entry(
                     Double.valueOf(2.689627424), 
-                    Double.valueOf(1 + (1d / 60d))
+                    Double.valueOf(1 + (5d / 60d))
                 ),
                 entry(
                     Double.valueOf(3.426810825), 
-                    Double.valueOf(1 + (10d / 60d))
+                    Double.valueOf(1 + (8d / 60d))
                 ),
                 entry(
                     Double.valueOf(4.101603993), 
-                    Double.valueOf(1 + (16d / 60d))
+                    Double.valueOf(1 + (8d / 60d))
                 ),
                 entry(
                     Double.valueOf(4.849751222), 
-                    Double.valueOf(1 + (16d / 60d))
+                    Double.valueOf(1 + (12.5 / 60d))
                 ),
                 entry(
                     Double.valueOf(5.461633668), 
-                    Double.valueOf(1 + (16d / 60d))
+                    Double.valueOf(1 + (15d / 60d))
                 ),
                 entry(
                     Double.valueOf(6.219219187), 
-                    Double.valueOf(1 + (16d / 60d))
+                    Double.valueOf(1 + (23d / 60d))
                 ),
                 entry(
                     Double.valueOf(6.887737446), 
-                    Double.valueOf(1 + (16d / 60d))
+                    Double.valueOf(1 + (25d / 60d))
                 ),
                 entry(
                     Double.valueOf(7.32984268), 
-                    Double.valueOf(1 + (16d / 60d))
+                    Double.valueOf(1 + (29d / 60d))
                 )
             )
         );
