@@ -159,7 +159,7 @@ public class Autos {
             ),
             Commands.sequence(
                 Commands.waitSeconds(1),
-                superstructure.intake.pulsateIntakeCommand(),
+                superstructure.intake.shootRaiseHopperCommand(),
                 Commands.waitSeconds(seconds - 2),
                 Commands.race(
                     superstructure.intake.deployIntakeWaitCommand(),

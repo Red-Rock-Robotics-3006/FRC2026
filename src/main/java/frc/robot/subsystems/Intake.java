@@ -26,9 +26,9 @@ public class Intake extends SubsystemBase{
     private RedRockTalon extensionLeftMotor = new RedRockTalon(23, "intake-extension-left-motor", "*");
     private RedRockTalon extensionRightMotor = new RedRockTalon(24, "intake-extension-right-motor", "*");
 
-    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 1, kEnableTuning && true);
-    private SmartDashboardNumber intakePulsateSpeed = new SmartDashboardNumber("intake/drive/pulsate speed", 0.4, kEnableTuning && true);
-    private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.4, kEnableTuning && true);
+    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.85, kEnableTuning && true);
+    private SmartDashboardNumber intakePulsateSpeed = new SmartDashboardNumber("intake/drive/pulsate speed", 0.3, kEnableTuning && true);
+    private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.3, kEnableTuning && true);
     private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 11.5, kEnableTuning && true);
     private SmartDashboardNumber minExtensionRotation = new SmartDashboardNumber("intake/extension/min rotation", 0, kEnableTuning && true);
 
