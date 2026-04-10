@@ -16,15 +16,15 @@ public class HubInterpolatingTable {
             Map.ofEntries(
                 entry(
                     Double.valueOf(1.340873257), 
-                    new ShotParameter(15, 2000 + rpmAdjust)
+                    new ShotParameter(15, 2050 + rpmAdjust)
                 ),
                 entry(
                     Double.valueOf(1.876275382), 
-                    new ShotParameter(22, 2025 + rpmAdjust)
+                    new ShotParameter(22, 2075 + rpmAdjust)
                 ),
                 entry(
                     Double.valueOf(2.319276105), 
-                    new ShotParameter(25, 2050 + rpmAdjust)
+                    new ShotParameter(25, 2125 + rpmAdjust)
                 ),
                 entry(
                     Double.valueOf(2.80138351), 

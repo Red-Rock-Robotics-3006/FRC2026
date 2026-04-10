@@ -59,7 +59,7 @@ public class Shooter extends SubsystemBase{
             .withInverted(InvertedValue.CounterClockwise_Positive)
         ).withSlot0Configs(
             new Slot0Configs()
-            .withKA(0)
+            .withKA(0.0)
             .withKS(0.25)
             .withKV(0.1275)
             .withKP(0.5)

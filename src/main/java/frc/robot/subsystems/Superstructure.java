@@ -184,7 +184,21 @@ public class Superstructure extends SubsystemBase {
         
 
         switch (robotState) {
+            case SHOOTING_JAMMED:
+                if (!index.isJamming()) setState(lastState);
+            case SHOOTING:
+                if (!turret.atTurretAngle()) setState(RobotState.FULL_TRACKING);
+            case FULL_TRACKING:
+                if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
+                if (!inAllianceZone() && !inLobEnabledZone()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
+                else {shooter.setShotParameter(dynamicShotParameter);}
+                if (this.robotState != RobotState.SHOOTING_JAMMED && this.readyToShoot()) setState(RobotState.SHOOTING);
+            case TURRET_TRACKING:
+                turret.setTurretAngle(turretTargetAngle.plus(dtTurretCompensation));
+                break;
+            
             case MANUAL_SHOT:
+                if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
                 turret.setTurretAngle(Rotation2d.fromDegrees(90));
                 if (readyToShoot()) index.startIndex();
                 break;
@@ -198,18 +212,7 @@ public class Superstructure extends SubsystemBase {
                     setState(lastState);
                 }
                 break;
-            case SHOOTING_JAMMED:
-                if (!index.isJamming()) setState(RobotState.SHOOTING);
-            case SHOOTING:
-                if (!turret.atTurretAngle()) setState(RobotState.FULL_TRACKING);
-            case FULL_TRACKING:
-                if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
-                if (!inAllianceZone() && !inLobEnabledZone()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
-                else {shooter.setShotParameter(dynamicShotParameter);}
-                if (this.robotState != RobotState.SHOOTING_JAMMED && this.readyToShoot()) setState(RobotState.SHOOTING);
-            case TURRET_TRACKING:
-                turret.setTurretAngle(turretTargetAngle.plus(dtTurretCompensation));
-                break;
+            
             case REVERSE:
                 break;
             case IDLE:
@@ -272,7 +275,6 @@ public class Superstructure extends SubsystemBase {
             case IDLE:
                 index.stopIndex();
                 shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);
-                intake.stopIntake();
                 break;
             case SHOOTING:
                 index.startIndex();

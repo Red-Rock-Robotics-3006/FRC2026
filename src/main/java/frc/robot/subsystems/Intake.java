@@ -22,7 +22,7 @@ public class Intake extends SubsystemBase{
     private static Intake instance = null;
     public static final boolean kEnableTuning = true;
 
-    private RedRockTalon driveMotor = new RedRockTalon(21, "intake-drive-motor", "*");
+    private RedRockTalon driveLeftMotor = new RedRockTalon(21, "intake-drive-left-motor", "*");
     private RedRockTalon extensionLeftMotor = new RedRockTalon(23, "intake-extension-left-motor", "*");
     private RedRockTalon extensionRightMotor = new RedRockTalon(24, "intake-extension-right-motor", "*");
 
@@ -70,7 +70,7 @@ public class Intake extends SubsystemBase{
         double resetSpeed = -0.13;
         double spikeThreshold = 30;
                 
-        this.driveMotor.withTuningEnabled(kEnableTuning && true)
+        this.driveLeftMotor.withTuningEnabled(kEnableTuning && true)
         .withMotorOutputConfigs(
             new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive)
@@ -131,7 +131,7 @@ public class Intake extends SubsystemBase{
     }
 
     public void setDriveSpeed(double speed) {
-        this.driveMotor.motor.setControl(new DutyCycleOut(speed).withEnableFOC(false));
+        this.driveLeftMotor.motor.setControl(new DutyCycleOut(speed).withEnableFOC(false));
     }
 
     public void deployIntake() {
@@ -235,7 +235,7 @@ public class Intake extends SubsystemBase{
 
     @Override
     public void periodic() {
-        this.driveMotor.update();
+        this.driveLeftMotor.update();
         this.extensionLeftMotor.update();
         this.extensionRightMotor.update();
     }
