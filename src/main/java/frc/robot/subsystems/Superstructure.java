@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.shooter.*;
 import frc.robot.subsystems.shooter.autoaim.*;
 import frc.robot.subsystems.swerve.*;
+import frc.robot.subsystems.swerve.CommandSwerveDrivetrain.DriveState;
 import frc.robot.subsystems.vision.Localization;
 
 import redrocklib.logging.*;
@@ -225,7 +226,7 @@ public class Superstructure extends SubsystemBase {
                 break;
         }
 
-        if (this.robotState != RobotState.NEAR_TRENCH && nearTrench() && trenchSafetyEnabled.getValue()) {setState(RobotState.NEAR_TRENCH);}
+        if (this.robotState != RobotState.NEAR_TRENCH && nearTrench() && trenchSafetyEnabled.getValue() && drivetrain.getDriveState() != DriveState.AUTO) {setState(RobotState.NEAR_TRENCH);}
 
 
         // SMARTDASHBOARD LOGGING | COMPETITION

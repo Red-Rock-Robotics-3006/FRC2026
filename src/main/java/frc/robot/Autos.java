@@ -26,22 +26,22 @@ public class Autos {
 
     public Command L_TwoSweeps_Paths() {
         return Commands.sequence(
-            drivetrain.followTrajectory("L_FarSweep"),
-            drivetrain.followTrajectory("L_CloseSweep"),
-            drivetrain.followTrajectory("L_Leave")
+            drivetrain.followTrajectoryMirroredWithResetOdometry("R_FarSweep"),
+            drivetrain.followTrajectoryMirrored("R_CloseSweep"),
+            drivetrain.followTrajectoryMirrored("R_Leave")
         );
     }
 
     public Command R_TwoSweeps_Paths() {
         return Commands.sequence(
-            drivetrain.followTrajectory("R_FarSweep"),
+            drivetrain.followTrajectoryWithResetOdometry("R_FarSweep"),
             drivetrain.followTrajectory("R_CloseSweep"),
             drivetrain.followTrajectory("R_Leave")
         );
     }
 
     public Command M_DepotOutpost_Paths() {
-        return drivetrain.followTrajectory("M_DepotOutpost");
+        return drivetrain.followTrajectoryWithResetOdometry("M_DepotOutpost");
     }
 
     // FULL AUTOS
@@ -50,14 +50,14 @@ public class Autos {
         return Commands.sequence(
             this.initAuto(),
 
-            drivetrain.followTrajectory("M_FullTest"),
-            this.shootPulsateAuto(2),
+            drivetrain.followTrajectoryWithResetOdometry("M_FullTest"),
+            this.shootRaiseHopperCommand(2),
 
             Commands.parallel(
                 drivetrain.followTrajectory("M_FullTest"),
                 this.reverseIndexAuto()
             ),
-            this.shootPulsateAuto(2),
+            this.shootRaiseHopperCommand(2),
 
             superstructure.intake.stopIntakeCommand()
         );
@@ -67,35 +67,17 @@ public class Autos {
         return Commands.sequence(
             this.initAuto(),
 
-            drivetrain.followTrajectory("L_FarSweep"),
-            this.shootPulsateAuto(4),
+            drivetrain.followTrajectoryMirroredWithResetOdometry("R_FarSweep"),
+            this.shootRaiseHopperCommand(4),
 
             Commands.parallel(
-                drivetrain.followTrajectory("L_CloseSweep"),
+                drivetrain.followTrajectoryMirrored("R_CloseSweep"),
                 this.reverseIndexAuto()
             ),
-            this.shootPulsateAuto(5),
+            this.shootRaiseHopperCommand(5),
 
             superstructure.intake.stopIntakeCommand(),
-            drivetrain.followTrajectory("L_Leave")
-        );
-    }
-
-    public Command L_TwoSweepsDepot() {
-        return Commands.sequence(
-            this.initAuto(),
-
-            drivetrain.followTrajectory("L_FarSweep"),
-            this.shootPulsateAuto(3),
-
-            Commands.parallel(
-                drivetrain.followTrajectory("L_CloseSweepDepot", 0),
-                this.reverseIndexAuto()
-            ),
-            Commands.parallel(
-                drivetrain.followTrajectory("L_CloseSweepDepot", 1),
-                this.shootAuto(10)
-            )
+            drivetrain.followTrajectoryMirrored("R_Leave")
         );
     }
 
@@ -103,17 +85,65 @@ public class Autos {
         return Commands.sequence(
             this.initAuto(),
 
-            drivetrain.followTrajectory("R_FarSweep"),
-            this.shootPulsateAuto(4),
+            drivetrain.followTrajectoryWithResetOdometry("R_FarSweep"),
+            this.shootRaiseHopperCommand(4),
 
             Commands.parallel(
                 drivetrain.followTrajectory("R_CloseSweep"),
                 this.reverseIndexAuto()
             ),
-            this.shootPulsateAuto(5),
+            this.shootRaiseHopperCommand(5),
 
             superstructure.intake.stopIntakeCommand(),
             drivetrain.followTrajectory("R_Leave")
+        );
+    }
+
+    public Command L_TwoSweepsBump() {
+        return Commands.sequence(
+            this.initAuto(),
+
+            drivetrain.followTrajectoryMirroredWithResetOdometry("R_FarSweepBump"),
+            Commands.parallel(
+                drivetrain.followTrajectoryMirrored("R_SOTM"),
+                this.shootRaiseHopperCommand(4)
+            ),
+
+            Commands.parallel(
+                drivetrain.followTrajectoryMirrored("R_CloseSweepBump"),
+                this.reverseIndexAuto()
+            ),
+            Commands.parallel(
+                drivetrain.followTrajectoryMirrored("R_SOTM"),
+                this.shootRaiseHopperCommand(5)
+            ),
+
+            superstructure.intake.stopIntakeCommand(),
+            drivetrain.followTrajectoryMirrored("R_LeaveAlt")
+        );
+    }
+
+    public Command R_TwoSweepsBump() {
+        return Commands.sequence(
+            this.initAuto(),
+
+            drivetrain.followTrajectoryWithResetOdometry("R_FarSweepBump"),
+            Commands.parallel(
+                drivetrain.followTrajectory("R_SOTM"),
+                this.shootRaiseHopperCommand(4)
+            ),
+
+            Commands.parallel(
+                drivetrain.followTrajectory("R_CloseSweepBump"),
+                this.reverseIndexAuto()
+            ),
+            Commands.parallel(
+                drivetrain.followTrajectory("R_SOTM"),
+                this.shootRaiseHopperCommand(5)
+            ),
+
+            superstructure.intake.stopIntakeCommand(),
+            drivetrain.followTrajectory("R_LeaveAlt")
         );
     }
 
@@ -124,10 +154,28 @@ public class Autos {
                 this.initAuto(),
                 Commands.waitSeconds(0.5),
                 this.shootAuto(10),
-                this.shootPulsateAuto(8)
+                this.shootRaiseHopperCommand(8)
             )
         );
     }
+
+    // public Command L_TwoSweepsDepot() {
+    //     return Commands.sequence(
+    //         this.initAuto(),
+
+    //         drivetrain.followTrajectoryMirrored("R_FarSweep"),
+    //         this.shootRaiseHopperCommand(3),
+
+    //         Commands.parallel(
+    //             drivetrain.followTrajectory("L_CloseSweepDepot", 0),
+    //             this.reverseIndexAuto()
+    //         ),
+    //         Commands.parallel(
+    //             drivetrain.followTrajectoryMirrored("R_CloseSweepDepot", 1),
+    //             this.shootAuto(10)
+    //         )
+    //     );
+    // }
 
     // AUTO UTILITY COMMANDS
     
@@ -136,7 +184,7 @@ public class Autos {
             superstructure.setStateCommand(RobotState.TURRET_TRACKING),
             Commands.race(
                 superstructure.intake.deployIntakeWaitCommand(),
-                Commands.waitSeconds(1)
+                Commands.waitSeconds(0.7)
             ),
             superstructure.intake.startIntakeCommand()
         );
@@ -150,7 +198,7 @@ public class Autos {
         );
     }
 
-    private Command shootPulsateAuto(double seconds) {
+    private Command shootRaiseHopperCommand(double seconds) {
         return Commands.parallel(
             Commands.sequence(
                 superstructure.setStateCommand(RobotState.FULL_TRACKING),
@@ -158,13 +206,14 @@ public class Autos {
                 superstructure.setStateCommand(RobotState.TURRET_TRACKING)
             ),
             Commands.sequence(
-                Commands.waitSeconds(1),
+                Commands.waitSeconds(0.5),
                 superstructure.intake.shootRaiseHopperCommand(),
-                Commands.waitSeconds(seconds - 2),
+                Commands.waitSeconds(seconds - 1.2),
                 Commands.race(
                     superstructure.intake.deployIntakeWaitCommand(),
-                    Commands.waitSeconds(1)
-                )
+                    Commands.waitSeconds(0.7)
+                ),
+                superstructure.intake.startIntakeCommand()
             )
         );
     }
@@ -172,7 +221,7 @@ public class Autos {
     private Command reverseIndexAuto() {
         return Commands.sequence(
             superstructure.index.reverseIndexCommand(),
-            Commands.waitSeconds(1),
+            Commands.waitSeconds(0.25),
             superstructure.index.stopIndexCommand()
         );
     }

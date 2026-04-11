@@ -36,7 +36,7 @@ public class RobotContainer {
         configureCompSelector();
         configureCompBindings();
 
-        configureTestSelector();
+        // configureTestSelector();
         configureTestBindings();
 
         // configureSysIDBindings();
@@ -46,8 +46,9 @@ public class RobotContainer {
         autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
 
         autoChooser.addOption("Left Two Sweeps", autos.L_TwoSweeps());
-        autoChooser.addOption("Left Two Sweeps Depot", autos.L_TwoSweepsDepot());
         autoChooser.addOption("Right Two Sweeps", autos.R_TwoSweeps());
+        autoChooser.addOption("Left Two Sweeps Bump", autos.L_TwoSweepsBump());
+        autoChooser.addOption("Right Two Sweeps Bump", autos.R_TwoSweepsBump());
         autoChooser.addOption("Middle Depot Outpost", autos.M_DepotOutpost());
 
         autoChooser.addOption("Full Test", autos.fullTestAuto());
@@ -58,7 +59,6 @@ public class RobotContainer {
     @SuppressWarnings("unused")
     private void configureTestSelector() {
         autoChooser.addOption("PATHS - Left Two Sweeps", autos.L_TwoSweeps_Paths());
-        autoChooser.addOption("PATHS - Left Two Sweeps Depot", autos.L_TwoSweepsDepot());
         autoChooser.addOption("PATHS - Right Two Sweeps", autos.R_TwoSweeps_Paths());
         autoChooser.addOption("PATHS - Middle Depot Outpost", autos.M_DepotOutpost_Paths());
 

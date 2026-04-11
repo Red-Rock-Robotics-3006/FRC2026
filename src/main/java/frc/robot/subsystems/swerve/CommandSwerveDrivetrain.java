@@ -12,10 +12,12 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
+import choreo.Choreo;
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
-// import choreo.auto.AutoTrajectory;
+import choreo.auto.AutoTrajectory;
 import choreo.trajectory.SwerveSample;
+import choreo.util.ChoreoAllianceFlipUtil;
 import edu.wpi.first.math.MathUtil;
 // import edu.wpi.first.apriltag.AprilTagFieldLayout;
 // import edu.wpi.first.apriltag.AprilTagFields;
@@ -729,7 +731,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.resetPose(pose);
     }
 
-    public Command followTrajectory(String pathName) {
+    public Command followTrajectoryWithResetOdometry(String pathName) {
         return Commands.sequence(
             this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
             this.factory.resetOdometry(pathName),
@@ -739,15 +741,37 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         );
     }
 
-    // public Command followTrajectoryLeft(String pathName) {
-    //     return Commands.sequence(
-    //         this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
-    //         this.factory.resetOdometry(pathName),
-    //         this.factory.trajectoryCmd(pathName, AutoTrajectory::mirrorY),
-    //         this.setTargetHeadingToCurrentHeadingCommand(),
-    //         this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
-    //     );
-    // }
+    public Command followTrajectory(String pathName) {
+        return Commands.sequence(
+            this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
+            this.factory.trajectoryCmd(pathName),
+            this.setTargetHeadingToCurrentHeadingCommand(),
+            this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
+        );
+    }
+
+    public Command followTrajectoryMirroredWithResetOdometry(String pathName) {
+        return Commands.sequence(
+            this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
+            this.factory.resetOdometry(
+                () -> Choreo.loadTrajectory(pathName)
+                    .flatMap(traj -> traj.getInitialPose(!this.isBlue()))
+                    .map(ChoreoAllianceFlipUtil.getMirrorY()::flip)
+            ),
+            this.factory.trajectoryCmd(pathName, AutoTrajectory::mirrorY),
+            this.setTargetHeadingToCurrentHeadingCommand(),
+            this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
+        );
+    }
+
+    public Command followTrajectoryMirrored(String pathName) {
+        return Commands.sequence(
+            this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
+            this.factory.trajectoryCmd(pathName, AutoTrajectory::mirrorY),
+            this.setTargetHeadingToCurrentHeadingCommand(),
+            this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
+        );
+    }
 
     public Command followTrajectory(String pathName, int index) {
         return Commands.sequence(
