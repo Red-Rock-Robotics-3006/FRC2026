@@ -99,6 +99,9 @@ public class RobotContainer {
                 superstructure.setStateCommand(RobotState.IDLE),
                 superstructure.intake.deployIntakeCommand()));
 
+        driverstick.x()
+            .onTrue(Commands.runOnce(() -> superstructure.turret.calibrateTurret()));
+
         driverstick.y()
             .onTrue(superstructure.setStateCommand(RobotState.REVERSE))
             .onFalse(superstructure.setStateCommand(RobotState.TURRET_TRACKING));
