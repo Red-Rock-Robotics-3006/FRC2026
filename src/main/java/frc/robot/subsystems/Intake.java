@@ -113,8 +113,8 @@ public class Intake extends SubsystemBase{
         .withResetSpeed(resetSpeed)
         .withCurrentLimitConfigs(currentLimitsConfigs);
 
-        this.extensionLeftMotor.motor.setPosition(maxExtensionRotation.getNumber());
-        this.extensionRightMotor.motor.setPosition(maxExtensionRotation.getNumber());
+        this.extensionLeftMotor.motor.setPosition(minExtensionRotation.getNumber());
+        this.extensionRightMotor.motor.setPosition(minExtensionRotation.getNumber());
     }
 
     public void setExtensionPosition(double rotations) {

@@ -74,7 +74,7 @@ public class Autos {
                 drivetrain.followTrajectoryMirrored("R_CloseSweep"),
                 this.reverseIndexAuto()
             ),
-            this.shootRaiseHopperCommand(5),
+            this.shootRaiseHopperCommand(4),
 
             superstructure.intake.stopIntakeCommand(),
             drivetrain.followTrajectoryMirrored("R_Leave")
@@ -106,16 +106,17 @@ public class Autos {
             drivetrain.followTrajectoryMirroredWithResetOdometry("R_FarSweepBump"),
             Commands.parallel(
                 drivetrain.followTrajectoryMirrored("R_SOTM"),
-                this.shootRaiseHopperCommand(4)
+                this.shootRaiseHopperCommand(5)
             ),
 
             Commands.parallel(
                 drivetrain.followTrajectoryMirrored("R_CloseSweepBump"),
                 this.reverseIndexAuto()
             ),
+            Commands.waitSeconds(0.8),
             Commands.parallel(
                 drivetrain.followTrajectoryMirrored("R_SOTM"),
-                this.shootRaiseHopperCommand(5)
+                this.shootRaiseHopperCommand(4)
             ),
 
             superstructure.intake.stopIntakeCommand(),

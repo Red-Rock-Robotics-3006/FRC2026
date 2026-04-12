@@ -102,7 +102,7 @@ public class PracticeTimer {
         SmartDashboard.putString("Match Timer/Headphone Counter/Match state", this.matchState.toString());
         SmartDashboard.putBoolean("Match Timer/Headphone Counter/disabled", DriverStation.isDisabled());
         SmartDashboard.putBoolean("Match Timer/Headphone Counter/is auto", DriverStation.isAutonomous());
-        SmartDashboard.putBoolean("Match Timer/Headphone Counter/auto won", wonAuto);
+        SmartDashboard.putBoolean("Match Timer/Headphone Counter/auto won", ((kPractice) ? true : wonAuto));
         Logger.recordOutput("Match Timer/Match State", this.matchState.toString());
     }
 
