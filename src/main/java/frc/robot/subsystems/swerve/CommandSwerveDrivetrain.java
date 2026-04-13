@@ -776,6 +776,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command followTrajectory(String pathName, int index) {
         return Commands.sequence(
             this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
+            this.factory.trajectoryCmd(pathName, index),
+            this.setTargetHeadingToCurrentHeadingCommand(),
+            this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
+        );
+    }
+
+    public Command followTrajectoryWithResetOdometry(String pathName, int index) {
+        return Commands.sequence(
+            this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
             this.factory.resetOdometry(pathName, index),
             this.factory.trajectoryCmd(pathName, index),
             this.setTargetHeadingToCurrentHeadingCommand(),

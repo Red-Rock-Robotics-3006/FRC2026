@@ -46,8 +46,9 @@ public class RobotContainer {
         autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
 
         autoChooser.addOption("Left Two Sweeps", autos.L_TwoSweeps());
-        autoChooser.addOption("Right Two Sweeps", autos.R_TwoSweeps());
         autoChooser.addOption("Left Two Sweeps Bump", autos.L_TwoSweepsBump());
+        autoChooser.addOption("Left Two Sweeps Bump Depot", autos.L_TwoSweepsBumpDepot());
+        autoChooser.addOption("Right Two Sweeps", autos.R_TwoSweeps());
         autoChooser.addOption("Right Two Sweeps Bump", autos.R_TwoSweepsBump());
         autoChooser.addOption("Middle Depot Outpost", autos.M_DepotOutpost());
 

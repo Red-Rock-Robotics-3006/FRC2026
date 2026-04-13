@@ -51,13 +51,13 @@ public class Autos {
             this.initAuto(),
 
             drivetrain.followTrajectoryWithResetOdometry("M_FullTest"),
-            this.shootRaiseHopperCommand(2),
+            this.shootRaiseHopper(2),
 
             Commands.parallel(
                 drivetrain.followTrajectory("M_FullTest"),
                 this.reverseIndexAuto()
             ),
-            this.shootRaiseHopperCommand(2),
+            this.shootRaiseHopper(2),
 
             superstructure.intake.stopIntakeCommand()
         );
@@ -68,13 +68,13 @@ public class Autos {
             this.initAuto(),
 
             drivetrain.followTrajectoryMirroredWithResetOdometry("R_FarSweep"),
-            this.shootRaiseHopperCommand(4),
+            this.shootRaiseHopper(4),
 
             Commands.parallel(
                 drivetrain.followTrajectoryMirrored("R_CloseSweep"),
                 this.reverseIndexAuto()
             ),
-            this.shootRaiseHopperCommand(4),
+            this.shootRaiseHopper(5),
 
             superstructure.intake.stopIntakeCommand(),
             drivetrain.followTrajectoryMirrored("R_Leave")
@@ -86,13 +86,13 @@ public class Autos {
             this.initAuto(),
 
             drivetrain.followTrajectoryWithResetOdometry("R_FarSweep"),
-            this.shootRaiseHopperCommand(4),
+            this.shootRaiseHopper(4),
 
             Commands.parallel(
                 drivetrain.followTrajectory("R_CloseSweep"),
                 this.reverseIndexAuto()
             ),
-            this.shootRaiseHopperCommand(5),
+            this.shootRaiseHopper(5),
 
             superstructure.intake.stopIntakeCommand(),
             drivetrain.followTrajectory("R_Leave")
@@ -106,18 +106,14 @@ public class Autos {
             drivetrain.followTrajectoryMirroredWithResetOdometry("R_FarSweepBump"),
             Commands.parallel(
                 drivetrain.followTrajectoryMirrored("R_SOTM"),
-                this.shootRaiseHopperCommand(5)
+                this.shootRaiseHopper(5)
             ),
 
             Commands.parallel(
                 drivetrain.followTrajectoryMirrored("R_CloseSweepBump"),
                 this.reverseIndexAuto()
             ),
-            Commands.waitSeconds(0.8),
-            Commands.parallel(
-                drivetrain.followTrajectoryMirrored("R_SOTM"),
-                this.shootRaiseHopperCommand(4)
-            ),
+            this.shootRaiseHopper(4),
 
             superstructure.intake.stopIntakeCommand(),
             drivetrain.followTrajectoryMirrored("R_LeaveAlt")
@@ -131,20 +127,56 @@ public class Autos {
             drivetrain.followTrajectoryWithResetOdometry("R_FarSweepBump"),
             Commands.parallel(
                 drivetrain.followTrajectory("R_SOTM"),
-                this.shootRaiseHopperCommand(4)
+                this.shootRaiseHopper(5)
             ),
 
             Commands.parallel(
                 drivetrain.followTrajectory("R_CloseSweepBump"),
                 this.reverseIndexAuto()
             ),
-            Commands.parallel(
-                drivetrain.followTrajectory("R_SOTM"),
-                this.shootRaiseHopperCommand(5)
-            ),
+            this.shootRaiseHopper(4),
 
             superstructure.intake.stopIntakeCommand(),
             drivetrain.followTrajectory("R_LeaveAlt")
+        );
+    }
+
+    public Command L_TwoSweepsBumpDepot() {
+        return Commands.sequence(
+            this.initAuto(),
+
+            //first swipe
+            drivetrain.followTrajectoryWithResetOdometry("L_TwoSweepsDepot", 0),
+            Commands.parallel(
+                drivetrain.followTrajectory("L_TwoSweepsDepot", 1),
+                Commands.sequence(
+                    Commands.waitSeconds(0.5),
+                    this.shootRaiseHopper(4.5)
+                )
+            ),
+
+            //second swipe intake
+            Commands.parallel(
+                drivetrain.followTrajectory("L_TwoSweepsDepot", 2),
+                this.reverseIndexAuto()
+            ),
+
+            //second swipe sotm to depot
+            Commands.deadline(
+                drivetrain.followTrajectory("L_TwoSweepsDepot", 3),
+                Commands.sequence(
+                    Commands.waitSeconds(0.5),
+                    this.shootAuto(3.5)
+                )
+            ),
+
+            //move away from depot
+            Commands.deadline(
+                drivetrain.followTrajectory("L_TwoSweepsDepot", 4),
+                this.shootRaiseHopper(2.3)
+            ),
+
+            superstructure.intake.stopIntakeCommand()
         );
     }
 
@@ -155,7 +187,7 @@ public class Autos {
                 this.initAuto(),
                 Commands.waitSeconds(0.5),
                 this.shootAuto(10),
-                this.shootRaiseHopperCommand(8)
+                this.shootRaiseHopper(8)
             )
         );
     }
@@ -165,7 +197,7 @@ public class Autos {
     //         this.initAuto(),
 
     //         drivetrain.followTrajectoryMirrored("R_FarSweep"),
-    //         this.shootRaiseHopperCommand(3),
+    //         this.shootRaiseHopper(3),
 
     //         Commands.parallel(
     //             drivetrain.followTrajectory("L_CloseSweepDepot", 0),
@@ -187,7 +219,7 @@ public class Autos {
                 superstructure.intake.deployIntakeWaitCommand(),
                 Commands.waitSeconds(0.7)
             ),
-            superstructure.intake.startIntakeCommand()
+            superstructure.intake.startIntakeAutoCommand()
         );
     }
 
@@ -199,7 +231,7 @@ public class Autos {
         );
     }
 
-    private Command shootRaiseHopperCommand(double seconds) {
+    private Command shootRaiseHopper(double seconds) {
         return Commands.parallel(
             Commands.sequence(
                 superstructure.setStateCommand(RobotState.FULL_TRACKING),
@@ -214,7 +246,7 @@ public class Autos {
                     superstructure.intake.deployIntakeWaitCommand(),
                     Commands.waitSeconds(0.7)
                 ),
-                superstructure.intake.startIntakeCommand()
+                superstructure.intake.startIntakeAutoCommand()
             )
         );
     }
