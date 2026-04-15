@@ -12,15 +12,12 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
-import choreo.Choreo;
 import choreo.Choreo.TrajectoryLogger;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoTrajectory;
 import choreo.trajectory.SwerveSample;
-import choreo.util.ChoreoAllianceFlipUtil;
+
 import edu.wpi.first.math.MathUtil;
-// import edu.wpi.first.apriltag.AprilTagFieldLayout;
-// import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -38,12 +35,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.shooter.autoaim.SOTMCalcs;
 import frc.robot.subsystems.swerve.generated.TunerConstants;
 import frc.robot.subsystems.swerve.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.vision.Localization;
 import frc.robot.subsystems.vision.Localization.RRPoseEstimate;
+
 import redrocklib.logging.SmartDashboardBoolean;
 import redrocklib.logging.SmartDashboardNumber;
 // import redrocklib.wrappers.RedRockCamera;
@@ -731,34 +730,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         this.resetPose(pose);
     }
 
-    public Command followTrajectoryWithResetOdometry(String pathName) {
-        return Commands.sequence(
-            this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
-            this.factory.resetOdometry(pathName),
-            this.factory.trajectoryCmd(pathName),
-            this.setTargetHeadingToCurrentHeadingCommand(),
-            this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
-        );
+    @Override
+    public void resetPose(Pose2d pose) {
+        super.resetPose(pose);
+        this.setTargetHeading(pose.getRotation());
     }
 
     public Command followTrajectory(String pathName) {
         return Commands.sequence(
             this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
             this.factory.trajectoryCmd(pathName),
-            this.setTargetHeadingToCurrentHeadingCommand(),
-            this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
-        );
-    }
-
-    public Command followTrajectoryMirroredWithResetOdometry(String pathName) {
-        return Commands.sequence(
-            this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
-            this.factory.resetOdometry(
-                () -> Choreo.loadTrajectory(pathName)
-                    .flatMap(traj -> traj.getInitialPose(!this.isBlue()))
-                    .map(ChoreoAllianceFlipUtil.getMirrorY()::flip)
-            ),
-            this.factory.trajectoryCmd(pathName, AutoTrajectory::mirrorY),
             this.setTargetHeadingToCurrentHeadingCommand(),
             this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
         );
@@ -776,16 +757,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command followTrajectory(String pathName, int index) {
         return Commands.sequence(
             this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
-            this.factory.trajectoryCmd(pathName, index),
-            this.setTargetHeadingToCurrentHeadingCommand(),
-            this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))
-        );
-    }
-
-    public Command followTrajectoryWithResetOdometry(String pathName, int index) {
-        return Commands.sequence(
-            this.runOnce(() -> this.setDriveState(DriveState.AUTO)),
-            this.factory.resetOdometry(pathName, index),
             this.factory.trajectoryCmd(pathName, index),
             this.setTargetHeadingToCurrentHeadingCommand(),
             this.runOnce(() -> this.setDriveState(DriveState.DRIVE_FACING_ANGLE))

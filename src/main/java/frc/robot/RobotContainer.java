@@ -11,7 +11,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 // import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-
+import frc.robot.autos.Autos;
+import frc.robot.autos.RedRockAuto;
 // import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Superstructure;
@@ -30,40 +31,32 @@ public class RobotContainer {
     public final LED led = LED.getInstance();
 
     private final Autos autos = Autos.getInstance();
-    private SendableChooser<Command> autoChooser = new SendableChooser<Command>();
+    private SendableChooser<RedRockAuto> autoChooser = new SendableChooser<RedRockAuto>();
 
     public RobotContainer() {
         configureCompSelector();
         configureCompBindings();
 
-        // configureTestSelector();
         configureTestBindings();
 
         // configureSysIDBindings();
     }
 
     private void configureCompSelector() {
-        autoChooser.setDefaultOption("NO AUTO", Commands.print("good luck drivers"));
+        autoChooser.setDefaultOption(autos.noAuto.getName(), autos.noAuto);
 
-        autoChooser.addOption("Left Two Sweeps", autos.L_TwoSweeps());
-        autoChooser.addOption("Left Two Sweeps Bump", autos.L_TwoSweepsBump());
-        autoChooser.addOption("Left Two Sweeps Bump Depot", autos.L_TwoSweepsBumpDepot());
-        autoChooser.addOption("Right Two Sweeps", autos.R_TwoSweeps());
-        autoChooser.addOption("Right Two Sweeps Bump", autos.R_TwoSweepsBump());
-        autoChooser.addOption("Middle Depot Outpost", autos.M_DepotOutpost());
+        autoChooser.addOption(autos.L_TwoSweeps.getName(), autos.L_TwoSweeps);
+        autoChooser.addOption(autos.L_TwoSweepsBump.getName(), autos.L_TwoSweepsBump);
+        autoChooser.addOption(autos.L_TwoSweepsBumpDepot.getName(), autos.L_TwoSweepsBumpDepot);
+        autoChooser.addOption(autos.R_TwoSweeps.getName(), autos.R_TwoSweeps);
+        autoChooser.addOption(autos.R_TwoSweepsBump.getName(), autos.R_TwoSweepsBump);
+        autoChooser.addOption(autos.M_DepotOutpost.getName(), autos.M_DepotOutpost);
+        
+        autoChooser.addOption(autos.fullTest.getName(), autos.fullTest);
 
-        autoChooser.addOption("Full Test", autos.fullTestAuto());
+        autoChooser.onChange(autos::resetPoseForAuto);
 
         SmartDashboard.putData("Auto Chooser", autoChooser);
-    }
-
-    @SuppressWarnings("unused")
-    private void configureTestSelector() {
-        autoChooser.addOption("PATHS - Left Two Sweeps", autos.L_TwoSweeps_Paths());
-        autoChooser.addOption("PATHS - Right Two Sweeps", autos.R_TwoSweeps_Paths());
-        autoChooser.addOption("PATHS - Middle Depot Outpost", autos.M_DepotOutpost_Paths());
-
-        autoChooser.addOption("PATHS - Full Test", autos.fullTestPaths());
     }
 
     private void configureCompBindings() {
@@ -113,9 +106,6 @@ public class RobotContainer {
 
         driverstick.b()
             .onTrue(superstructure.setStateCommand(RobotState.IDLE));
-
-        driverstick.povLeft()
-            .onTrue(superstructure.intake.pushRetractIntakeCommand());
             
         driverstick.povRight()
             .onTrue(superstructure.intake.resetIntakeExtensionCommand());
@@ -183,6 +173,6 @@ public class RobotContainer {
     // }
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        return autoChooser.getSelected().getCommand();
     }
 }

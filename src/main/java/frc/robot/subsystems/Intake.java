@@ -63,9 +63,9 @@ public class Intake extends SubsystemBase{
             // .withMotionMagicJerk(0);
 
         CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(35)
+            .withSupplyCurrentLimit(45)
             .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(50)
+            .withStatorCurrentLimit(60)
             .withStatorCurrentLimitEnable(true);
 
         double resetSpeed = -0.13;

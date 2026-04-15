@@ -91,7 +91,7 @@ public class RedRockTalon {
     /**
      * Creates a wrapper for TalonFX that handles commonly used configs, commonly used telemetry, and updating config code
      * 
-     * REMMEBER TO CALL {@link #update()} every loop somewhere in code
+     * REMEMBER TO CALL {@link #update()} every loop somewhere in code
      * @param motorID
      * @param name
      * @param canivore
