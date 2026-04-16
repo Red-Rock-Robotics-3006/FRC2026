@@ -3,6 +3,7 @@ package frc.robot.autos;
 import choreo.Choreo;
 import choreo.util.ChoreoAllianceFlipUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
 // import choreo.util.ChoreoAllianceFlipUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -27,13 +28,14 @@ public class Autos {
 
     public RedRockAuto fullTest = new RedRockAuto("Full Test", 
         Commands.sequence(
-            this.initAuto(),
-
-            drivetrain.followTrajectory("M_FullTest"),
+            Commands.parallel(
+                this.initAuto(),
+                drivetrain.followTrajectory("M_FullTest")
+            ),
             this.shootRaiseHopperAuto(2),
 
             Commands.parallel(
-                drivetrain.followTrajectory("M_FullTest"),
+                drivetrain.followTrajectory("M_FullTest2"),
                 this.reverseIndexAuto()
             ),
             this.shootRaiseHopperAuto(2),
@@ -51,9 +53,10 @@ public class Autos {
 
     public RedRockAuto L_TwoSweeps = new RedRockAuto("Left - Two Sweeps",
         Commands.sequence(
-            this.initAuto(),
-
-            drivetrain.followTrajectoryMirrored("R_FarSweep"),
+            Commands.parallel(
+                this.initAuto(),
+                drivetrain.followTrajectoryMirrored("R_FarSweep")
+            ),
             this.shootRaiseHopperAuto(4),
 
             Commands.parallel(
@@ -78,9 +81,10 @@ public class Autos {
 
     public RedRockAuto R_TwoSweeps = new RedRockAuto("Right - Two Sweeps",
         Commands.sequence(
-            this.initAuto(),
-
-            drivetrain.followTrajectory("R_FarSweep"),
+            Commands.parallel(
+                this.initAuto(),
+                drivetrain.followTrajectory("R_FarSweep")
+            ),
             this.shootRaiseHopperAuto(4),
 
             Commands.parallel(
@@ -103,9 +107,10 @@ public class Autos {
 
     public RedRockAuto L_TwoSweepsBump = new RedRockAuto("Left - Two Sweeps Bump",
         Commands.sequence(
-            this.initAuto(),
-
-            drivetrain.followTrajectoryMirrored("R_FarSweepBump"),
+            Commands.parallel(
+                this.initAuto(),
+                drivetrain.followTrajectoryMirrored("R_FarSweepBump")
+            ),
             Commands.parallel(
                 drivetrain.followTrajectoryMirrored("R_SOTM"),
                 Commands.sequence(
@@ -136,9 +141,10 @@ public class Autos {
 
     public RedRockAuto R_TwoSweepsBump = new RedRockAuto("Right - Two Sweeps Bump",
         Commands.sequence(
-            this.initAuto(),
-
-            drivetrain.followTrajectory("R_FarSweepBump"),
+            Commands.parallel(
+                this.initAuto(),
+                drivetrain.followTrajectory("R_FarSweepBump")
+            ),
             Commands.parallel(
                 drivetrain.followTrajectory("R_SOTM"),
                 Commands.sequence(
@@ -168,8 +174,10 @@ public class Autos {
     public RedRockAuto L_TwoSweepsBumpDepot = new RedRockAuto("Left - Two Sweeps Bump Depot",
         Commands.sequence(
             //first swipe intake
-            this.initAuto(),
-            drivetrain.followTrajectory("L_TwoSweepsDepot", 0),
+            Commands.parallel(
+                this.initAuto(),
+                drivetrain.followTrajectory("L_TwoSweepsDepot", 0)
+            ),
 
             //first swipe sotm to trench
             Commands.parallel(
@@ -234,19 +242,18 @@ public class Autos {
     // AUTO UTILITY
 
     public void resetPoseForAuto(RedRockAuto auto) {
-        drivetrain.resetPose(
-            drivetrain.isBlue() ?
-                auto.getBlueInitialPose() :
-                auto.getRedInitialPose());
+        if (DriverStation.isDisabled()) {
+            drivetrain.resetPose(
+                drivetrain.isBlue() ?
+                    auto.getBlueInitialPose() :
+                    auto.getRedInitialPose());
+        }
     }
     
     private Command initAuto() {
         return Commands.sequence(
             superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-            Commands.race(
-                superstructure.intake.deployIntakeWaitCommand(),
-                Commands.waitSeconds(0.7)
-            ),
+            superstructure.intake.deployIntakeCommand(),
             superstructure.intake.startIntakeAutoCommand()
         );
     }
@@ -282,7 +289,7 @@ public class Autos {
     private Command reverseIndexAuto() {
         return Commands.sequence(
             superstructure.index.reverseIndexCommand(),
-            Commands.waitSeconds(0.25),
+            Commands.waitSeconds(0.35),
             superstructure.index.stopIndexCommand()
         );
     }

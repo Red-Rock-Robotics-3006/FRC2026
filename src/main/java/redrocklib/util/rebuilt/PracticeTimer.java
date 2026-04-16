@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class PracticeTimer {
-    public static final boolean kPractice = true;
+    public static final boolean kPractice = false;
     private static PracticeTimer instance = null;
 
     private double matchTime;

@@ -27,7 +27,7 @@ public class Intake extends SubsystemBase{
     private RedRockTalon extensionRightMotor = new RedRockTalon(24, "intake-extension-right-motor", "*");
 
     private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.85, kEnableTuning && true);
-    private SmartDashboardNumber intakeAutoSpeed = new SmartDashboardNumber("intake/drive/intake speed", 1, kEnableTuning && true);
+    private SmartDashboardNumber intakeAutoSpeed = new SmartDashboardNumber("intake/drive/intake auto speed", 1, kEnableTuning && true);
     private SmartDashboardNumber intakePulsateSpeed = new SmartDashboardNumber("intake/drive/pulsate speed", 0.3, kEnableTuning && true);
     private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.3, kEnableTuning && true);
     private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 11.5, kEnableTuning && true);
@@ -114,8 +114,8 @@ public class Intake extends SubsystemBase{
         .withResetSpeed(resetSpeed)
         .withCurrentLimitConfigs(currentLimitsConfigs);
 
-        this.extensionLeftMotor.motor.setPosition(minExtensionRotation.getNumber());
-        this.extensionRightMotor.motor.setPosition(minExtensionRotation.getNumber());
+        this.extensionLeftMotor.motor.setPosition(maxExtensionRotation.getNumber());
+        this.extensionRightMotor.motor.setPosition(maxExtensionRotation.getNumber());
     }
 
     public void setExtensionPosition(double rotations) {
@@ -212,6 +212,10 @@ public class Intake extends SubsystemBase{
             ),
             Commands.waitSeconds(0.075)
         );
+    }
+
+    public Command deployIntakeStoplessCommand() {
+        return Commands.runOnce(() -> this.deployIntake());
     }
 
     public Command pushRetractIntakeCommand() {

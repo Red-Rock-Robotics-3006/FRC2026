@@ -142,8 +142,6 @@ public class Superstructure extends SubsystemBase {
             //calculates exit velocity using static pose
         
         double distanceToTarget = shooterPose.getTranslation().getDistance(staticTargetPose.getTranslation());
-        double exitVelocity = SOTMCalcs.rpmToExitVelocity(staticShotParameter.getShooterRPM());
-
         double[] fieldCentricRobotVelocity = SOTMCalcs.rotate(state.Speeds.vxMetersPerSecond, state.Speeds.vyMetersPerSecond, dtRotation);
 
         double r = shooterOffset.getTranslation().getNorm();
@@ -270,7 +268,7 @@ public class Superstructure extends SubsystemBase {
             SmartDashboard.putNumber("auto aim/dynamic lerp/rpm", dynamicShotParameter.getShooterRPM());
             SmartDashboard.putNumber("auto aim/dynamic lerp/deg", dynamicShotParameter.pivotAngleDeg);
 
-            SmartDashboard.putNumber("auto aim/exit velocity", exitVelocity);
+            // SmartDashboard.putNumber("auto aim/exit velocity", exitVelocity);
         }
     }
 

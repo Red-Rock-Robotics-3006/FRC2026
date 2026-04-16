@@ -37,8 +37,7 @@ public class RobotContainer {
         configureCompSelector();
         configureCompBindings();
 
-        configureTestBindings();
-
+        // configureTestBindings();
         // configureSysIDBindings();
     }
 
@@ -79,19 +78,17 @@ public class RobotContainer {
             .onTrue(superstructure.setStateCommand(RobotState.FULL_TRACKING))
             .onFalse(Commands.sequence(
                 superstructure.setStateCommand(RobotState.TURRET_TRACKING),
-                superstructure.intake.deployIntakeCommand()));
+                superstructure.intake.deployIntakeStoplessCommand()));
             
         driverstick.leftBumper() 
             .onTrue(superstructure.intake.shootRaiseHopperCommand())
-            .onFalse(Commands.sequence(
-                superstructure.intake.stopIntakeCommand(),
-                superstructure.intake.deployIntakeCommand()));
+            .onFalse(superstructure.intake.deployIntakeCommand());
 
         driverstick.rightBumper() //manual hub shot
             .onTrue(superstructure.setManualShotParameterCommand())
             .onFalse(Commands.parallel(
                 superstructure.setStateCommand(RobotState.IDLE),
-                superstructure.intake.deployIntakeCommand()));
+                superstructure.intake.deployIntakeStoplessCommand()));
 
         driverstick.x()
             .onTrue(Commands.runOnce(() -> superstructure.turret.calibrateTurret()));
@@ -105,9 +102,6 @@ public class RobotContainer {
             .onFalse(superstructure.intake.stopIntakeCommand());
 
         driverstick.b()
-            .onTrue(superstructure.setStateCommand(RobotState.IDLE));
-            
-        driverstick.povRight()
             .onTrue(superstructure.intake.resetIntakeExtensionCommand());
 
         operatorstick.y()
