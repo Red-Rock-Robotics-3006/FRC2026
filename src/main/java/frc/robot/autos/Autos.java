@@ -183,8 +183,8 @@ public class Autos {
             Commands.parallel(
                 drivetrain.followTrajectory("L_TwoSweepsDepot", 1),
                 Commands.sequence(
-                    Commands.waitSeconds(0.3),
-                    this.shootRaiseHopperAuto(4.7)
+                    Commands.waitSeconds(0.15),
+                    this.shootRaiseHopperAuto(4.85)
                 )
             ),
 
@@ -198,15 +198,15 @@ public class Autos {
             Commands.deadline(
                 drivetrain.followTrajectory("L_TwoSweepsDepot", 3),
                 Commands.sequence(
-                    Commands.waitSeconds(0.3),
-                    this.shootAuto(3.7)
+                    Commands.waitSeconds(0.15),
+                    this.shootAuto(3)
                 )
             ),
 
             //move away from depot
             Commands.deadline(
                 drivetrain.followTrajectory("L_TwoSweepsDepot", 4),
-                this.shootRaiseHopperAuto(2.3)
+                this.shootRaiseHopperAuto(2.65)
             ),
 
             superstructure.intake.stopIntakeCommand()

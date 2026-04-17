@@ -71,8 +71,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private SlewRateLimiter driveSlewRateLimiterY = new SlewRateLimiter(3);
     private SlewRateLimiter rotateSlewRateLimiter = new SlewRateLimiter(3);
 
-    private SmartDashboardNumber limitedMaxDriveSpeed = new SmartDashboardNumber("dt/dt sotm/drive speeds", 2);
-    private SmartDashboardNumber limitedMaxRotateSpeed = new SmartDashboardNumber("dt/dt sotm/rotate speeds", 0.5);
+    private SmartDashboardNumber limitedMaxDriveSpeed = new SmartDashboardNumber("dt/dt sotm/drive speeds", 2.5);
+    private SmartDashboardNumber limitedMaxRotateSpeed = new SmartDashboardNumber("dt/dt sotm/rotate speeds", 0.65);
 
     private SmartDashboardNumber lobLimitDriveSpeed = new SmartDashboardNumber("dt/dt lob speeds/drive speed", 2.75);
     private SmartDashboardNumber lobLimitTurnSpeed = new SmartDashboardNumber("dt/dt lob speeds/turn speed", 0.75);
