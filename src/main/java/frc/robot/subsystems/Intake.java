@@ -22,11 +22,11 @@ public class Intake extends SubsystemBase{
     private static Intake instance = null;
     public static final boolean kEnableTuning = true;
 
-    private RedRockTalon driveLeftMotor = new RedRockTalon(21, "intake-drive-left-motor", "*");
+    private RedRockTalon driveLeftMotor = new RedRockTalon(22, "intake-drive-left-motor", "*");
     private RedRockTalon extensionLeftMotor = new RedRockTalon(23, "intake-extension-left-motor", "*");
     private RedRockTalon extensionRightMotor = new RedRockTalon(24, "intake-extension-right-motor", "*");
 
-    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 0.85, kEnableTuning && true);
+    private SmartDashboardNumber intakeSpeed = new SmartDashboardNumber("intake/drive/intake speed", 1, kEnableTuning && true);
     private SmartDashboardNumber intakeAutoSpeed = new SmartDashboardNumber("intake/drive/intake auto speed", 1, kEnableTuning && true);
     private SmartDashboardNumber intakePulsateSpeed = new SmartDashboardNumber("intake/drive/pulsate speed", 0.3, kEnableTuning && true);
     private SmartDashboardNumber intakeReverseSpeed = new SmartDashboardNumber("intake/drive/intake reverse speed", -0.3, kEnableTuning && true);
@@ -74,7 +74,7 @@ public class Intake extends SubsystemBase{
         this.driveLeftMotor.withTuningEnabled(kEnableTuning && true)
         .withMotorOutputConfigs(
             new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withInverted(InvertedValue.Clockwise_Positive) //COUNTER FOR TWO MOTORS
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
@@ -83,8 +83,8 @@ public class Intake extends SubsystemBase{
             .withSupplyCurrentLimit(45)
             .withSupplyCurrentLimitEnable(true)
             .withStatorCurrentLimit(80)
-            .withStatorCurrentLimitEnable(true)
-        ).withFollowerMotor(new TalonFX(22, "*"), MotorAlignmentValue.Opposed);
+            .withStatorCurrentLimitEnable(true));
+        // ).withFollowerMotor(new TalonFX(22, "*"), MotorAlignmentValue.Opposed);
 
         this.extensionLeftMotor.withTuningEnabled(kEnableTuning && true)
         .withMotorOutputConfigs(

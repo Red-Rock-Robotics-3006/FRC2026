@@ -180,11 +180,11 @@ public class Autos {
             ),
 
             //first swipe sotm to trench
-            Commands.parallel(
+            Commands.deadline(
                 drivetrain.followTrajectory("L_TwoSweepsDepot", 1),
                 Commands.sequence(
                     Commands.waitSeconds(0.15),
-                    this.shootRaiseHopperAuto(4.41)
+                    this.shootRaiseHopperAuto(4.35)
                 )
             ),
 
@@ -206,7 +206,7 @@ public class Autos {
             //move away from depot
             Commands.deadline(
                 drivetrain.followTrajectory("L_TwoSweepsDepot", 4),
-                this.shootRaiseHopperAuto(2.4)
+                this.shootRaiseHopperAuto(2.05)
             ),
 
             superstructure.intake.stopIntakeCommand()

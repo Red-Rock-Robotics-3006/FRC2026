@@ -55,8 +55,8 @@ public class PracticeTimer {
         char autoWinner = (gameStr.isEmpty()) ? 'B' : gameStr.charAt(0);
 
         boolean wonAuto = 
-            autoWinner == 'R' && alliance == Alliance.Red ||
-            autoWinner == 'B' && alliance == Alliance.Blue;
+            (autoWinner == 'R' && alliance == Alliance.Red) ||
+            (autoWinner == 'B' && alliance == Alliance.Blue);
 
         String displayString = "";
 
@@ -102,7 +102,11 @@ public class PracticeTimer {
         SmartDashboard.putString("Match Timer/Headphone Counter/Match state", this.matchState.toString());
         SmartDashboard.putBoolean("Match Timer/Headphone Counter/disabled", DriverStation.isDisabled());
         SmartDashboard.putBoolean("Match Timer/Headphone Counter/is auto", DriverStation.isAutonomous());
-        SmartDashboard.putBoolean("Match Timer/Headphone Counter/auto won", ((kPractice) ? true : wonAuto));
+        SmartDashboard.putBoolean("Match Timer/Headphone Counter/auto won", true);//((kPractice) ? true : wonAuto));
+        Logger.recordOutput("Match Timer/calculated won auto", wonAuto);
+        Logger.recordOutput("Match Timer/Alliance", alliance);
+        Logger.recordOutput("Match Timer/auto winner char", autoWinner);
+        Logger.recordOutput("Match Timer/Game Specific Message", DriverStation.getGameSpecificMessage());
         Logger.recordOutput("Match Timer/Match State", this.matchState.toString());
     }
 

@@ -203,7 +203,8 @@ public class LED extends SubsystemBase{
                 this.setLights(BLUE);
                 break;
             case SHOOTING_JAMMED:
-                this.blinkHard(RED, 12);
+                // this.blinkHard(RED, 12);
+                this.blink(GREEN, 5);
                 break;
             case SHOOTING:
                 this.blink(GREEN, 5);
