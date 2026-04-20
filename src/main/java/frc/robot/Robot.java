@@ -93,7 +93,9 @@ public class Robot extends LoggedRobot {
     public void autonomousPeriodic() {}
 
     @Override
-    public void autonomousExit() {}
+    public void autonomousExit() {
+        // CommandSwerveDrivetrain.getInstance().setLowerCurrentLimits();
+    }
 
     @Override
     public void teleopInit() {

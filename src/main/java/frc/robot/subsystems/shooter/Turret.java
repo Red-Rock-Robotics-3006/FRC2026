@@ -1,5 +1,7 @@
 package frc.robot.subsystems.shooter;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -35,7 +37,7 @@ public class Turret extends SubsystemBase{
 
     private double targetTurretPositionMotorRotations = 0;
 
-    private SmartDashboardNumber turretTolerance = new SmartDashboardNumber("turret/tolerance", 2, kEnableTurretTuning && true);
+    private SmartDashboardNumber turretTolerance = new SmartDashboardNumber("turret/tolerance", 4.5, kEnableTurretTuning && true);
 
     private RedRockTalon turretMotor = new RedRockTalon(44, "turret-motor", "*");
 
@@ -249,6 +251,8 @@ public class Turret extends SubsystemBase{
         SmartDashboard.putNumber("turret/ccoder A", this.ccoderA.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putNumber("turret/ccoder B", this.ccoderB.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putNumber("turret/target motor rotations", this.targetTurretPositionMotorRotations);
+
+        Logger.recordOutput("turret/at target", this.atTurretAngle());
 
         // SmartDashboard.putNumber("turret/crt/result", this.crtDegrees(crtTestA.getNumber() / 16.0, crtTestB.getNumber() / 15.0));
     }

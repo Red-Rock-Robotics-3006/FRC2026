@@ -64,7 +64,7 @@ public class Superstructure extends SubsystemBase {
         TURRET_TRACKING, //turret tracking
         FULL_TRACKING, //flywheels spin up, hood tracking, turret tracking
         SHOOTING, //index spinning, flywheels spinning, hood tracking, turret tracking
-        SHOOTING_JAMMED, //index jammed, flywheels spinning, hood tracking, turret tracking
+        // SHOOTING_JAMMED, //index jammed, flywheels spinning, hood tracking, turret tracking
 
         MANUAL_SHOT, //any manual shot, turret at set angle, hood at set angle, flywheels at set rpm
         LERP_TUNING, //for tuning lerp tables, turret tracking, hood at set angle, flywheels at set rpm
@@ -187,28 +187,29 @@ public class Superstructure extends SubsystemBase {
         
 
         switch (robotState) {
-            case SHOOTING_JAMMED:
-                // if (indexTimer.get() > indexJamReverseTime.getNumber()) setState(lastState);
-                if (!index.isJamming()) setState(lastState);
+            // case SHOOTING_JAMMED:
+            //     // if (indexTimer.get() > indexJamReverseTime.getNumber()) setState(lastState);
+            //     if (!index.isJamming()) setState(lastState);
             case SHOOTING:
                 if (!turret.atTurretAngle()) setState(RobotState.FULL_TRACKING);
             case FULL_TRACKING:
-                if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
+                // if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
                 if (!inAllianceZone() && !inLobEnabledZone()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
                 else {shooter.setShotParameter(dynamicShotParameter);}
-                if (this.robotState != RobotState.SHOOTING_JAMMED && this.readyToShoot()) setState(RobotState.SHOOTING);
+                if (this.readyToShoot()) setState(RobotState.SHOOTING);
             case TURRET_TRACKING:
                 turret.setTurretAngle(turretTargetAngle.plus(dtTurretCompensation));
                 break;
             
             case MANUAL_SHOT:
-                if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
+                // if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
                 turret.setTurretAngle(Rotation2d.fromDegrees(90));
                 if (readyToShoot()) index.startIndex();
                 break;
             case LERP_TUNING:
-                if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
-                turret.setTurretAngle(turretTargetAngle.plus(dtTurretCompensation));
+                // if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
+                // turret.setTurretAngle(turretTargetAngle.plus(dtTurretCompensation));
+                turret.setTurretAngle(Rotation2d.fromDegrees(90));
                 if (readyToShoot()) index.startIndex();
                 break;
             case NEAR_TRENCH:
@@ -299,10 +300,10 @@ public class Superstructure extends SubsystemBase {
                 index.stopIndex();
                 shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);
                 break;
-            case SHOOTING_JAMMED:
+            // case SHOOTING_JAMMED:
                 // indexTimer.reset();
                 // index.reverseIndex();
-                break;
+                // break;
             default:
                 break;
         }

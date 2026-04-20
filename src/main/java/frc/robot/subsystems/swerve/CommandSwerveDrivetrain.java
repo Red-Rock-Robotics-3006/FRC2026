@@ -7,7 +7,9 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -777,6 +779,19 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command resetOdometryCommand(String pathName, int index) {
         return this.factory.resetOdometry(pathName, index);
+    }
+
+    public void setLowerCurrentLimits() {
+        // var modules = this.getModules();
+        // for (int i = 0; i < modules.length; i++) {
+        //     this.getModule(i).getDriveMotor().getConfigurator().apply(
+        //         new CurrentLimitsConfigs()
+        //         .withSupplyCurrentLimit(45)
+        //         .withSupplyCurrentLimitEnable(true)
+        //         .withStatorCurrentLimit(80)
+        //         .withStatorCurrentLimitEnable(true)
+        //     );
+        // }
     }
 
     public static CommandSwerveDrivetrain getInstance() {

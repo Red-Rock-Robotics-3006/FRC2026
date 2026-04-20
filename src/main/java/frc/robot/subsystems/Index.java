@@ -67,7 +67,7 @@ public class Index extends SubsystemBase {
             new CurrentLimitsConfigs()
             .withSupplyCurrentLimit(45)
             .withSupplyCurrentLimitEnable(true)
-            .withStatorCurrentLimit(80)
+            .withStatorCurrentLimit(100)
             .withStatorCurrentLimitEnable(true)
         ).withSpikeThreshold(79);
 
