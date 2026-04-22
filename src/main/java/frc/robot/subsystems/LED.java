@@ -29,6 +29,8 @@ public class LED extends SubsystemBase{
     public final Color RED = new Color(255, 0, 0);
     
     private int loopControl = 0;
+    private int blinkSetStartLoop = -1;
+    private boolean blinkSetActiveThisCycle = false;
     private SmartDashboardNumber rainbowControl = new SmartDashboardNumber("led/rainbow speed", 3);
     private SmartDashboardNumber policeSpeed = new SmartDashboardNumber("led/police speed", 6);
 
@@ -87,11 +89,34 @@ public class LED extends SubsystemBase{
     }
 
     public void blinkSetLights(Color c, int blinks, int freq) {
-        if (loopControl < freq * blinks) {
-            if (loopControl % freq * 2 < freq) this.setLights(c);
-            else this.setLights(OFF);
+        blinkSetActiveThisCycle = true;
+
+        if (freq <= 0 || blinks <= 0) {
+            setLights(c);
+            return;
         }
-        else setLights(c);
+
+        int fullCycle = freq * 2;
+        if (blinkSetStartLoop < 0) blinkSetStartLoop = loopControl;
+
+        int elapsed = loopControl - blinkSetStartLoop;
+        int completedBlinks = elapsed / fullCycle;
+
+        if (completedBlinks >= blinks) {
+            setLights(c);
+            return;
+        }
+
+        int cycle = elapsed % fullCycle;
+        double brightness = cycle < freq
+            ? (double) cycle / freq
+            : (double) (fullCycle - cycle) / freq;
+
+        setLights(new Color(
+            c.red * brightness,
+            c.green * brightness,
+            c.blue * brightness
+        ));
     }
 
     private int rainbowHue = 0;
@@ -194,6 +219,7 @@ public class LED extends SubsystemBase{
     @Override
     public void periodic() {
         loopControl++;
+        blinkSetActiveThisCycle = false;
 
         switch (superstructure.getRobotState()) {
             case MANUAL_SHOT:
@@ -207,7 +233,7 @@ public class LED extends SubsystemBase{
             //     this.blink(GREEN, 5);
             //     break;
             case SHOOTING:
-                this.blink(GREEN, 5);
+                this.blinkSetLights(GREEN, 2, 5);
                 break;
             case FULL_TRACKING:
                 this.setLights(RED);
@@ -223,6 +249,7 @@ public class LED extends SubsystemBase{
                 break;
         }
 
+        if (!blinkSetActiveThisCycle) blinkSetStartLoop = -1;
         if (policeEnabled) this.police();
         
         this.control.setData(buffer);

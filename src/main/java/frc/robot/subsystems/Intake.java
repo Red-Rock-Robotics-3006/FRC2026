@@ -74,7 +74,7 @@ public class Intake extends SubsystemBase{
         this.driveLeftMotor.withTuningEnabled(kEnableTuning && true)
         .withMotorOutputConfigs(
             new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive) //COUNTER FOR TWO MOTORS
+            .withInverted(InvertedValue.CounterClockwise_Positive)
             .withPeakForwardDutyCycle(1d)
             .withPeakReverseDutyCycle(-1d)
             .withNeutralMode(NeutralModeValue.Brake)
