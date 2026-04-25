@@ -50,7 +50,7 @@ public class Robot extends LoggedRobot {
             // Logger.addDataReceiver(new NT4Publisher());
         }
 
-        RobotController.setBrownoutVoltage(Volts.of(5.5));
+        // RobotController.setBrownoutVoltage(Volts.of(5.5));
 
         Logger.start();
 

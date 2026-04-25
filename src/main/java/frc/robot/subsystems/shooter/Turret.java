@@ -82,17 +82,17 @@ public class Turret extends SubsystemBase{
             .withMotionMagicCruiseVelocity(300)
             .withMotionMagicJerk(99999)
         );
-
+   
         ccoderA.getConfigurator().apply(
             new MagnetSensorConfigs()
-            .withMagnetOffset(-0.36181640625)
+            .withMagnetOffset(-0.22705078125)
             .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
             .withAbsoluteSensorDiscontinuityPoint(1.0)
         );
 
         ccoderB.getConfigurator().apply(
             new MagnetSensorConfigs()
-            .withMagnetOffset(-0.972412109375)
+            .withMagnetOffset(-0.96923828125)
             .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
             .withAbsoluteSensorDiscontinuityPoint(1.0)
         );

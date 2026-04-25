@@ -33,7 +33,7 @@ public class Intake extends SubsystemBase{
     private SmartDashboardNumber maxExtensionRotation = new SmartDashboardNumber("intake/extension/max rotation", 11.5, kEnableTuning && true);
     private SmartDashboardNumber minExtensionRotation = new SmartDashboardNumber("intake/extension/min rotation", 0, kEnableTuning && true);
 
-    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0.4, kEnableTuning && false);
+    private SmartDashboardNumber intakeDeployPosition = new SmartDashboardNumber("intake/extension/deploy position", 0.1, kEnableTuning && false);
     private SmartDashboardNumber intakeStowPosition = new SmartDashboardNumber("intake/extension/stow position", 10.5, kEnableTuning && false);
     private SmartDashboardNumber intakePushRetractPosition = new SmartDashboardNumber("intake/extension/push retract position", 4.5, kEnableTuning && true);
     private SmartDashboardNumber intakePushDeployPosition = new SmartDashboardNumber("intake/extension/push deploy position", 1, kEnableTuning && false);
