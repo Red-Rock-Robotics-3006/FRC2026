@@ -51,127 +51,127 @@ public class Autos {
             .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
     );
 
-    public RedRockAuto L_TwoSweeps = new RedRockAuto("Left - Two Sweeps",
-        Commands.sequence(
-            Commands.parallel(
-                this.initAuto(),
-                drivetrain.followTrajectoryMirrored("R_FarSweep")
-            ),
-            this.shootRaiseHopperAuto(4),
+    // public RedRockAuto L_TwoSweeps = new RedRockAuto("Left - Two Sweeps",
+    //     Commands.sequence(
+    //         Commands.parallel(
+    //             this.initAuto(),
+    //             drivetrain.followTrajectoryMirrored("R_FarSweep")
+    //         ),
+    //         this.shootRaiseHopperAuto(4),
 
-            Commands.parallel(
-                drivetrain.followTrajectoryMirrored("R_CloseSweep"),
-                this.reverseIndexAuto()
-            ),
-            this.shootRaiseHopperAuto(5),
+    //         Commands.parallel(
+    //             drivetrain.followTrajectoryMirrored("R_CloseSweep"),
+    //             this.reverseIndexAuto()
+    //         ),
+    //         this.shootRaiseHopperAuto(5),
 
-            superstructure.intake.stopIntakeCommand(),
-            drivetrain.followTrajectoryMirrored("R_Leave")
-        ),
+    //         superstructure.intake.stopIntakeCommand(),
+    //         drivetrain.followTrajectoryMirrored("R_Leave")
+    //     ),
 
-        Choreo.loadTrajectory("R_FarSweep")
-            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
-            .map(ChoreoAllianceFlipUtil.getMirrorY()::flip).get(),
+    //     Choreo.loadTrajectory("R_FarSweep")
+    //         .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
+    //         .map(ChoreoAllianceFlipUtil.getMirrorY()::flip).get(),
         
-        Choreo.loadTrajectory("R_FarSweep")
-            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
-            .map(ChoreoAllianceFlipUtil.getMirrorY()::flip)
-            .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
-    );
+    //     Choreo.loadTrajectory("R_FarSweep")
+    //         .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
+    //         .map(ChoreoAllianceFlipUtil.getMirrorY()::flip)
+    //         .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
+    // );
 
-    public RedRockAuto R_TwoSweeps = new RedRockAuto("Right - Two Sweeps",
-        Commands.sequence(
-            Commands.parallel(
-                this.initAuto(),
-                drivetrain.followTrajectory("R_FarSweep")
-            ),
-            this.shootRaiseHopperAuto(4),
+    // public RedRockAuto R_TwoSweeps = new RedRockAuto("Right - Two Sweeps",
+    //     Commands.sequence(
+    //         Commands.parallel(
+    //             this.initAuto(),
+    //             drivetrain.followTrajectory("R_FarSweep")
+    //         ),
+    //         this.shootRaiseHopperAuto(4),
 
-            Commands.parallel(
-                drivetrain.followTrajectory("R_CloseSweep"),
-                this.reverseIndexAuto()
-            ),
-            this.shootRaiseHopperAuto(5),
+    //         Commands.parallel(
+    //             drivetrain.followTrajectory("R_CloseSweep"),
+    //             this.reverseIndexAuto()
+    //         ),
+    //         this.shootRaiseHopperAuto(5),
 
-            superstructure.intake.stopIntakeCommand(),
-            drivetrain.followTrajectory("R_Leave")
-        ),
+    //         superstructure.intake.stopIntakeCommand(),
+    //         drivetrain.followTrajectory("R_Leave")
+    //     ),
 
-        Choreo.loadTrajectory("R_FarSweep")
-            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue())).get(),
+    //     Choreo.loadTrajectory("R_FarSweep")
+    //         .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue())).get(),
         
-        Choreo.loadTrajectory("R_FarSweep")
-            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
-            .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
-    );
+    //     Choreo.loadTrajectory("R_FarSweep")
+    //         .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
+    //         .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
+    // );
 
-    public RedRockAuto L_TwoSweepsBump = new RedRockAuto("Left - Two Sweeps Bump",
-        Commands.sequence(
-            Commands.parallel(
-                this.initAuto(),
-                drivetrain.followTrajectoryMirrored("R_FarSweepBump")
-            ),
-            Commands.parallel(
-                drivetrain.followTrajectoryMirrored("R_SOTM"),
-                Commands.sequence(
-                    Commands.waitSeconds(0.5),
-                    this.shootRaiseHopperAuto(4.5)
-                )
-            ),
+    // public RedRockAuto L_TwoSweepsBump = new RedRockAuto("Left - Two Sweeps Bump",
+    //     Commands.sequence(
+    //         Commands.parallel(
+    //             this.initAuto(),
+    //             drivetrain.followTrajectoryMirrored("R_FarSweepBump")
+    //         ),
+    //         Commands.parallel(
+    //             drivetrain.followTrajectoryMirrored("R_SOTM"),
+    //             Commands.sequence(
+    //                 Commands.waitSeconds(0.5),
+    //                 this.shootRaiseHopperAuto(4.5)
+    //             )
+    //         ),
 
-            Commands.parallel(
-                drivetrain.followTrajectoryMirrored("R_CloseSweepBump"),
-                this.reverseIndexAuto()
-            ),
-            this.shootRaiseHopperAuto(4),
+    //         Commands.parallel(
+    //             drivetrain.followTrajectoryMirrored("R_CloseSweepBump"),
+    //             this.reverseIndexAuto()
+    //         ),
+    //         this.shootRaiseHopperAuto(4),
 
-            superstructure.intake.stopIntakeCommand(),
-            drivetrain.followTrajectoryMirrored("R_LeaveAlt")
-        ),
+    //         superstructure.intake.stopIntakeCommand(),
+    //         drivetrain.followTrajectoryMirrored("R_LeaveAlt")
+    //     ),
 
-        Choreo.loadTrajectory("R_FarSweepBump")
-            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
-            .map(ChoreoAllianceFlipUtil.getMirrorY()::flip).get(),
+    //     Choreo.loadTrajectory("R_FarSweepBump")
+    //         .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
+    //         .map(ChoreoAllianceFlipUtil.getMirrorY()::flip).get(),
         
-        Choreo.loadTrajectory("R_FarSweepBump")
-            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
-            .map(ChoreoAllianceFlipUtil.getMirrorY()::flip)
-            .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
-    );
+    //     Choreo.loadTrajectory("R_FarSweepBump")
+    //         .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
+    //         .map(ChoreoAllianceFlipUtil.getMirrorY()::flip)
+    //         .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
+    // );
 
-    public RedRockAuto R_TwoSweepsBump = new RedRockAuto("Right - Two Sweeps Bump",
-        Commands.sequence(
-            Commands.parallel(
-                this.initAuto(),
-                drivetrain.followTrajectory("R_FarSweepBump")
-            ),
-            Commands.parallel(
-                drivetrain.followTrajectory("R_SOTM"),
-                Commands.sequence(
-                    Commands.waitSeconds(0.5),
-                    this.shootRaiseHopperAuto(4.5)
-                )
-            ),
+    // public RedRockAuto R_TwoSweepsBump = new RedRockAuto("Right - Two Sweeps Bump",
+    //     Commands.sequence(
+    //         Commands.parallel(
+    //             this.initAuto(),
+    //             drivetrain.followTrajectory("R_FarSweepBump")
+    //         ),
+    //         Commands.parallel(
+    //             drivetrain.followTrajectory("R_SOTM"),
+    //             Commands.sequence(
+    //                 Commands.waitSeconds(0.5),
+    //                 this.shootRaiseHopperAuto(4.5)
+    //             )
+    //         ),
 
-            Commands.parallel(
-                drivetrain.followTrajectory("R_CloseSweepBump"),
-                this.reverseIndexAuto()
-            ),
-            this.shootRaiseHopperAuto(4),
+    //         Commands.parallel(
+    //             drivetrain.followTrajectory("R_CloseSweepBump"),
+    //             this.reverseIndexAuto()
+    //         ),
+    //         this.shootRaiseHopperAuto(4),
 
-            superstructure.intake.stopIntakeCommand(),
-            drivetrain.followTrajectory("R_LeaveAlt")
-        ),
+    //         superstructure.intake.stopIntakeCommand(),
+    //         drivetrain.followTrajectory("R_LeaveAlt")
+    //     ),
 
-        Choreo.loadTrajectory("R_FarSweepBump")
-            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue())).get(),
+    //     Choreo.loadTrajectory("R_FarSweepBump")
+    //         .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue())).get(),
         
-        Choreo.loadTrajectory("R_FarSweepBump")
-            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
-            .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
-    );
+    //     Choreo.loadTrajectory("R_FarSweepBump")
+    //         .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
+    //         .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
+    // );
 
-    public RedRockAuto L_TwoSweepsBumpDepot = new RedRockAuto("Left - Two Sweeps Bump Depot",
+    public RedRockAuto L_TwoSweepsDepot = new RedRockAuto("Left - Two Sweeps Depot",
         Commands.sequence(
             //first swipe intake
             Commands.parallel(
@@ -220,21 +220,119 @@ public class Autos {
             .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
     );
 
-    public RedRockAuto M_DepotOutpost = new RedRockAuto("Middle - Depot Outpost",
+    public RedRockAuto L_TwoSweeps = new RedRockAuto("Left - Two Sweeps",
+        Commands.sequence(
+            //first swipe intake
+            Commands.parallel(
+                this.initAuto(),
+                drivetrain.followTrajectory("L_TwoSweeps", 0)
+            ),
+
+            //first swipe sotm to trench
+            Commands.deadline(
+                drivetrain.followTrajectory("L_TwoSweeps", 1),
+                Commands.sequence(
+                    Commands.waitSeconds(0.15),
+                    this.shootRaiseHopperAuto(4.35)
+                )
+            ),
+
+            //second swipe intake
+            Commands.parallel(
+                drivetrain.followTrajectory("L_TwoSweeps", 2),
+                this.reverseIndexAuto()
+            ),
+
+            //second swipe sotm to trench
+            Commands.deadline(
+                drivetrain.followTrajectory("L_TwoSweeps", 3),
+                this.shootRaiseHopperAuto(5.6)
+            ),
+
+            superstructure.intake.stopIntakeCommand()
+        ),
+
+        Choreo.loadTrajectory("L_TwoSweeps")
+            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue())).get(),
+        
+        Choreo.loadTrajectory("L_TwoSweeps")
+            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
+            .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
+    );
+
+    public RedRockAuto R_TwoSweeps = new RedRockAuto("Right - Two Sweeps",
+        Commands.sequence(
+            //first swipe intake
+            Commands.parallel(
+                this.initAuto(),
+                drivetrain.followTrajectory("R_TwoSweeps", 0)
+            ),
+
+            //first swipe sotm to trench
+            Commands.deadline(
+                drivetrain.followTrajectory("R_TwoSweeps", 1),
+                Commands.sequence(
+                    Commands.waitSeconds(0.15),
+                    this.shootRaiseHopperAuto(4.35)
+                )
+            ),
+
+            //second swipe intake
+            Commands.parallel(
+                drivetrain.followTrajectory("R_TwoSweeps", 2),
+                this.reverseIndexAuto()
+            ),
+
+            //second swipe sotm to trench
+            Commands.deadline(
+                drivetrain.followTrajectory("R_TwoSweeps", 3),
+                this.shootRaiseHopperAuto(5.6)
+            ),
+
+            superstructure.intake.stopIntakeCommand()
+        ),
+
+        Choreo.loadTrajectory("R_TwoSweeps")
+            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue())).get(),
+        
+        Choreo.loadTrajectory("R_TwoSweeps")
+            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
+            .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
+    );
+
+    public RedRockAuto M_Depot = new RedRockAuto("Middle - Depot",
         Commands.parallel(
-            drivetrain.followTrajectory("M_DepotOutpost"),
+            drivetrain.followTrajectory("M_Depot"),
             Commands.sequence(
                 this.initAuto(),
                 Commands.waitSeconds(0.5),
-                this.shootAuto(10),
+                this.shootAuto(7),
                 this.shootRaiseHopperAuto(8)
             )
         ),
 
-        Choreo.loadTrajectory("M_DepotOutpost")
+        Choreo.loadTrajectory("M_Depot")
             .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue())).get(),
         
-        Choreo.loadTrajectory("M_DepotOutpost")
+        Choreo.loadTrajectory("M_Depot")
+            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
+            .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
+    );
+
+    public RedRockAuto M_Preload = new RedRockAuto("Middle - Preload",
+        Commands.parallel(
+            drivetrain.followTrajectory("M_Preload"),
+            Commands.sequence(
+                this.initAuto(),
+                Commands.waitSeconds(0.5),
+                this.shootRaiseHopperAuto(5)
+            )
+        ),
+
+        Choreo.loadTrajectory("M_Preload")
+            .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue())).get(),
+        
+        Choreo.loadTrajectory("M_Preload")
             .flatMap(traj -> traj.getInitialPose(!drivetrain.isBlue()))
             .map(ChoreoAllianceFlipUtil.getFlipper()::flip).get()
     );

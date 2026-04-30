@@ -45,11 +45,12 @@ public class RobotContainer {
         autoChooser.setDefaultOption(autos.noAuto.getName(), autos.noAuto);
 
         autoChooser.addOption(autos.L_TwoSweeps.getName(), autos.L_TwoSweeps);
-        autoChooser.addOption(autos.L_TwoSweepsBump.getName(), autos.L_TwoSweepsBump);
-        autoChooser.addOption(autos.L_TwoSweepsBumpDepot.getName(), autos.L_TwoSweepsBumpDepot);
+        autoChooser.addOption(autos.L_TwoSweepsDepot.getName(), autos.L_TwoSweepsDepot);
+        
         autoChooser.addOption(autos.R_TwoSweeps.getName(), autos.R_TwoSweeps);
-        autoChooser.addOption(autos.R_TwoSweepsBump.getName(), autos.R_TwoSweepsBump);
-        autoChooser.addOption(autos.M_DepotOutpost.getName(), autos.M_DepotOutpost);
+
+        autoChooser.addOption(autos.M_Depot.getName(), autos.M_Depot);
+        autoChooser.addOption(autos.M_Preload.getName(), autos.M_Preload);
         
         autoChooser.addOption(autos.fullTest.getName(), autos.fullTest);
 

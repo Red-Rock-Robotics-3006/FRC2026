@@ -48,6 +48,7 @@ public class Superstructure extends SubsystemBase {
     private SmartDashboardNumber trenchZoneTolerance = new SmartDashboardNumber("superstructure/trench zone tolerance", 0.5, kTuning); //tolerance for hood near trench, probably best to be generous with this one
     private SmartDashboardBoolean trenchSafetyEnabled = new SmartDashboardBoolean("superstructure/trench safety enabled", true);
     // private SmartDashboardNumber indexJamReverseTime = new SmartDashboardNumber("index/index jam reverse time", 0.5);
+    // private SmartDashboardNumber indexJamDelayTime = new SmartDashboardNumber("index/index jam reverse time", 1);
 
     private SmartDashboardNumber autoAimOffsetRPM = new SmartDashboardNumber("superstructure/auto aim offset rpm", 0);
     private SmartDashboardNumber autoAimOffsetHood = new SmartDashboardNumber("superstructure/auto aim offset hood", 0);
@@ -105,7 +106,8 @@ public class Superstructure extends SubsystemBase {
         return shooter.atHoodAngle() && shooter.atShooterSpeed() && turret.atTurretAngle();
     }
 
-    // private Timer indexTimer = new Timer();
+    // private Timer indexJamReverseTimer = new Timer();
+    // private Timer indexJamDelayTimer = new Timer();
 
     private Pose2d dtPose;
     private Pose2d shooterPose;
@@ -188,12 +190,12 @@ public class Superstructure extends SubsystemBase {
 
         switch (robotState) {
             // case SHOOTING_JAMMED:
-            //     // if (indexTimer.get() > indexJamReverseTime.getNumber()) setState(lastState);
-            //     if (!index.isJamming()) setState(lastState);
+                // if (indexJamReverseTimer.get() > indexJamReverseTime.getNumber()) setState(lastState);
+                // if (!index.isJamming()) setState(lastState);
             case SHOOTING:
                 if (!turret.atTurretAngle()) setState(RobotState.FULL_TRACKING);
             case FULL_TRACKING:
-                // if (index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
+                // if (indexJamDelayTimer.get() > indexJamDelayTime.getNumber() && index.isJamming()) setState(RobotState.SHOOTING_JAMMED);
                 if (!inAllianceZone() && !inLobEnabledZone()) {shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);}
                 else {shooter.setShotParameter(dynamicShotParameter);}
                 if (this.readyToShoot()) setState(RobotState.SHOOTING);
@@ -286,6 +288,7 @@ public class Superstructure extends SubsystemBase {
                 index.startIndex();
                 break;
             case FULL_TRACKING:
+                // indexJamDelayTimer.reset();
                 index.stopIndex();
                 break;
             case TURRET_TRACKING:
@@ -301,9 +304,9 @@ public class Superstructure extends SubsystemBase {
                 shooter.setShotParameter(SHOOTER_IDLE_PARAMETER);
                 break;
             // case SHOOTING_JAMMED:
-                // indexTimer.reset();
-                // index.reverseIndex();
-                // break;
+            //     indexJamReverseTimer.reset();
+            //     index.reverseIndex();
+            //     break;
             default:
                 break;
         }
