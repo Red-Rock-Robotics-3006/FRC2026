@@ -44,10 +44,14 @@ public class RobotContainer {
     private void configureCompSelector() {
         autoChooser.setDefaultOption(autos.noAuto.getName(), autos.noAuto);
 
-        autoChooser.addOption(autos.L_TwoSweeps.getName(), autos.L_TwoSweeps);
         autoChooser.addOption(autos.L_TwoSweepsDepot.getName(), autos.L_TwoSweepsDepot);
+        autoChooser.addOption(autos.L_TwoSweeps.getName(), autos.L_TwoSweeps);
+        autoChooser.addOption(autos.L_Follow.getName(), autos.L_Follow);
+        autoChooser.addOption(autos.L_Leave.getName(), autos.L_Leave);
+        autoChooser.addOption(autos.L_DepotLeave.getName(), autos.L_DepotLeave);
         
         autoChooser.addOption(autos.R_TwoSweeps.getName(), autos.R_TwoSweeps);
+        autoChooser.addOption(autos.R_Follow.getName(), autos.R_Follow);
 
         autoChooser.addOption(autos.M_Depot.getName(), autos.M_Depot);
         autoChooser.addOption(autos.M_Preload.getName(), autos.M_Preload);

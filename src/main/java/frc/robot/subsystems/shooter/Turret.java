@@ -37,7 +37,7 @@ public class Turret extends SubsystemBase{
 
     private double targetTurretPositionMotorRotations = 0;
 
-    private SmartDashboardNumber turretTolerance = new SmartDashboardNumber("turret/tolerance", 4.5, kEnableTurretTuning && true);
+    private SmartDashboardNumber turretTolerance = new SmartDashboardNumber("turret/tolerance", 15, kEnableTurretTuning && true);
 
     private RedRockTalon turretMotor = new RedRockTalon(44, "turret-motor", "*");
 
@@ -56,8 +56,10 @@ public class Turret extends SubsystemBase{
 
     private LerpingSmartDashboardNumber turretRestrictions
         = new LerpingSmartDashboardNumber(
+            // 100, 0, 
+            // 550, 50.1484375, 
             -270, 0, 
-            180, 50.1484375, 
+            180, 50.1484375,
             // 270, 110.0/16.0,
             "turret/angle-degrees", "turret/motor-rotations", 
             kEnableTurretTuning && true);
@@ -85,14 +87,20 @@ public class Turret extends SubsystemBase{
    
         ccoderA.getConfigurator().apply(
             new MagnetSensorConfigs()
-            .withMagnetOffset(-0.225341796875)
+            .withMagnetOffset(-0.474853515625)
+            // .withMagnetOffset(-0.240234375) // TODO calibrate
+            // .withMagnetOffset(0.6328125)
+            // .withMagnetOffset(-0.225341796875)
             .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
             .withAbsoluteSensorDiscontinuityPoint(1.0)
         );
 
         ccoderB.getConfigurator().apply(
             new MagnetSensorConfigs()
-            .withMagnetOffset(-0.149169921875)
+            .withMagnetOffset(-0.933837890625)
+            // .withMagnetOffset(-0.77587890625) // TODO calibrate
+            // .withMagnetOffset(0.892822265625)
+            // .withMagnetOffset(-0.149169921875)
             .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
             .withAbsoluteSensorDiscontinuityPoint(1.0)
         );
@@ -147,7 +155,7 @@ public class Turret extends SubsystemBase{
 
         double absDegrees = (absTurretToothCount / kTurretToothCount) * 360 + turretRestrictions.getMinInput();
 
-        return absDegrees;
+        return absDegrees; // TODO calibrate -175
     }
     
     @SuppressWarnings("unused")
@@ -212,7 +220,7 @@ public class Turret extends SubsystemBase{
 
     public boolean atTurretAngle() {
         return Math.abs(turretMotor.motor.getPosition().getValueAsDouble() - this.targetTurretPositionMotorRotations)
-            < Math.abs(turretRestrictions.convertOutputByRate(turretTolerance.getNumber()));
+            < Math.abs(turretRestrictions.convertByInputRate(turretTolerance.getNumber()));
     }
 
     public double getTruePositionDegrees() {

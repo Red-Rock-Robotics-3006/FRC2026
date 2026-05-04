@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.shooter.*;
 import frc.robot.subsystems.shooter.autoaim.*;
 import frc.robot.subsystems.swerve.*;
-import frc.robot.subsystems.swerve.CommandSwerveDrivetrain.DriveState;
 import frc.robot.subsystems.vision.Localization;
 
 import redrocklib.logging.*;
@@ -227,12 +228,13 @@ public class Superstructure extends SubsystemBase {
                 break;
         }
 
-        if (this.robotState != RobotState.NEAR_TRENCH && nearTrench() && trenchSafetyEnabled.getValue() && drivetrain.getDriveState() != DriveState.AUTO) {setState(RobotState.NEAR_TRENCH);}
+        if (this.robotState != RobotState.NEAR_TRENCH && nearTrench() && trenchSafetyEnabled.getValue()) {setState(RobotState.NEAR_TRENCH);}
 
 
         // SMARTDASHBOARD LOGGING | COMPETITION
 
         SmartDashboard.putString("ROBOT STATE", this.robotState.toString());
+        Logger.recordOutput("ROBOT STATE", this.robotState);
         SmartDashboard.putString("LAST STATE", this.lastState.toString());
         SmartDashboard.putBoolean("superstructure/ready to shoot", this.readyToShoot());
         SmartDashboard.putBoolean("superstructure/in alliance zone", inAllianceZone());
@@ -249,6 +251,11 @@ public class Superstructure extends SubsystemBase {
             poses.add(new Pose2d(shooterPose.getX(), shooterPose.getY(), turretTargetAngle.plus(dtRotation)));
             poses.add(dynamicTargetPose);
             poses.add(staticTargetPose);
+
+            for (int i = 0; i < poses.size(); i++) {
+                Logger.recordOutput("superstructure/pose" + i, poses.get(i));
+            }
+
             fieldObject2d.setPoses(poses);
 
             SmartDashboard.putBoolean("superstructure/in lob enabled zone", this.inLobEnabledZone());

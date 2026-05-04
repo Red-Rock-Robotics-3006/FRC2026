@@ -233,7 +233,7 @@ public class LED extends SubsystemBase{
             //     // this.blink(GREEN, 5);
                 // break;
             case SHOOTING:
-                this.blinkSetLights(GREEN, 2, 5);
+                this.blink(GREEN, 5);
                 break;
             case FULL_TRACKING:
                 this.setLights(RED);

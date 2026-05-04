@@ -30,7 +30,7 @@ public class Index extends SubsystemBase {
 
     private Slot1Configs slot1Configs = new Slot1Configs();
 
-    private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 1).withTuningEnabled(true);
+    private SmartDashboardNumber indexSpeed = new SmartDashboardNumber("index/index speed", 0.93).withTuningEnabled(true);
     private SmartDashboardNumber indexReverseSpeed = new SmartDashboardNumber("index/index reverse speed", -0.3).withTuningEnabled(true);
     private SmartDashboardNumber dyeRotorJamSpeed = new SmartDashboardNumber("index/index jam speed rps", 5).withTuningEnabled(true);
 

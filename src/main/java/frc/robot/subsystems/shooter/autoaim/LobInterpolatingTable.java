@@ -27,11 +27,11 @@ public class LobInterpolatingTable {
                 entry(
                     Double.valueOf(7.9501400162639), 
                     new ShotParameter(44.67, 2850)
-                ),
-                entry(
-                    Double.valueOf(9), 
-                    new ShotParameter(44.67, 3100)
                 )//,
+                // entry(
+                //     Double.valueOf(9), 
+                //     new ShotParameter(44.67, 3100)
+                // ),
                 // entry(
                 //     Double.valueOf(12.3204298138742), 
                 //     new ShotParameter(44.67, 3800)

@@ -1,5 +1,7 @@
 package frc.robot.subsystems.shooter;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -187,6 +189,9 @@ public class Shooter extends SubsystemBase{
             SmartDashboard.putNumber("shooter/target/hood position", targetHoodPositionMotorRotations);
             SmartDashboard.putNumber("shooter/target/flywheel speed", targetFlywheelSpeedRPM);
         }
+        
+        Logger.recordOutput("shooter/at hood target", this.atHoodAngle());
+        Logger.recordOutput("shooter/at rpm target", this.atShooterSpeed());
     }
 
     public static Shooter getInstance() {

@@ -34,6 +34,10 @@ public class LerpingSmartDashboardNumber {
         return ((inputUpperBound.getNumber() - inputLowerBound.getNumber()) / (outputUpperBound.getNumber() - outputLowerBound.getNumber())) * val;
     }
 
+    public double convertByInputRate(double val) {
+        return ((outputUpperBound.getNumber() - outputLowerBound.getNumber()) / (inputUpperBound.getNumber() - inputLowerBound.getNumber())) * val;
+    }
+
     public double getMinInput() {
         return inputLowerBound.getNumber();
     }
